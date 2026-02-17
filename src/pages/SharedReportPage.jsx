@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useRef, useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import SingleReport from '../components/report/SingleReport';
 import CompareReport from '../components/report/CompareReport';
 import StrategyReport from '../components/report/StrategyReport';
 
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
 export default function SharedReportPage() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -13,10 +17,6 @@ export default function SharedReportPage() {
     useEffect(() => {
         const fetchReport = async () => {
             try {
-                // 1. Firebase 모듈 동적 임포트
-                const { db } = await import('../firebase');
-                const { doc, getDoc, collection, getDocs } = await import('firebase/firestore');
-
                 // 2. 메인 문서 조회 (메타데이터)
                 const docRef = doc(db, "reports", id);
                 const docSnap = await getDoc(docRef);

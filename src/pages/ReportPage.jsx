@@ -4,6 +4,9 @@ import SingleReport from '../components/report/SingleReport';
 import CompareReport from '../components/report/CompareReport';
 import StrategyReport from '../components/report/StrategyReport';
 
+import { db } from '../firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+
 export default function ReportPage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -25,10 +28,6 @@ export default function ReportPage() {
     const handleShare = async () => {
         setSharing(true);
         try {
-            // 1. Firebase 모듈 동적 임포트
-            const { db } = await import('../firebase');
-            const { doc, setDoc, writeBatch, serverTimestamp } = await import('firebase/firestore');
-
             // 2. 고유 ID 생성
             const generateId = () => Math.random().toString(36).substring(2, 10);
             const reportId = generateId();
