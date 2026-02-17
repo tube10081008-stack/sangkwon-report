@@ -21,31 +21,27 @@ export default function ReportPage() {
 
     if (!data) return null;
 
-    // URL 공유 기능
-    // URL 공유 기능 (Firebase Direct Upload)
+    // URL 공유 기능 (Firestore Chunking - Plan B/No Billing)
     const handleShare = async () => {
         setSharing(true);
         try {
-            // 1. Firebase 모듈 동적 임포트 (초기 로딩 최적화)
-            const { db, storage } = await import('../firebase');
-            const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
-            const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
+            // 1. Firebase 모듈 동적 임포트
+            const { db } = await import('../firebase');
+            const { doc, setDoc, writeBatch, serverTimestamp } = await import('firebase/firestore');
 
-            // 2. 고유 ID 생성 (nanoid 대체)
+            // 2. 고유 ID 생성
             const generateId = () => Math.random().toString(36).substring(2, 10);
             const reportId = generateId();
 
-            // 3. 리포트 데이터 JSON 변환
+            // 3. 데이터 직렬화 및 청킹 (Chunking)
             const reportData = { type, data, address1, address2, targetCategory, radius };
             const jsonString = JSON.stringify(reportData);
 
-            // 4. Storage에 JSON 파일 업로드 (대용량 데이터 처리)
-            const storagePath = `reports/${reportId}.json`;
-            const storageRef = ref(storage, storagePath);
-            await uploadString(storageRef, jsonString, 'raw', { contentType: 'application/json' });
-            const downloadUrl = await getDownloadURL(storageRef);
+            // Firestore 문서 제한(1MB)을 고려하여 900KB 단위로 분할
+            const CHUNK_SIZE = 900 * 1024;
+            const totalChunks = Math.ceil(jsonString.length / CHUNK_SIZE);
 
-            // 5. Firestore에 메타데이터 저장
+            // 4. 메인 문서 저장 (메타데이터)
             await setDoc(doc(db, "reports", reportId), {
                 id: reportId,
                 type,
@@ -53,9 +49,28 @@ export default function ReportPage() {
                 address2: address2 || null,
                 targetCategory: targetCategory || null,
                 createdAt: serverTimestamp(),
-                storagePath: storagePath, // 나중에 삭제하거나 참조할 때 사용
-                downloadUrl: downloadUrl // 공유 페이지에서 바로 fetch 가능
+                chunkCount: totalChunks, // 청크 개수 저장
+                totalSize: jsonString.length,
+                isChunked: true
             });
+
+            // 5. 청크 데이터 분할 저장 (Batch 사용 권장되나 크기 제한 고려하여 Promise.all 사용)
+            const chunkPromises = [];
+            for (let i = 0; i < totalChunks; i++) {
+                const start = i * CHUNK_SIZE;
+                const end = start + CHUNK_SIZE;
+                const chunkContent = jsonString.substring(start, end);
+
+                // 서브컬렉션 'chunks'에 저장: reports/{id}/chunks/{index}
+                // 문서 ID를 0, 1, 2... 인덱스로 지정하여 정렬 용이하게 함
+                const chunkRef = doc(db, "reports", reportId, "chunks", i.toString());
+                chunkPromises.push(setDoc(chunkRef, {
+                    index: i,
+                    content: chunkContent
+                }));
+            }
+
+            await Promise.all(chunkPromises);
 
             // 6. 공유 URL 생성
             const url = `${window.location.origin}/shared/${reportId}`;

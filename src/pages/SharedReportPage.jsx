@@ -14,43 +14,66 @@ export default function SharedReportPage() {
         const fetchReport = async () => {
             try {
                 // 1. Firebase 모듈 동적 임포트
-                const { db, storage } = await import('../firebase');
-                const { doc, getDoc } = await import('firebase/firestore');
-                const { ref, getDownloadURL } = await import('firebase/storage');
+                const { db } = await import('../firebase');
+                const { doc, getDoc, collection, getDocs } = await import('firebase/firestore');
 
-                // 2. Firestore에서 메타데이터(storagePath) 조회
+                // 2. 메인 문서 조회 (메타데이터)
                 const docRef = doc(db, "reports", id);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const reportMeta = docSnap.data();
 
-                    // 3. Storage에서 JSON 파일 다운로드 URL 획득
-                    // (구버전 호환: storagePath가 없으면 에러 혹은 별도 처리)
-                    let jsonUrl = reportMeta.downloadUrl;
-                    if (!jsonUrl && reportMeta.storagePath) {
-                        jsonUrl = await getDownloadURL(ref(storage, reportMeta.storagePath));
-                    }
+                    // Case A: Chunked Data (Plan B)
+                    if (reportMeta.isChunked && reportMeta.chunkCount > 0) {
+                        const chunkPromises = [];
+                        for (let i = 0; i < reportMeta.chunkCount; i++) {
+                            // 문서 ID가 인덱스"0", "1" 형식이므로 바로 접근
+                            const chunkRef = doc(db, "reports", id, "chunks", i.toString());
+                            chunkPromises.push(getDoc(chunkRef));
+                        }
 
-                    if (jsonUrl) {
-                        const res = await fetch(jsonUrl);
-                        const reportJson = await res.json();
+                        const chunkSnaps = await Promise.all(chunkPromises);
+
+                        // 모든 청크가 존재하는지 확인 및 순서대로 결합
+                        let fullJson = "";
+                        chunkSnaps.forEach(snap => {
+                            if (snap.exists()) {
+                                fullJson += snap.data().content;
+                            }
+                        });
+
+                        const reportJson = JSON.parse(fullJson);
                         setReport(reportJson);
-                    } else {
-                        // 레거시: 데이터가 Firestore에 직접 저장된 경우 (초기 개발 버전 등)
-                        if (reportMeta.data) {
-                            setReport(reportMeta);
-                        } else {
-                            setError('리포트 데이터를 찾을 수 없습니다.');
+                    }
+                    // Case B: Storage URL (Storage 사용 가능한 경우 / 레거시)
+                    else if (reportMeta.downloadUrl) {
+                        try {
+                            const res = await fetch(reportMeta.downloadUrl);
+                            if (res.ok) {
+                                const reportJson = await res.json();
+                                setReport(reportJson);
+                            } else {
+                                throw new Error("Storage fetch failed");
+                            }
+                        } catch (e) {
+                            // CORS 등으로 실패 시, 혹시 Firestore에 데이터가 있는지 확인 (아주 옛날 버전)
+                            if (reportMeta.data) setReport(reportMeta);
+                            else throw e;
                         }
                     }
+                    // Case C: Raw Data in Firestore (소용량 레거시)
+                    else if (reportMeta.data) {
+                        setReport(reportMeta);
+                    } else {
+                        setError('리포트 데이터를 찾을 수 없습니다.');
+                    }
                 } else {
-                    // ID로 Firestore 문서 못 찾음 -> 레거시 API 시도 (선택 사항)
                     setError('리포트를 찾을 수 없습니다.');
                 }
             } catch (err) {
                 console.error(err);
-                setError('리포트를 불러오는 중 오류가 발생했습니다.');
+                setError(`리포트 로딩 오류: ${err.message}`);
             } finally {
                 setLoading(false);
             }
