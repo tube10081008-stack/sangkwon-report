@@ -13,16 +13,52 @@ export default function SharedReportPage() {
     useEffect(() => {
         const fetchReport = async () => {
             try {
-                const res = await fetch(`/api/reports/${id}`);
-                const json = await res.json();
-                if (!res.ok) throw new Error(json.error);
-                setReport(json.report);
+                // 1. Firebase 모듈 동적 임포트
+                const { db, storage } = await import('../firebase');
+                const { doc, getDoc } = await import('firebase/firestore');
+                const { ref, getDownloadURL } = await import('firebase/storage');
+
+                // 2. Firestore에서 메타데이터(storagePath) 조회
+                const docRef = doc(db, "reports", id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const reportMeta = docSnap.data();
+
+                    // 3. Storage에서 JSON 파일 다운로드 URL 획득
+                    // (구버전 호환: storagePath가 없으면 에러 혹은 별도 처리)
+                    let jsonUrl = reportMeta.downloadUrl;
+                    if (!jsonUrl && reportMeta.storagePath) {
+                        jsonUrl = await getDownloadURL(ref(storage, reportMeta.storagePath));
+                    }
+
+                    if (jsonUrl) {
+                        const res = await fetch(jsonUrl);
+                        const reportJson = await res.json();
+                        setReport(reportJson);
+                    } else {
+                        // 레거시: 데이터가 Firestore에 직접 저장된 경우 (초기 개발 버전 등)
+                        if (reportMeta.data) {
+                            setReport(reportMeta);
+                        } else {
+                            setError('리포트 데이터를 찾을 수 없습니다.');
+                        }
+                    }
+                } else {
+                    // ID로 Firestore 문서 못 찾음 -> 레거시 API 시도 (선택 사항)
+                    setError('리포트를 찾을 수 없습니다.');
+                }
             } catch (err) {
-                setError(err.message);
+                console.error(err);
+                setError('리포트를 불러오는 중 오류가 발생했습니다.');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
-        fetchReport();
+
+        if (id) {
+            fetchReport();
+        }
     }, [id]);
 
     if (loading) {

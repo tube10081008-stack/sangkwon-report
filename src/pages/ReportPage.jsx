@@ -22,22 +22,48 @@ export default function ReportPage() {
     if (!data) return null;
 
     // URL 공유 기능
+    // URL 공유 기능 (Firebase Direct Upload)
     const handleShare = async () => {
         setSharing(true);
         try {
-            const res = await fetch('/api/reports', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, data, address1, address2, targetCategory, radius })
-            });
-            const json = await res.json();
-            if (!json.success) throw new Error(json.error);
+            // 1. Firebase 모듈 동적 임포트 (초기 로딩 최적화)
+            const { db, storage } = await import('../firebase');
+            const { doc, setDoc, serverTimestamp } = await import('firebase/firestore');
+            const { ref, uploadString, getDownloadURL } = await import('firebase/storage');
 
-            const url = `${window.location.origin}/shared/${json.id}`;
+            // 2. 고유 ID 생성 (nanoid 대체)
+            const generateId = () => Math.random().toString(36).substring(2, 10);
+            const reportId = generateId();
+
+            // 3. 리포트 데이터 JSON 변환
+            const reportData = { type, data, address1, address2, targetCategory, radius };
+            const jsonString = JSON.stringify(reportData);
+
+            // 4. Storage에 JSON 파일 업로드 (대용량 데이터 처리)
+            const storagePath = `reports/${reportId}.json`;
+            const storageRef = ref(storage, storagePath);
+            await uploadString(storageRef, jsonString, 'raw', { contentType: 'application/json' });
+            const downloadUrl = await getDownloadURL(storageRef);
+
+            // 5. Firestore에 메타데이터 저장
+            await setDoc(doc(db, "reports", reportId), {
+                id: reportId,
+                type,
+                address1,
+                address2: address2 || null,
+                targetCategory: targetCategory || null,
+                createdAt: serverTimestamp(),
+                storagePath: storagePath, // 나중에 삭제하거나 참조할 때 사용
+                downloadUrl: downloadUrl // 공유 페이지에서 바로 fetch 가능
+            });
+
+            // 6. 공유 URL 생성
+            const url = `${window.location.origin}/shared/${reportId}`;
             setShareUrl(url);
+
         } catch (err) {
-            alert('공유 링크 생성 중 오류가 발생했습니다.');
             console.error(err);
+            alert(`공유 중 오류가 발생했습니다: ${err.message}`);
         }
         setSharing(false);
     };
