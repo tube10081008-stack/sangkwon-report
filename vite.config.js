@@ -32,5 +32,14 @@ export default defineConfig({
                 changeOrigin: true,
             }
         }
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    vendor: ['react', 'react-dom', 'firebase/app', 'firebase/firestore', 'firebase/storage']
+                }
+            }
+        }
     }
 })
