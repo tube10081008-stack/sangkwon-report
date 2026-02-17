@@ -823,8 +823,9 @@ body {
 }
 
 .heatmap-tab {
-    flex: 1;
-    min-width: 0;
+    flex: none;
+    /* 크기 축소 방지 */
+    min-width: auto;
     padding: 10px 14px;
     border: none;
     border-radius: var(--radius-sm);
