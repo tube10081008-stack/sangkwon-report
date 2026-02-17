@@ -1,7 +1,40 @@
+
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function AccessDenied() {
     const navigate = useNavigate();
+    const [clickCount, setClickCount] = useState(0);
+    let timeoutId = null; // To store the timeout ID
+
+    const handleSecretClick = (e) => {
+        // PC: Shift + Click
+        if (e.shiftKey) {
+            navigate('/start-analysis');
+            return;
+        }
+
+        // Clear any existing timeout to prevent premature reset
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+
+        // Mobile: 5번 연속 탭 (2초 내)
+        setClickCount(prev => {
+            const newCount = prev + 1;
+            if (newCount >= 5) {
+                navigate('/start-analysis');
+                return 0; // Reset count after successful navigation
+            }
+            return newCount;
+        });
+
+        // Set a new timeout to reset the count if no further clicks occur within 500ms
+        timeoutId = setTimeout(() => {
+            setClickCount(0);
+            timeoutId = null; // Clear the stored ID after timeout
+        }, 500);
+    };
 
     return (
         <div style={{
@@ -16,11 +49,7 @@ export default function AccessDenied() {
         }}>
             <div
                 style={{ fontSize: '64px', marginBottom: '20px', cursor: 'default', userSelect: 'none' }}
-                onClick={(e) => {
-                    if (e.shiftKey) {
-                        navigate('/start-analysis');
-                    }
-                }}
+                onClick={handleSecretClick}
                 title=""
             >🚫</div>
             <h1 style={{
