@@ -14,7 +14,15 @@ export default function AccessDenied() {
             textAlign: 'center',
             padding: '20px'
         }}>
-            <div style={{ fontSize: '64px', marginBottom: '20px' }}>🚫</div>
+            <div
+                style={{ fontSize: '64px', marginBottom: '20px', cursor: 'default', userSelect: 'none' }}
+                onClick={(e) => {
+                    if (e.shiftKey) {
+                        navigate('/start-analysis');
+                    }
+                }}
+                title=""
+            >🚫</div>
             <h1 style={{
                 fontSize: '24px',
                 fontWeight: '800',
@@ -29,27 +37,6 @@ export default function AccessDenied() {
                 올바른 리포트 링크를 통해 접속해주세요.<br />
                 직접적인 페이지 접근은 제한됩니다.
             </p>
-
-            {/* 
-                보안상 숨겨진 분석 시작 버튼 
-                (투명도 0이지만 클릭 가능하거나, 특정 제스처로 활성화)
-                여기서는 간단히 아래쪽에 작게 표시
-            */}
-            <button
-                onClick={() => navigate('/start-analysis')}
-                style={{
-                    padding: '8px 16px',
-                    background: 'transparent',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '8px',
-                    color: '#cbd5e1',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    marginTop: '80px'
-                }}
-            >
-                관리자 로그인 / 분석 시작
-            </button>
         </div>
     );
 }
