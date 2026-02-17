@@ -37,7 +37,9 @@ export default function ReportPage() {
             const jsonString = JSON.stringify(reportData);
 
             // Firestore 문서 제한(1MB)을 고려하여 900KB 단위로 분할
-            const CHUNK_SIZE = 900 * 1024;
+            // Firestore는 UTF-8 바이트 크기를 기준으로 1MiB 제한이 있음.
+            // 한글(3바이트)이 포함될 수 있으므로, 안전하게 200KB(약 20만자) 단위로 자름.
+            const CHUNK_SIZE = 200 * 1024;
             const totalChunks = Math.ceil(jsonString.length / CHUNK_SIZE);
 
             // 4. 메인 문서 저장 (메타데이터)
