@@ -66,7 +66,7 @@ export default function VworldBuildingAgeMap({ center, radius = 500 }) {
                 const maxX = center[1] + offset;
                 const maxY = center[0] + offset;
 
-                const url = `https://api.vworld.kr/req/data?service=data&request=GetFeature&data=lt_c_bldginfo&key=${apiKey}&domain=${window.location.hostname || 'localhost'}&geomFilter=BOX(${minX},${minY},${maxX},${maxY})&size=1000`;
+                const url = `/vworld-api/req/data?service=data&request=GetFeature&data=lt_c_bldginfo&key=${apiKey}&domain=${window.location.hostname || 'localhost'}&geomFilter=BOX(${minX},${minY},${maxX},${maxY})&size=1000`;
 
                 const res = await fetch(url);
                 const data = await res.json();

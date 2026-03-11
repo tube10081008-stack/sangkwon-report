@@ -1,6 +1,10 @@
 {
     "rewrites": [
         {
+            "source": "/vworld-api/(.*)",
+            "destination": "https://api.vworld.kr/$1"
+        },
+        {
             "source": "/api/(.*)",
             "destination": "/api/index.js"
         },

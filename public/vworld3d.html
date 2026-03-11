@@ -38,45 +38,48 @@
         if (!lon || !lat || !apiKey) {
             document.getElementById('loading').innerHTML = '지도 좌표 또는 API Key가 제공되지 않았습니다.';
         } else {
-            // 2. 스크립트 객체 동적 생성 및 로드 (document.write 이슈를 우회하는 유일한 html 격리 방식)
+            // 2. 동기식(document.write) 로드: Vworld API 내부 document.write 문제를 해결
             const scriptUrl = `https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&domain=${domain}&apiKey=${apiKey}`;
-            const script = document.createElement('script');
-            script.src = scriptUrl;
-            document.head.appendChild(script);
-
-            script.onload = () => {
-                // 3. Vworld 객체가 준비될 때까지 대기
-                const checkVw = setInterval(() => {
-                    if (window.vw && window.vw.Map) {
-                        clearInterval(checkVw);
-                        try {
-                            const mapOptions = {
-                                controlsAutoArrange: true,
-                                homePosition: new vw.CameraPosition(
-                                    new vw.CoordZ(lon, lat, 400),
-                                    new vw.Direction(0, -45, 0)
-                                ),
-                                initPosition: new vw.CameraPosition(
-                                    new vw.CoordZ(lon, lat, 400),
-                                    new vw.Direction(0, -45, 0)
-                                )
-                            };
-                            
-                            const map = new vw.Map("vmap", mapOptions);
-                            map.setOption({ building: true, terrain: true });
-                            
-                            document.getElementById('loading').style.display = 'none';
-                        } catch (err) {
-                            console.error(err);
-                            document.getElementById('loading').innerHTML = '3D 맵 엔진 로딩에 실패했습니다.';
-                        }
+            document.write('<script src="' + scriptUrl + '"><\/script>');
+        }
+    </script>
+    <script>
+        if (lon && lat && apiKey) {
+            // 3. Vworld 객체가 준비될 때까지 대기
+            const checkVw = setInterval(() => {
+                if (window.vw && window.vw.Map) {
+                    clearInterval(checkVw);
+                    try {
+                        const mapOptions = {
+                            controlsAutoArrange: true,
+                            homePosition: new vw.CameraPosition(
+                                new vw.CoordZ(lon, lat, 400),
+                                new vw.Direction(0, -45, 0)
+                            ),
+                            initPosition: new vw.CameraPosition(
+                                new vw.CoordZ(lon, lat, 400),
+                                new vw.Direction(0, -45, 0)
+                            )
+                        };
+                        
+                        const map = new vw.Map("vmap", mapOptions);
+                        map.setOption({ building: true, terrain: true });
+                        
+                        document.getElementById('loading').style.display = 'none';
+                    } catch (err) {
+                        console.error(err);
+                        document.getElementById('loading').innerHTML = '3D 맵 엔진 초기화에 실패했습니다.';
                     }
-                }, 300);
-            };
-            
-            script.onerror = () => {
-                document.getElementById('loading').innerHTML = '네트워크 문제로 지도를 불러올 수 없습니다.';
-            };
+                }
+            }, 300);
+
+            // 타임아웃 처리 (최대 10초)
+            setTimeout(() => {
+                clearInterval(checkVw);
+                if (!window.vw || !window.vw.Map) {
+                    document.getElementById('loading').innerHTML = '네트워크 문제로 3D 맵 엔진을 불러올 수 없습니다. 팝업 차단 등을 확인해주세요.';
+                }
+            }, 10000);
         }
     </script>
 </body>
