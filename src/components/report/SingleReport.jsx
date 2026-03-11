@@ -4,6 +4,8 @@ import { Doughnut, Radar, Bar } from 'react-chartjs-2';
 import HeatMap from '../maps/HeatMap';
 import Vworld3DMap from '../maps/Vworld3DMap';
 import VworldLandUseMap from '../maps/VworldLandUseMap';
+import VworldBuildingAgeMap from '../maps/VworldBuildingAgeMap';
+import SlopeChecker from '../maps/SlopeChecker';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
@@ -242,6 +244,17 @@ export default function SingleReport({ data }) {
                         <VworldLandUseMap center={[location.latitude, location.longitude]} radius={radius} />
                         {/* Leaflet은 [lat, lon] 사용 */}
                     </div>
+                    
+                    {/* 2D Building Age Map (건물 노후도 & X-Ray) */}
+                    <div className="vworld-card">
+                        <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#334155' }}>🏠 건물 노후도 컬러맵 & 건물 X-ray 팝업</h4>
+                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>건축물 연식을 파악하여 신도심/구도심 여부를 판별하고, 클릭하여 세부정보를 확인하세요.</p>
+                        <VworldBuildingAgeMap center={[location.latitude, location.longitude]} radius={radius} />
+                    </div>
+                </div>
+
+                <div style={{ marginTop: '20px' }}>
+                    <SlopeChecker center={[location.latitude, location.longitude]} radius={radius} />
                 </div>
             </div>
 
