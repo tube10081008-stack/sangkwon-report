@@ -21,6 +21,13 @@
     <div id="vmap"></div>
 
     <script>
+        // 0. Vworld 엔진 내부 버그 패치 (removeEventListener 파라미터 누락 해결)
+        const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+        EventTarget.prototype.removeEventListener = function(type, listener, options) {
+            if (listener === undefined) return; // listener가 없으면 무시 (Vworld 버그 우회)
+            return originalRemoveEventListener.call(this, type, listener, options);
+        };
+
         // 1. URL 파라미터 파싱
         const urlParams = new URLSearchParams(window.location.search);
         const lon = parseFloat(urlParams.get('lon'));
