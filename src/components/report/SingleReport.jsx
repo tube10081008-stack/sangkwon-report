@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Radar, Bar } from 'react-chartjs-2';
-import { Doughnut, Radar, Bar } from 'react-chartjs-2';
 import HeatMap from '../maps/HeatMap';
 import Vworld3DMap from '../maps/Vworld3DMap';
 import VworldLandUseMap from '../maps/VworldLandUseMap';
