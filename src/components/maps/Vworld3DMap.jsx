@@ -6,44 +6,15 @@ export default function Vworld3DMap({ center }) {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // 이미 스크립트가 로드되었는지 확인
-        if (window.vw && window.vw.Map) {
-            setScriptLoaded(true);
-            return;
-        }
+        if (!mapRef.current || !center) return;
 
-        const scriptUrl = `https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=${import.meta.env.VITE_VWORLD_API_KEY}`;
-        
-        // 기존 스크립트가 로딩 중인지 확인
-        let script = document.querySelector(`script[src^="https://map.vworld.kr/js/webglMapInit.js.do"]`);
-        
-        if (!script) {
-            script = document.createElement('script');
-            script.src = scriptUrl;
-            script.async = true;
-            document.head.appendChild(script);
-        }
+        let retryCount = 0;
+        const maxRetries = 20; // 10초 대기 (500ms * 20)
 
-        const handleLoad = () => setScriptLoaded(true);
-        const handleError = () => setError("Vworld 3D 지도를 불러오는데 실패했습니다.");
-
-        script.addEventListener('load', handleLoad);
-        script.addEventListener('error', handleError);
-
-        return () => {
-            script.removeEventListener('load', handleLoad);
-            script.removeEventListener('error', handleError);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (!scriptLoaded || !mapRef.current || !center) return;
-
-        try {
-            // Vworld 3D Map 초기화
-            // vw.Map 객체가 로드될 때까지 약간의 지연이 필요할 수 있음
-            const initMap = () => {
-                if (window.vw && window.vw.Map) {
+        const initMap = () => {
+            // 전역 vw 객체가 로드될 때까지 재시도
+            if (window.vw && window.vw.Map) {
+                try {
                     const mapOptions = {
                         controlsAutoArrange: true,
                         homePosition: new window.vw.CameraPosition(
@@ -58,23 +29,29 @@ export default function Vworld3DMap({ center }) {
                     
                     const map = new window.vw.Map("vmap3d", mapOptions);
                     
-                    // 건물 모델링 활성화
                     map.setOption({
                         building: true,
                         terrain: true
                     });
-                } else {
-                    setTimeout(initMap, 500);
+                    
+                    setScriptLoaded(true);
+                } catch (err) {
+                    console.error("Vworld Map Init Error:", err);
+                    setError("3D 지도 초기화 중 오류가 발생했습니다.");
                 }
-            };
-            
-            initMap();
-        } catch (err) {
-            console.error("Vworld Map Init Error:", err);
-            setError("3D 지도 초기화 중 오류가 발생했습니다.");
-        }
+            } else {
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    setTimeout(initMap, 500);
+                } else {
+                    setError("Vworld 3D 엔진 로딩에 실패했습니다. (API 설정 확인 필요)");
+                }
+            }
+        };
         
-    }, [scriptLoaded, center]);
+        initMap();
+        
+    }, [center]);
 
     if (error) {
         return (
@@ -96,7 +73,6 @@ export default function Vworld3DMap({ center }) {
             )}
             <div id="vmap3d" ref={mapRef} style={{ width: '100%', height: '100%' }} />
             
-            {/* 3D 컨트롤러 오버레이 안내 */}
             <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'rgba(255,255,255,0.9)', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', zIndex: 100, pointerEvents: 'none' }}>
                 🖱️ 우클릭 + 드래그하여 화면을 회전해보세요
             </div>
