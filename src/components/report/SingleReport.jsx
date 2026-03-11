@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Radar, Bar } from 'react-chartjs-2';
+import { Doughnut, Radar, Bar } from 'react-chartjs-2';
 import HeatMap from '../maps/HeatMap';
+import Vworld3DMap from '../maps/Vworld3DMap';
+import VworldLandUseMap from '../maps/VworldLandUseMap';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
@@ -209,6 +212,38 @@ export default function SingleReport({ data }) {
                     탭을 전환하여 전체 밀집도, 업종별 분포, 추정 유동인구, 소비 활성화 지수 등 다양한 관점의 히트맵을 확인하세요.
                 </p>
                 <HeatMap center={[location.latitude, location.longitude]} points={heatmapData} radius={radius} multiHeatmaps={multiHeatmaps} />
+            </div>
+
+            {/* [NEW] 5-1. 프리미엄 부동산/입지 분석 (Vworld 연동) */}
+            <div className="report-section">
+                <div className="section-header">
+                    <div className="section-number" style={{ background: '#ec4899', color: 'white' }}>5-1</div>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        🏢 프리미엄 부동산 / 입지 분석
+                        <span style={{ fontSize: '10px', background: '#fef08a', color: '#854d0e', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>PRO</span>
+                    </h2>
+                </div>
+                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
+                    브이월드(Vworld) 국가공간정보를 활용하여 타겟 상권의 입체적 스카이라인과 토지 용도(상업/주거 등)를 심층 분석합니다.
+                </p>
+                
+                <div className="vworld-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    {/* 3D Map */}
+                    <div className="vworld-card">
+                        <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#334155' }}>👀 3D 상권 뷰어 (스카이라인)</h4>
+                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>주변 건물의 높낮이와 밀집도를 통해 오피스/상업 권역을 직관적으로 확인하세요.</p>
+                        <Vworld3DMap center={[location.longitude, location.latitude]} /> 
+                        {/* Vworld API는 [lon, lat] 순서를 사용함 유의 */}
+                    </div>
+
+                    {/* 2D Land Use Map */}
+                    <div className="vworld-card">
+                        <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#334155' }}>🎨 토지 컬러 테마 (용도지역)</h4>
+                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>해당 구역의 법정 토지 용도를 색상표로 확인하여 상권의 성격을 유추하세요.</p>
+                        <VworldLandUseMap center={[location.latitude, location.longitude]} radius={radius} />
+                        {/* Leaflet은 [lat, lon] 사용 */}
+                    </div>
+                </div>
             </div>
 
             {/* 6. 프랜차이즈 분석 */}
