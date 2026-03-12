@@ -8,13 +8,14 @@ import VworldBuildingAgeMap from '../maps/VworldBuildingAgeMap';
 import SlopeChecker from '../maps/SlopeChecker';
 import TransitScore from './TransitScore';
 import DemographicsPanel from './DemographicsPanel';
+import SeoulDataPanel from './SeoulDataPanel';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
 const CHART_COLORS = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
 
 export default function SingleReport({ data }) {
-    const { location, analysis, aiComments, radius, transitInfo, demographics } = data;
+    const { location, analysis, aiComments, radius, transitInfo, demographics, seoulData } = data;
     const { totalStores, categorySummary, franchiseAnalysis, indicators, overallScore, grade, heatmapData, multiHeatmaps, categoryHeatmap, targetAnalysis } = analysis;
 
     // Donut chart data
@@ -270,6 +271,20 @@ export default function SingleReport({ data }) {
                 {demographics && (
                     <div style={{ marginTop: '20px', padding: '24px', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
                         <DemographicsPanel data={demographics} />
+                    </div>
+                )}
+
+                {/* 서울시 열린데이터 상권분석 */}
+                {seoulData && (
+                    <div style={{ marginTop: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                            <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, #667eea, #764ba2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: '14px' }}>S</div>
+                            <div>
+                                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700 }}>📊 서울시 공공데이터 상권분석</h3>
+                                <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>KT 유동인구 + SKT 직장인구 + 신한카드 매출 + KB카드 소비 + 서울시 주민등록</p>
+                            </div>
+                        </div>
+                        <SeoulDataPanel seoulData={seoulData} />
                     </div>
                 )}
             </div>
