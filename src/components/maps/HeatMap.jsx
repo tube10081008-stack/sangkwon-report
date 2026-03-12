@@ -222,6 +222,9 @@ const TABS = [
     { key: 'top3', icon: '🍽️' },
     { key: 'spending', icon: '💳' },
     { key: 'nightlife', icon: '🌙' },
+    { key: 'floating', icon: '🚶' },
+    { key: 'working', icon: '💼' },
+    { key: 'resident', icon: '🏠' },
 ];
 
 // ===== 메인 컴포넌트 =====
@@ -293,6 +296,21 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
             case 'spending':
                 if (data.spending?.points?.length > 0) {
                     layer = createSmoothHeatLayer(map, data.spending.points, 'warm');
+                }
+                break;
+            case 'floating':
+                if (data.floating?.points?.length > 0) {
+                    layer = createSmoothHeatLayer(map, data.floating.points, 'heat');
+                }
+                break;
+            case 'working':
+                if (data.working?.points?.length > 0) {
+                    layer = createSmoothHeatLayer(map, data.working.points, 'cool');
+                }
+                break;
+            case 'resident':
+                if (data.resident?.points?.length > 0) {
+                    layer = createSmoothHeatLayer(map, data.resident.points, 'warm');
                 }
                 break;
         }

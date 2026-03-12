@@ -1,7 +1,16 @@
 /**
  * 교통 접근성 분석 서비스
- * 카카오 로컬 API를 사용하여 지하철역/버스정류장 검색
+ * 카카오 로컬 API(지하철) + OpenStreetMap Overpass API(버스정류장) 사용
  */
+
+/** 두 좌표 사이 거리(m) 계산 (Haversine) */
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 /**
  * 반경 내 대중교통 시설 검색 및 접근성 점수 산출
@@ -15,15 +24,16 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     const headers = { 'Authorization': `KakaoAK ${KAKAO_API_KEY}` };
     const searchRadius = Math.max(radius, 1000); // 최소 1km 반경으로 대중교통 검색
 
-    // 1. 지하철역 검색 (category_group_code: SW8)
+    // 1. 지하철역 검색 (카카오 category_group_code: SW8)
     const subwayUrl = `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=SW8&x=${lng}&y=${lat}&radius=${searchRadius}&sort=distance&size=15`;
     
-    // 2. 버스정류장 검색 (키워드)
-    const busUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=버스정류장&x=${lng}&y=${lat}&radius=${searchRadius}&sort=distance&size=15`;
+    // 2. 버스정류장 검색 (OpenStreetMap Overpass API - 카카오에 버스정류장 카테고리 없음)
+    const overpassQuery = `[out:json];node[highway=bus_stop](around:${searchRadius},${lat},${lng});out body;`;
+    const busUrl = `https://overpass-api.de/api/interpreter`;
 
-    const [subwayRes, busRes] = await Promise.all([
+    const [subwayRes, busRaw] = await Promise.all([
         fetch(subwayUrl, { headers }).then(r => r.json()).catch(() => ({ documents: [] })),
-        fetch(busUrl, { headers }).then(r => r.json()).catch(() => ({ documents: [] }))
+        fetch(busUrl, { method: 'POST', body: 'data=' + encodeURIComponent(overpassQuery), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(r => r.json()).catch(() => ({ elements: [] }))
     ]);
 
     const subways = (subwayRes.documents || []).map(doc => ({
@@ -35,13 +45,17 @@ export async function getTransitInfo(lat, lng, radius = 500) {
         url: doc.place_url || ''
     }));
 
-    const busStops = (busRes.documents || []).map(doc => ({
-        name: doc.place_name,
-        distance: parseInt(doc.distance) || 0,
-        walkMinutes: Math.round((parseInt(doc.distance) || 0) / 80),
-        lat: parseFloat(doc.y),
-        lng: parseFloat(doc.x)
-    }));
+    // Overpass 결과를 거리 계산 후 정렬
+    const busStops = (busRaw.elements || []).map(el => {
+        const dist = haversineDistance(lat, lng, el.lat, el.lon);
+        return {
+            name: el.tags?.name || el.tags?.['name:ko'] || '버스정류장',
+            distance: Math.round(dist),
+            walkMinutes: Math.round(dist / 80),
+            lat: el.lat,
+            lng: el.lon
+        };
+    }).sort((a, b) => a.distance - b.distance);
 
     // 3. 접근성 점수 산출 (100점 만점)
     let score = 0;

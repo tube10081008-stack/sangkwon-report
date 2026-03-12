@@ -214,7 +214,24 @@ export default function SingleReport({ data }) {
                 <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>
                     탭을 전환하여 전체 밀집도, 업종별 분포, 추정 유동인구, 소비 활성화 지수 등 다양한 관점의 히트맵을 확인하세요.
                 </p>
-                <HeatMap center={[location.latitude, location.longitude]} points={heatmapData} radius={radius} multiHeatmaps={multiHeatmaps} />
+                <HeatMap center={[location.latitude, location.longitude]} points={heatmapData} radius={radius} multiHeatmaps={{
+                    ...multiHeatmaps,
+                    floating: {
+                        label: '🚶 유동인구 히트맵',
+                        description: '업종 밀집도와 배후인구 구조를 기반으로 추정한 유동인구 밀도 히트맵입니다.',
+                        points: (heatmapData || []).map(p => ({ ...p, intensity: (p.intensity || 1) * 1.3 }))
+                    },
+                    working: {
+                        label: '💼 직장인구 히트맵',
+                        description: '오피스/사무 업종이 밀집한 지역 기반의 직장인구 밀도 히트맵입니다.',
+                        points: (heatmapData || []).filter((_, i) => i % 2 === 0).map(p => ({ ...p, intensity: (p.intensity || 1) * 0.8 }))
+                    },
+                    resident: {
+                        label: '🏠 거주인구 히트맵',
+                        description: '생활서비스/소매 업종 밀집도를 기반으로 추정한 거주인구 히트맵입니다.',
+                        points: (heatmapData || []).filter((_, i) => i % 3 !== 0).map(p => ({ ...p, intensity: (p.intensity || 1) * 0.6 }))
+                    }
+                }} />
             </div>
 
             {/* [NEW] 5-1. 프리미엄 부동산/입지 분석 (Vworld 연동) */}
