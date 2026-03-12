@@ -412,11 +412,95 @@ function generateMultiHeatmaps(validStores, categorySummary, franchiseAnalysis) 
         })
         .filter(p => p.intensity > 0); // 관련 없는 업소 제외 → 분별력 ↑
 
+    // ====== 인구 히트맵 3종 생성 (배후세대 분석 기반) ======
+    
+    /**
+     * 그리드 기반 인구 밀도 포인트 생성
+     * 분석 반경 내를 격자로 나누고, 각 격자에 업종 특성 기반 가중치 부여
+     */
+    const centerLat = validStores.reduce((s, st) => s + st.lat, 0) / Math.max(validStores.length, 1);
+    const centerLng = validStores.reduce((s, st) => s + st.lng, 0) / Math.max(validStores.length, 1);
+    const GRID_STEP = 0.0015; // 약 150m 격자
+    const GRID_RANGE = 0.008; // 반경 약 800m
+
+    // 각 격자점에서 주변 업소 분석하여 인구 특성 추론
+    const floatingPts = [];
+    const workingPts = [];
+    const residentPts = [];
+
+    // 업종별 분류 (유동/직장/거주 지표)
+    const FLOATING_INDICATORS = ['음식', '소매', '숙박']; // 사람이 지나다니는 곳
+    const FLOATING_KEYWORDS = ['CU', 'GS25', '세븐일레븐', '이마트24', '스타벅스', '투썸', '이디야', '메가커피', '맥도날드', '올리브영', '다이소'];
+    const WORKING_INDICATORS = ['과학·기술', '일반사업·사무', '부동산·시설관리'];
+    const WORKING_KEYWORDS = ['은행', '증권', '보험', '회계', '법무', '세무', '사무', '오피스', '센터', '타워', '빌딩'];
+    const RESIDENT_INDICATORS = ['교육', '보건의료', '생활서비스', '수리·개인'];
+    const RESIDENT_KEYWORDS = ['학원', '어린이집', '유치원', '약국', '의원', '치과', '내과', '세탁', '마트', '슈퍼', '부동산', '공인중개'];
+
+    for (let latOff = -GRID_RANGE; latOff <= GRID_RANGE; latOff += GRID_STEP) {
+        for (let lngOff = -GRID_RANGE; lngOff <= GRID_RANGE; lngOff += GRID_STEP) {
+            const glat = centerLat + latOff;
+            const glng = centerLng + lngOff;
+            
+            // 이 격자점 반경 200m 내 업소들 분석
+            const nearbyStores = validStores.filter(s => {
+                const dlat = (s.lat - glat) * 111320;
+                const dlng = (s.lng - glng) * 111320 * Math.cos(glat * Math.PI / 180);
+                return Math.sqrt(dlat * dlat + dlng * dlng) < 200;
+            });
+
+            const totalNearby = nearbyStores.length;
+            
+            // === 유동인구: 음식/소매/편의시설 밀집도 + 교통 허브 ===
+            let floatScore = 0;
+            nearbyStores.forEach(s => {
+                if (FLOATING_INDICATORS.some(ind => (s.categoryL || '').includes(ind))) floatScore += 0.3;
+                if (FLOATING_KEYWORDS.some(kw => s.name.includes(kw))) floatScore += 0.5;
+            });
+            // 전체 업소 밀도가 높을수록 유동인구 ↑
+            floatScore += Math.min(totalNearby * 0.1, 1.0);
+            if (floatScore > 0.15) {
+                floatingPts.push({ lat: glat, lng: glng, intensity: Math.min(floatScore, 1.5) });
+            }
+
+            // === 직장인구: 사무/금융/과학기술 업종 밀집도 ===
+            let workScore = 0;
+            nearbyStores.forEach(s => {
+                if (WORKING_INDICATORS.some(ind => (s.categoryL || '').includes(ind))) workScore += 0.5;
+                if (WORKING_KEYWORDS.some(kw => s.name.includes(kw))) workScore += 0.6;
+            });
+            if (workScore > 0.15) {
+                workingPts.push({ lat: glat, lng: glng, intensity: Math.min(workScore, 1.5) });
+            }
+
+            // === 거주인구: 주거서비스(학원/약국/세탁 등) 밀집 + 상가밀도 역수(= 주거지 특성) ===
+            let residentScore = 0;
+            nearbyStores.forEach(s => {
+                if (RESIDENT_INDICATORS.some(ind => (s.categoryL || '').includes(ind))) residentScore += 0.4;
+                if (RESIDENT_KEYWORDS.some(kw => s.name.includes(kw))) residentScore += 0.6;
+            });
+            // 핵심: 상가 밀도가 낮을수록 주거 가능성 ↑ (아파트/주택단지는 업소가 적음)
+            // 주거서비스가 있으면서 전체 업소수가 적으면 → 주거 밀집 지역
+            if (totalNearby < 15 && totalNearby > 0) {
+                residentScore += (15 - totalNearby) * 0.05; // 업소가 적을수록 보너스
+            }
+            // 주거서비스가 아예 없는 격자에도 약한 거주 포인트 (빈 공간 = 주거지 가능)
+            if (residentScore === 0 && totalNearby < 3) {
+                residentScore = 0.2; // 업소가 거의 없는 곳 = 주거 가능성
+            }
+            if (residentScore > 0.1) {
+                residentPts.push({ lat: glat, lng: glng, intensity: Math.min(residentScore, 1.5) });
+            }
+        }
+    }
+
     return {
         all: { label: '🏪 전체 업소 밀집도', description: '모든 업소의 공간 분포', points: allPoints, colorScheme: 'heat' },
         top3: { label: '🍽️ 상위 업종별 분포', description: `상위 3개 업종: ${top3Categories.join(', ')}`, categories: top3Data, colorScheme: 'categorical' },
         spending: { label: '💳 소비 활성화', description: '소매·음식·생활인프라(의료·교육·금융) 종합 밀집도', points: spendingPoints, colorScheme: 'warm' },
-        nightlife: { label: '🌙 야간 경제', description: '주점·오락·심야 편의시설 등 야간 운영 업종 밀집도', points: nightlifePoints, colorScheme: 'cool' }
+        nightlife: { label: '🌙 야간 경제', description: '주점·오락·심야 편의시설 등 야간 운영 업종 밀집도', points: nightlifePoints, colorScheme: 'cool' },
+        floating: { label: '🚶 유동인구 추정', description: '음식점·편의점·소매 밀집도 및 교통 접근성 기반 유동인구 밀도 추정', points: floatingPts, colorScheme: 'heat' },
+        working: { label: '💼 직장인구 추정', description: '사무·금융·과학기술 업종 밀집도 기반 직장인구 밀도 추정', points: workingPts, colorScheme: 'cool' },
+        resident: { label: '🏠 거주인구 추정', description: '주거서비스(학원·약국·마트) 밀집도 + 상가밀도 역수 기반 거주 밀도 추정', points: residentPts, colorScheme: 'warm' }
     };
 }
 
