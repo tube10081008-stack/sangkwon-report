@@ -71,16 +71,9 @@
         if (!lon || !lat || !apiKey) {
             document.getElementById('loading').innerHTML = '지도 좌표 또는 API Key가 제공되지 않았습니다.';
         } else {
-            // 2. 동기식 XHR로 스크립트 텍스트를 가져와 eval 실행 (document.write 우회)
             var scriptUrl = 'https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&domain=' + domain + '&apiKey=' + apiKey;
             
-            // 방법: createElement로 스크립트를 동기 삽입
-            var s = document.createElement('script');
-            s.src = scriptUrl;
-            s.onload = initVworldMap;
-            s.onerror = function() {
-                document.getElementById('loading').innerHTML = '네트워크 문제로 지도를 불러올 수 없습니다.';
-            };
+            var scriptsToLoad = [];
             // document.write를 임시로 허용 (Vworld 내부에서 호출)
             var origWrite = document.write.bind(document);
             document.write = function(html) {
@@ -88,13 +81,44 @@
                 tmp.innerHTML = html;
                 var scripts = tmp.querySelectorAll('script');
                 scripts.forEach(function(sc) {
-                    var newSc = document.createElement('script');
-                    if (sc.src) newSc.src = sc.src;
-                    else newSc.textContent = sc.textContent;
-                    document.head.appendChild(newSc);
+                    if (sc.src) {
+                        scriptsToLoad.push(sc.src);
+                    } else {
+                        scriptsToLoad.push({ code: sc.innerHTML });
+                    }
                 });
                 var nonScripts = tmp.querySelectorAll(':not(script)');
                 nonScripts.forEach(function(el) { document.body.appendChild(el); });
+            };
+
+            function loadNextScript(callback) {
+                if (scriptsToLoad.length === 0) {
+                    if (callback) callback();
+                    return;
+                }
+                var target = scriptsToLoad.shift();
+                var newSc = document.createElement('script');
+                if (typeof target === 'string') {
+                    newSc.src = target;
+                    newSc.onload = function() { loadNextScript(callback); };
+                    newSc.onerror = function(err) { console.warn('Script load error:', target); loadNextScript(callback); };
+                    document.head.appendChild(newSc);
+                } else {
+                    newSc.textContent = target.code;
+                    document.head.appendChild(newSc);
+                    setTimeout(function() { loadNextScript(callback); }, 0);
+                }
+            }
+
+            var s = document.createElement('script');
+            s.src = scriptUrl;
+            s.onload = function() {
+                // webglMapInit.js.do 파일 자체 로드 완료 후,
+                // 내부에서 document.write로 주입하려 했던 스크립트들을 순차적으로 로드
+                loadNextScript(initVworldMap);
+            };
+            s.onerror = function() {
+                document.getElementById('loading').innerHTML = '네트워크 문제로 지도를 불러올 수 없습니다.';
             };
             document.head.appendChild(s);
         }
