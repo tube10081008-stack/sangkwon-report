@@ -8,6 +8,8 @@ import { geocodeAddress } from '../services/geocoding.js';
 import { getStoresInRadius } from '../services/storeData.js';
 import { analyzeDistrict, compareDistricts } from '../services/analyzer.js';
 import { generateSingleAnalysisComment, generateCompareComment, generateStrategyGuide } from '../services/aiConsultant.js';
+import { getTransitInfo } from '../services/transitData.js';
+import { getDemographics } from '../services/demographicData.js';
 
 const router = Router();
 
@@ -39,6 +41,18 @@ router.post('/analyze/single', async (req, res) => {
         // 4. AI 컨설팅 코멘트
         const aiComments = generateSingleAnalysisComment(analysis, location);
 
+        // 5. 교통 접근성 & 인구통계 (병렴 조회 - 실패해도 메인 분석에 영향 없음)
+        let transitInfo = null;
+        let demographics = null;
+        try {
+            [transitInfo, demographics] = await Promise.all([
+                getTransitInfo(location.latitude, location.longitude, radius).catch(e => { console.warn('교통 정보 조회 실패:', e.message); return null; }),
+                getDemographics(location.latitude, location.longitude, location, stores).catch(e => { console.warn('인구통계 조회 실패:', e.message); return null; })
+            ]);
+        } catch (e) {
+            console.warn('프리미엄 데이터 조회 실패:', e.message);
+        }
+
         res.json({
             success: true,
             data: {
@@ -46,6 +60,8 @@ router.post('/analyze/single', async (req, res) => {
                 radius,
                 analysis,
                 aiComments,
+                transitInfo,
+                demographics,
                 generatedAt: new Date().toISOString()
             }
         });

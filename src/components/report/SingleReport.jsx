@@ -6,13 +6,15 @@ import Vworld3DMap from '../maps/Vworld3DMap';
 import VworldLandUseMap from '../maps/VworldLandUseMap';
 import VworldBuildingAgeMap from '../maps/VworldBuildingAgeMap';
 import SlopeChecker from '../maps/SlopeChecker';
+import TransitScore from './TransitScore';
+import DemographicsPanel from './DemographicsPanel';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
 const CHART_COLORS = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
 
 export default function SingleReport({ data }) {
-    const { location, analysis, aiComments, radius } = data;
+    const { location, analysis, aiComments, radius, transitInfo, demographics } = data;
     const { totalStores, categorySummary, franchiseAnalysis, indicators, overallScore, grade, heatmapData, multiHeatmaps, categoryHeatmap, targetAnalysis } = analysis;
 
     // Donut chart data
@@ -256,6 +258,20 @@ export default function SingleReport({ data }) {
                 <div style={{ marginTop: '20px' }}>
                     <SlopeChecker center={[location.latitude, location.longitude]} radius={radius} />
                 </div>
+
+                {/* 교통 접근성 스코어 */}
+                {transitInfo && (
+                    <div style={{ marginTop: '20px' }}>
+                        <TransitScore data={transitInfo} />
+                    </div>
+                )}
+
+                {/* 배후세대 인구분석 */}
+                {demographics && (
+                    <div style={{ marginTop: '20px', padding: '24px', background: 'white', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                        <DemographicsPanel data={demographics} />
+                    </div>
+                )}
             </div>
 
             {/* 6. 프랜차이즈 분석 */}

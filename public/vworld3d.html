@@ -22,35 +22,25 @@
 
     <script>
         // 0. Vworld 엔진 내부 버그 패치 (removeEventListener 파라미터 누락 해결)
-        const originalRemoveEventListener = EventTarget.prototype.removeEventListener;
+        var originalRemoveEventListener = EventTarget.prototype.removeEventListener;
         EventTarget.prototype.removeEventListener = function(type, listener, options) {
-            if (listener === undefined) return; // listener가 없으면 무시 (Vworld 버그 우회)
+            if (listener === undefined) return;
             return originalRemoveEventListener.call(this, type, listener, options);
         };
 
         // 1. URL 파라미터 파싱
-        const urlParams = new URLSearchParams(window.location.search);
-        const lon = parseFloat(urlParams.get('lon'));
-        const lat = parseFloat(urlParams.get('lat'));
-        const apiKey = urlParams.get('apikey');
-        const domain = window.location.hostname; // 현재 도메인 동적으로 전송 (CORS 대응)
+        var urlParams = new URLSearchParams(window.location.search);
+        var lon = parseFloat(urlParams.get('lon'));
+        var lat = parseFloat(urlParams.get('lat'));
+        var apiKey = urlParams.get('apikey');
+        var domain = window.location.hostname;
 
-        if (!lon || !lat || !apiKey) {
-            document.getElementById('loading').innerHTML = '지도 좌표 또는 API Key가 제공되지 않았습니다.';
-        } else {
-            // 2. 동기식(document.write) 로드: Vworld API 내부 document.write 문제를 해결
-            const scriptUrl = `https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&domain=${domain}&apiKey=${apiKey}`;
-            document.write('<script src="' + scriptUrl + '"><\/script>');
-        }
-    </script>
-    <script>
-        if (lon && lat && apiKey) {
-            // 3. Vworld 객체가 준비될 때까지 대기
-            const checkVw = setInterval(() => {
+        function initVworldMap() {
+            var checkVw = setInterval(function() {
                 if (window.vw && window.vw.Map) {
                     clearInterval(checkVw);
                     try {
-                        const mapOptions = {
+                        var mapOptions = {
                             controlsAutoArrange: true,
                             homePosition: new vw.CameraPosition(
                                 new vw.CoordZ(lon, lat, 400),
@@ -61,24 +51,52 @@
                                 new vw.Direction(0, -45, 0)
                             )
                         };
-                        
-                        const map = new vw.Map("vmap", mapOptions);
-                        
+                        var map = new vw.Map("vmap", mapOptions);
                         document.getElementById('loading').style.display = 'none';
                     } catch (err) {
-                        console.error(err);
+                        console.error('Vworld Map Init Error:', err);
                         document.getElementById('loading').innerHTML = '3D 맵 엔진 초기화에 실패했습니다.';
                     }
                 }
             }, 300);
 
-            // 타임아웃 처리 (최대 10초)
-            setTimeout(() => {
+            setTimeout(function() {
                 clearInterval(checkVw);
                 if (!window.vw || !window.vw.Map) {
-                    document.getElementById('loading').innerHTML = '네트워크 문제로 3D 맵 엔진을 불러올 수 없습니다. 팝업 차단 등을 확인해주세요.';
+                    document.getElementById('loading').innerHTML = '네트워크 문제로 3D 맵 엔진을 불러올 수 없습니다.';
                 }
-            }, 10000);
+            }, 15000);
+        }
+
+        if (!lon || !lat || !apiKey) {
+            document.getElementById('loading').innerHTML = '지도 좌표 또는 API Key가 제공되지 않았습니다.';
+        } else {
+            // 2. 동기식 XHR로 스크립트 텍스트를 가져와 eval 실행 (document.write 우회)
+            var scriptUrl = 'https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&domain=' + domain + '&apiKey=' + apiKey;
+            
+            // 방법: createElement로 스크립트를 동기 삽입
+            var s = document.createElement('script');
+            s.src = scriptUrl;
+            s.onload = initVworldMap;
+            s.onerror = function() {
+                document.getElementById('loading').innerHTML = '네트워크 문제로 지도를 불러올 수 없습니다.';
+            };
+            // document.write를 임시로 허용 (Vworld 내부에서 호출)
+            var origWrite = document.write.bind(document);
+            document.write = function(html) {
+                var tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                var scripts = tmp.querySelectorAll('script');
+                scripts.forEach(function(sc) {
+                    var newSc = document.createElement('script');
+                    if (sc.src) newSc.src = sc.src;
+                    else newSc.textContent = sc.textContent;
+                    document.head.appendChild(newSc);
+                });
+                var nonScripts = tmp.querySelectorAll(':not(script)');
+                nonScripts.forEach(function(el) { document.body.appendChild(el); });
+            };
+            document.head.appendChild(s);
         }
     </script>
 </body>
