@@ -57,7 +57,7 @@ router.post('/analyze/single', async (req, res) => {
                 getTransitInfo(location.latitude, location.longitude, radius).catch(e => { console.warn('교통 정보 조회 실패:', e.message); return null; }),
                 getDemographics(location.latitude, location.longitude, location, stores).catch(e => { console.warn('인구통계 조회 실패:', e.message); return null; }),
                 getSeoulDistrictData(location.latitude, location.longitude).catch(e => { console.warn('서울시 데이터 조회 실패:', e.message); return null; }),
-                (bCode ? getRealEstateData(bCode) : Promise.resolve(null)).catch(e => { console.warn('부동산 실거래 데이터 조회 실패:', e.message); return null; })
+                (bCode ? getRealEstateData(bCode, location, radius) : Promise.resolve(null)).catch(e => { console.warn('부동산 실거래 데이터 조회 실패:', e.message); return null; })
             ]);
         } catch (e) {
             console.warn('프리미엄 데이터 조회 실패:', e.message);

@@ -4,9 +4,8 @@
  * 기간: 최근 6개월
  */
 
-// 내장 fetch 사용 (Node 18+)
+import { geocodeAddress } from './geocoding.js'; // 좌표 변환용
 
-// 사용자가 Vercel 환경 변수에 입력한 마스터 키
 const API_KEY = process.env.DATA_GO_KR_API_KEY || 'e534803dfbbec3959cc365626b326777049c150c6d0ac6f23c214b9ff561a1fe';
 
 async function fetchPublicData(url, params) {
@@ -48,13 +47,24 @@ function getRecentMonths(count = 6) {
     return months;
 }
 
-export async function getRealEstateData(bCode) {
+function getDistanceFromLatLonInMeter(lat1, lng1, lat2, lng2) {
+    const R = 6371e3; 
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lng2 - lng1) * Math.PI / 180;
+    const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2); 
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    return Math.floor(R * c);
+}
+
+export async function getRealEstateData(bCode, location, radius) {
     const lawdCd = getLawdCd(bCode);
     if (!lawdCd) return null;
 
-    const months = getRecentMonths(6); // 최근 6개월치 데이터 조회
+    const months = getRecentMonths(6);
     
-    // 4가지 핵심 부동산 API 엔드포인트
     const API_ENDPOINTS = {
         aptTrade: 'http://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
         aptRent: 'http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent',
@@ -62,13 +72,7 @@ export async function getRealEstateData(bCode) {
         offiTrade: 'http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMSDataSvcOffiTrade'
     };
 
-    // 타겟 법정동 이름 추출 (예: "서울특별시 강남구 역삼동" -> "역삼동")
-    // 여기서는 간단히 bCode만 넘겨받았으므로 필터링 로직을 느슨하게 가져가거나 향후 고도화 가능
-    // 현재는 해당 시/군/구(lawdCd) 전체 데이터 중 상위 10건씩 반환
-
     let allData = { aptTrade: [], aptRent: [], commTrade: [], offiTrade: [] };
-
-    // 6개월 * 4종목 API = 24번의 호출을 병렬로 처리 (Promise.all 활용하여 딜레이 최소화)
     const fetchPromises = [];
 
     months.forEach(yyyymm => {
@@ -82,58 +86,117 @@ export async function getRealEstateData(bCode) {
         );
     });
 
-    await Promise.allSettled(fetchPromises); // 병렬 요청 완료 대기
+    await Promise.allSettled(fetchPromises);
 
-    // 데이터 정제 및 파싱 (가장 최신 거래가 앞으로 오도록 함 - 일반적으로 응답이 최근일순이 아닐 수 있음, 금액기준 정렬도 고려)
-    // 여기서는 최신 정보를 위해 파싱만 깔끔하게 수행해 줌
     const parseNumber = (str) => parseInt(String(str).replace(/,/g, ''), 10) || 0;
 
-    // 아파트 매매 파싱
-    const cleanAptTrade = allData.aptTrade.map(item => ({
+    let cleanAptTrade = allData.aptTrade.map(item => ({
         name: item.aptNm || item.umdNm || '명칭없음',
         area: item.excluUseAr,
-        price: item.dealAmount, // 문자열 '100,000' 형태
+        price: item.dealAmount,
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
-        floor: item.floor
-    })).sort((a, b) => b.priceNum - a.priceNum); // 전체 데이터 반환 (AI 컨텍스트용)
+        floor: item.floor,
+        umdNm: item.umdNm || '',
+        jibun: item.jibun || ''
+    }));
 
-    // 아파트 전월세 파싱
-    const cleanAptRent = allData.aptRent.map(item => ({
+    let cleanAptRent = allData.aptRent.map(item => ({
         name: item.aptNm || item.umdNm || '명칭없음',
         area: item.excluUseAr,
-        deposit: item.deposit, // 보증금
-        monthlyRent: item.monthlyRent, // 월세 (0이면 전세)
-        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => parseNumber(b.deposit) - parseNumber(a.deposit));
+        deposit: item.deposit,
+        monthlyRent: item.monthlyRent,
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
+        umdNm: item.umdNm || '',
+        jibun: item.jibun || ''
+    }));
 
-    // 상업업무용 파싱
-    const cleanCommTrade = allData.commTrade.map(item => ({
+    let cleanCommTrade = allData.commTrade.map(item => ({
         name: `${item.umdNm} ${item.jibun}`.trim() || '상가/업무용',
         type: item.buildingUse || '건물',
         area: item.buildingAr,
         price: item.dealAmount,
         priceNum: parseNumber(item.dealAmount),
-        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => b.priceNum - a.priceNum);
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
+        umdNm: item.umdNm || '',
+        jibun: item.jibun || ''
+    }));
 
-    // 오피스텔 매매 파싱
-    const cleanOffiTrade = allData.offiTrade.map(item => ({
+    let cleanOffiTrade = allData.offiTrade.map(item => ({
         name: item.offiNm || item.umdNm || '오피스텔',
         area: item.excluUseAr,
         price: item.dealAmount,
         priceNum: parseNumber(item.dealAmount),
-        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => b.priceNum - a.priceNum);
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
+        umdNm: item.umdNm || '',
+        jibun: item.jibun || ''
+    }));
+
+    // ====== 반경(거리) 데이터 필터링 적용 ======
+    if (location && location.latitude && radius) {
+        const centerLat = location.latitude;
+        const centerLng = location.longitude;
+        const regionPrefix = `${location.region1} ${location.region2}`.trim();
+        
+        const coordCache = {};
+        
+        const filterByDistance = async (items) => {
+            const filtered = [];
+            for (const item of items) {
+                const addressStr = `${regionPrefix} ${item.umdNm} ${item.jibun}`.replace(/\s+/g, ' ').trim();
+                
+                if (!item.umdNm && !item.jibun) {
+                    filtered.push(item); 
+                    continue;
+                }
+                
+                let coords = coordCache[addressStr];
+                if (!coords) {
+                    try {
+                        const geo = await geocodeAddress(addressStr);
+                        coords = { lat: geo.latitude, lng: geo.longitude };
+                        coordCache[addressStr] = coords;
+                    } catch (e) {
+                        coords = { lat: null, lng: null };
+                        coordCache[addressStr] = coords;
+                    }
+                }
+                
+                if (coords.lat !== null && coords.lng !== null) {
+                    const dist = getDistanceFromLatLonInMeter(centerLat, centerLng, coords.lat, coords.lng);
+                    if (dist <= radius) {
+                        filtered.push(item);
+                    }
+                } else {
+                    filtered.push(item); // 지오코딩 실패 시 데이터 누락 방지를 위해 남김
+                }
+            }
+            return filtered;
+        };
+
+        try {
+            cleanAptTrade = await filterByDistance(cleanAptTrade);
+            cleanAptRent = await filterByDistance(cleanAptRent);
+            cleanCommTrade = await filterByDistance(cleanCommTrade);
+            cleanOffiTrade = await filterByDistance(cleanOffiTrade);
+        } catch(e) {
+            console.warn('거리 필터링 중 오류:', e.message);
+        }
+    }
+
+    cleanAptTrade.sort((a, b) => b.priceNum - a.priceNum);
+    cleanAptRent.sort((a, b) => parseNumber(b.deposit) - parseNumber(a.deposit));
+    cleanCommTrade.sort((a, b) => b.priceNum - a.priceNum);
+    cleanOffiTrade.sort((a, b) => b.priceNum - a.priceNum);
 
     return {
         lawdCd,
         monthsSearched: months,
         summary: {
-            aptTotal6Months: allData.aptTrade.length,
-            aptRentTotal6Months: allData.aptRent.length,
-            commTotal6Months: allData.commTrade.length,
-            offiTotal6Months: allData.offiTrade.length,
+            aptTotal6Months: cleanAptTrade.length,
+            aptRentTotal6Months: cleanAptRent.length,
+            commTotal6Months: cleanCommTrade.length,
+            offiTotal6Months: cleanOffiTrade.length,
         },
         topTransactions: {
             aptTrade: cleanAptTrade,

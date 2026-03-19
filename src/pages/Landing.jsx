@@ -182,7 +182,7 @@ export default function Landing() {
                             <div className="form-group">
                                 <label className="form-label">분석 반경</label>
                                 <div className="radius-selector">
-                                    {[300, 500, 1000].map(r => (
+                                    {[500, 1000, 1500, 3000].map(r => (
                                         <button
                                             key={r}
                                             type="button"
