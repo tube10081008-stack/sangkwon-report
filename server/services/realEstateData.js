@@ -3,7 +3,7 @@
  * DATA_GO_KR_API_KEY 단일 키를 사용하여 여러 API 연동
  */
 
-import fetch from 'node-fetch'; // Node 향 fetch (Node 18 이상에서는 내장 fetch 사용 가능, 하지만 안전하게 작성)
+// 내장 fetch 사용 (Node 18+)
 
 const API_KEY = process.env.DATA_GO_KR_API_KEY || 'e534803dfbbec3959cc365626b326777049c150c6d0ac6f23c214b9ff561a1fe';
 
