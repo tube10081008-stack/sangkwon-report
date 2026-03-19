@@ -30,7 +30,7 @@ router.get('/geocode', async (req, res) => {
         const location = await geocodeAddress(address);
         res.json({ success: true, location });
     } catch (error) {
-        res.status(500).json({ error: error.message || '지오코딩 실패' });
+        res.status(404).json({ error: error.message || '지오코딩 실패' });
     }
 });
 

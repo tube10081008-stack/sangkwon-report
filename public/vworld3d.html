@@ -82,7 +82,13 @@
                         new vw.CoordZ(newLon, newLat, 400),
                         new vw.Direction(0, -45, 0)
                     );
-                    window.vmapInstance.getViewCamera().move(movePo);
+                    if (typeof window.vmapInstance.moveTo === 'function') {
+                        window.vmapInstance.moveTo(movePo);
+                    } else if (window.vmapInstance.getViewCamera && typeof window.vmapInstance.getViewCamera().move === 'function') {
+                        window.vmapInstance.getViewCamera().move(movePo);
+                    } else {
+                        console.warn('Vworld Map camera move function not found.');
+                    }
                 }
             }
         });
