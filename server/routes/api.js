@@ -18,6 +18,23 @@ import { askGemini } from '../services/geminiService.js';
 const router = Router();
 
 /**
+ * GET /api/geocode
+ * 특정 주소를 위경도로 변환 (3D 스카이뷰 인터랙티브 이동 등 활용)
+ */
+router.get('/geocode', async (req, res) => {
+    try {
+        const { address } = req.query;
+        if (!address) {
+            return res.status(400).json({ error: '주소를 입력해주세요.' });
+        }
+        const location = await geocodeAddress(address);
+        res.json({ success: true, location });
+    } catch (error) {
+        res.status(500).json({ error: error.message || '지오코딩 실패' });
+    }
+});
+
+/**
  * POST /api/analyze/single
  * 단일 상권 분석
  */

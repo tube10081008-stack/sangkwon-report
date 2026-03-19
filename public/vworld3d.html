@@ -52,6 +52,10 @@
                             )
                         };
                         var map = new vw.Map("vmap", mapOptions);
+                        
+                        // 외부 제어를 위해 맵 인스턴스를 전역에 저장
+                        window.vmapInstance = map;
+                        
                         document.getElementById('loading').style.display = 'none';
                     } catch (err) {
                         console.error('Vworld Map Init Error:', err);
@@ -67,6 +71,21 @@
                 }
             }, 15000);
         }
+
+        // 부모 창(리액트)으로부터의 검색/이동 메시지 수신
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'MOVE_CAMERA') {
+                if (window.vmapInstance && window.vw && window.vw.CameraPosition) {
+                    var newLon = e.data.lon;
+                    var newLat = e.data.lat;
+                    var movePo = new vw.CameraPosition(
+                        new vw.CoordZ(newLon, newLat, 400),
+                        new vw.Direction(0, -45, 0)
+                    );
+                    window.vmapInstance.getViewCamera().move(movePo);
+                }
+            }
+        });
 
         if (!lon || !lat || !apiKey) {
             document.getElementById('loading').innerHTML = '지도 좌표 또는 API Key가 제공되지 않았습니다.';
