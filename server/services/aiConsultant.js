@@ -7,7 +7,7 @@
 /**
  * 단일 상권 분석 AI 코멘트 생성
  */
-export function generateSingleAnalysisComment(analysis, location) {
+export function generateSingleAnalysisComment(analysis, location, realEstateData) {
     const { grade, overallScore, totalStores, categorySummary, franchiseAnalysis, indicators, targetAnalysis } = analysis;
 
     const topCategories = categorySummary.slice(0, 3);
@@ -20,7 +20,8 @@ export function generateSingleAnalysisComment(analysis, location) {
         opportunities: identifyOpportunities(categorySummary, franchiseAnalysis, totalStores),
         threats: identifyThreats(indicators, categorySummary, totalStores),
         recommendations: generateRecommendations(grade, indicators, categorySummary, targetAnalysis),
-        conclusion: generateConclusion(grade, overallScore, location)
+        conclusion: generateConclusion(grade, overallScore, location),
+        realEstateTrend: realEstateData ? generateRealEstateTrend(realEstateData) : '부동산 실거래가 데이터를 수집할 수 없습니다.'
     };
 
     if (targetAnalysis) {
@@ -369,4 +370,26 @@ function generateFinalAdvice(grade, score, targetCategory, location) {
             `반드시 현장 답사와 주변 상인 인터뷰를 진행하고, 대안 지역과 비교 분석 후 최종 결정하시기 바랍니다. ` +
             `철저한 준비가 리스크를 줄입니다. 화이팅! 🙏`;
     }
+}
+
+function generateRealEstateTrend(data) {
+    if (!data) return '부동산 실거래 데이터가 없습니다.';
+    
+    let text = `📈 [참고: 최신 부동산 실거래 동향]\n`;
+    text += `- 최근 ${data.months.length}개월간 해당 법정동내 상업업무용 실거래 건수: **${data.commercialTotalRecent}건**\n`;
+    text += `- 최근 ${data.months.length}개월간 주변 아파트 매매 실거래 건수: **${data.aptTotalRecent}건**\n`;
+    
+    if (data.commercialSales && data.commercialSales.length > 0) {
+        text += `\n* 상가 주요 최근 3건 실거래 예시:\n`;
+        data.commercialSales.slice(0, 3).forEach(sale => {
+            const size = sale.BLDG_AREA || sale.BILD_MTRC || '?';
+            const price = sale.DEAL_AMT || '?';
+            const name = sale.BLDG_NM || sale.BJD_NM || '알수없음';
+            text += `  > 건물/상가 [${name}] (면적: ${size}㎡) -> 실거래가: **${price}만원**\n`;
+        });
+    } else {
+        text += `\n* 최근 주변 상가 매매 거래가 확연히 적습니다. 상권 점포 이동이 정체되어 있을 수 있습니다.\n`;
+    }
+
+    return text;
 }

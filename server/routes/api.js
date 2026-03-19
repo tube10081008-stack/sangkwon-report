@@ -11,6 +11,9 @@ import { generateSingleAnalysisComment, generateCompareComment, generateStrategy
 import { getTransitInfo } from '../services/transitData.js';
 import { getDemographics } from '../services/demographicData.js';
 import { getSeoulDistrictData } from '../services/seoulData.js';
+import { getRealEstateData } from '../services/realEstateData.js';
+import { reverseGeocode } from '../services/geocoding.js';
+import { askGemini } from '../services/geminiService.js';
 
 const router = Router();
 
@@ -39,22 +42,29 @@ router.post('/analyze/single', async (req, res) => {
         // 3. 데이터 분석
         const analysis = analyzeDistrict(stores, targetCategory);
 
-        // 4. AI 컨설팅 코멘트
-        const aiComments = generateSingleAnalysisComment(analysis, location);
+        // 4. (위치 이동: 하단에서 실거래가와 함께 생성됨)
 
         // 5. 교통 접근성 & 인구통계 & 서울시 데이터 (병렬 조회 - 실패해도 메인 분석에 영향 없음)
         let transitInfo = null;
         let demographics = null;
         let seoulData = null;
+        let realEstateData = null;
         try {
-            [transitInfo, demographics, seoulData] = await Promise.all([
+            const regionInfo = await reverseGeocode(location.latitude, location.longitude);
+            const bCode = regionInfo ? regionInfo.code : null;
+
+            [transitInfo, demographics, seoulData, realEstateData] = await Promise.all([
                 getTransitInfo(location.latitude, location.longitude, radius).catch(e => { console.warn('교통 정보 조회 실패:', e.message); return null; }),
                 getDemographics(location.latitude, location.longitude, location, stores).catch(e => { console.warn('인구통계 조회 실패:', e.message); return null; }),
-                getSeoulDistrictData(location.latitude, location.longitude).catch(e => { console.warn('서울시 데이터 조회 실패:', e.message); return null; })
+                getSeoulDistrictData(location.latitude, location.longitude).catch(e => { console.warn('서울시 데이터 조회 실패:', e.message); return null; }),
+                (bCode ? getRealEstateData(bCode) : Promise.resolve(null)).catch(e => { console.warn('부동산 실거래 데이터 조회 실패:', e.message); return null; })
             ]);
         } catch (e) {
             console.warn('프리미엄 데이터 조회 실패:', e.message);
         }
+
+        // AI 컨설팅 코멘트에 실거래가 데이터 적용
+        const aiComments = generateSingleAnalysisComment(analysis, location, realEstateData);
 
         res.json({
             success: true,
@@ -66,6 +76,7 @@ router.post('/analyze/single', async (req, res) => {
                 transitInfo,
                 demographics,
                 seoulData,
+                realEstateData,
                 generatedAt: new Date().toISOString()
             }
         });
@@ -232,6 +243,37 @@ router.get('/reports/:id', (req, res) => {
  */
 router.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+/**
+ * POST /api/ask-ai
+ * 섹션별 Gemini 채팅 연동
+ */
+router.post('/ask-ai', async (req, res) => {
+    try {
+        const { prompt, contextData, sectionName } = req.body;
+
+        if (!prompt) {
+            return res.status(400).json({ error: '질문(prompt)을 입력해주세요.' });
+        }
+
+        console.log(`🤖 AI 질문 요청 수신 [섹션: ${sectionName}] - "${prompt.substring(0, 30)}..."`);
+
+        const systemInstruction = `당신은 대한민국 최고의 상권 분석 및 부동산 실무 전문가입니다. 
+제공된 분석 데이터(JSON 형식)를 바탕으로 사용자의 질문에 답하세요. 
+데이터에 없는 내용을 지어내지 말고, 데이터에 기반한 날카로운 인사이트만 제공하세요.`;
+
+        const answer = await askGemini(prompt, contextData, systemInstruction);
+
+        res.json({
+            success: true,
+            answer: answer
+        });
+
+    } catch (error) {
+        console.error('AI 질문 오류:', error);
+        res.status(500).json({ error: error.message || 'AI 서버 통신 중 오류가 발생했습니다.' });
+    }
 });
 
 export default router;

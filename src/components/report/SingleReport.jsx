@@ -9,13 +9,14 @@ import SlopeChecker from '../maps/SlopeChecker';
 import TransitScore from './TransitScore';
 import DemographicsPanel from './DemographicsPanel';
 import SeoulDataPanel from './SeoulDataPanel';
+import AISectionChat from './AISectionChat';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
 const CHART_COLORS = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
 
 export default function SingleReport({ data }) {
-    const { location, analysis, aiComments, radius, transitInfo, demographics, seoulData } = data;
+    const { location, analysis, aiComments, radius, transitInfo, demographics, seoulData, realEstateData } = data;
     const { totalStores, categorySummary, franchiseAnalysis, indicators, overallScore, grade, heatmapData, multiHeatmaps, categoryHeatmap, targetAnalysis } = analysis;
 
     // Donut chart data
@@ -204,6 +205,11 @@ export default function SingleReport({ data }) {
                         ))}
                     </div>
                 </div>
+                <AISectionChat 
+                    sectionName="업종별 분포 분석" 
+                    contextData={categorySummary} 
+                    suggestedQuestions={["이 상권에서 당장 들어가기 가장 좋은 블루오션 업종은?", "현재 1위 업종의 경쟁 포화도 방어 전략은?", "이 업종 분포를 볼 때 추천하는 타겟 연령층/성별은?"]} 
+                />
             </div>
 
             {/* 5. GIS 다중 히트맵 */}
@@ -326,6 +332,11 @@ export default function SingleReport({ data }) {
                         </div>
                     </>
                 )}
+                <AISectionChat 
+                    sectionName="프랜차이즈 현황 분석" 
+                    contextData={franchiseAnalysis} 
+                    suggestedQuestions={["개인 매장 창업 시 대형 프랜차이즈 방어 전략은?", "가장 많이 입점해 있는 브랜드들의 공통된 특징은?", "이 정도 프랜차이즈 비율을 볼 때 상권의 매력도는?"]} 
+                />
             </div>
 
             {/* 7. 타겟 업종 분석 (있을 경우) */}
@@ -386,6 +397,23 @@ export default function SingleReport({ data }) {
                     </div>
                 </div>
             </div>
+
+            {/* 8-1. 실거래 트렌드 */}
+            {aiComments.realEstateTrend && (
+                <div className="report-section">
+                    <div className="section-header">
+                        <div className="section-number" style={{ background: '#3b82f6', color: 'white' }}>{targetAnalysis ? '8-1' : '7-1'}</div>
+                        <h2>🏢 최신 부동산 실거래 동향</h2>
+                    </div>
+                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '16px', fontSize: '14px', lineHeight: '1.8', whiteSpace: 'pre-line', color: '#1e3a8a' }}
+                         dangerouslySetInnerHTML={{ __html: aiComments.realEstateTrend.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1d4ed8;">$1</strong>') }} />
+                    <AISectionChat 
+                        sectionName="부동산 실거래 트렌드" 
+                        contextData={realEstateData} 
+                        suggestedQuestions={["최근 실거래 데이터를 바탕으로 대략적인 시세를 평가해줘.", "최근 거래 건수로 볼 때 상가 매매 시장 활성도는 어떨까?", "상가 임대/초기 자본 세팅 시 권리금 협상 꿀팁 좀 알려줄래?"]} 
+                    />
+                </div>
+            )}
 
             {/* 9. 종합 결론 및 제언 */}
             <div className="report-section">
