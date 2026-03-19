@@ -74,7 +74,7 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
             console.error(`페이지 ${pageNo} 조회 오류:`, error.message);
             break;
         }
-    } while (allStores.length < totalCount && pageNo <= 20);
+    } while (allStores.length < totalCount && pageNo <= 4); // 최대 4,000건(4페이지)으로 제한하여 서버 Vercel 504 에러 및 브라우저 렉(Heatmap Freeze) 방지
 
     return processStoreData(allStores);
 }

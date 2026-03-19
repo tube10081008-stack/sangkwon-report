@@ -161,6 +161,31 @@ export async function getRealEstateData(bCode, location, radius) {
         const coordCache = {};
         
         const filterByDistance = async (items) => {
+            // 1. 사전에 고유 주소를 모두 추출 (중복 요청 방지)
+            const uniqueAddrs = new Set();
+            for (const item of items) {
+                const addressStr = `${regionPrefix} ${item.umdNm} ${item.jibun}`.replace(/\s+/g, ' ').trim();
+                if (item.umdNm || item.jibun) {
+                    uniqueAddrs.add(addressStr);
+                }
+            }
+
+            // 2. 캐시를 뚫고 지나가는 새 주소들만 20개 단위(Chunk)로 묶어 Promise.all 병렬 고속 지오코딩!
+            const addrsToGeocode = Array.from(uniqueAddrs).filter(a => !coordCache[a]);
+            const chunkSize = 20;
+            for (let i = 0; i < addrsToGeocode.length; i += chunkSize) {
+                const chunk = addrsToGeocode.slice(i, i + chunkSize);
+                await Promise.all(chunk.map(async (addressStr) => {
+                    try {
+                        const geo = await geocodeAddress(addressStr);
+                        coordCache[addressStr] = { lat: geo.latitude, lng: geo.longitude };
+                    } catch (e) {
+                        coordCache[addressStr] = { lat: null, lng: null };
+                    }
+                }));
+            }
+
+            // 3. 지오코딩 캐시가 완성되었으므로 for문 안의 느린 await를 없애고 빛의 속도로 단순 거리 계산 후 동기화 필터링
             const filtered = [];
             for (const item of items) {
                 const addressStr = `${regionPrefix} ${item.umdNm} ${item.jibun}`.replace(/\s+/g, ' ').trim();
@@ -171,18 +196,7 @@ export async function getRealEstateData(bCode, location, radius) {
                 }
                 
                 let coords = coordCache[addressStr];
-                if (!coords) {
-                    try {
-                        const geo = await geocodeAddress(addressStr);
-                        coords = { lat: geo.latitude, lng: geo.longitude };
-                        coordCache[addressStr] = coords;
-                    } catch (e) {
-                        coords = { lat: null, lng: null };
-                        coordCache[addressStr] = coords;
-                    }
-                }
-                
-                if (coords.lat !== null && coords.lng !== null) {
+                if (coords && coords.lat !== null && coords.lng !== null) {
                     const dist = getDistanceFromLatLonInMeter(centerLat, centerLng, coords.lat, coords.lng);
                     if (dist <= radius) {
                         filtered.push(item);
