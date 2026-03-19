@@ -373,23 +373,17 @@ function generateFinalAdvice(grade, score, targetCategory, location) {
 }
 
 function generateRealEstateTrend(data) {
-    if (!data) return '부동산 실거래 데이터가 없습니다.';
+    if (!data || !data.summary) return '부동산 실거래 데이터가 없습니다.';
     
-    let text = `📈 [참고: 최신 부동산 실거래 동향]\n`;
-    text += `- 최근 ${data.months.length}개월간 해당 법정동내 상업업무용 실거래 건수: **${data.commercialTotalRecent}건**\n`;
-    text += `- 최근 ${data.months.length}개월간 주변 아파트 매매 실거래 건수: **${data.aptTotalRecent}건**\n`;
+    const { summary, topTransactions } = data;
+
+    let text = '📈 [최근 6개월간 주변 상권 및 거주지 단기 실거래 요약]\n';
+    text += '- 상업/업무용 빌딩/상가 매매: **' + summary.commTotal6Months + '건** 거래\n';
+    text += '- 오피스텔 매매: **' + summary.offiTotal6Months + '건** 거래\n';
+    text += '- 아파트 매매: **' + summary.aptTotal6Months + '건** 거래\n';
+    text += '- 아파트 전월세: **' + summary.aptRentTotal6Months + '건** 거래\n\n';
     
-    if (data.commercialSales && data.commercialSales.length > 0) {
-        text += `\n* 상가 주요 최근 3건 실거래 예시:\n`;
-        data.commercialSales.slice(0, 3).forEach(sale => {
-            const size = sale.BLDG_AREA || sale.BILD_MTRC || '?';
-            const price = sale.DEAL_AMT || '?';
-            const name = sale.BLDG_NM || sale.BJD_NM || '알수없음';
-            text += `  > 건물/상가 [${name}] (면적: ${size}㎡) -> 실거래가: **${price}만원**\n`;
-        });
-    } else {
-        text += `\n* 최근 주변 상가 매매 거래가 확연히 적습니다. 상권 점포 이동이 정체되어 있을 수 있습니다.\n`;
-    }
+    text += '\n💡 각 부동산 분야별 구체적인 실거래가(최고가/단가 등) 및 입지 분석은 하단의 AI 채팅 봇에게 자유롭게 질문해 보세요!';
 
     return text;
 }

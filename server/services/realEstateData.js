@@ -1,22 +1,15 @@
 /**
- * 공공데이터포털 부동산/경매 데이터 호출 모듈
- * DATA_GO_KR_API_KEY 단일 키를 사용하여 여러 API 연동
+ * 공공데이터포털 부동산 데이터 다중 연동 모듈 (대규모 확장판)
+ * 아파트 매매, 아파트 전월세, 상업업무용 매매, 오피스텔 매매 등 4개 API 통합 조회
+ * 기간: 최근 6개월
  */
 
 // 내장 fetch 사용 (Node 18+)
 
+// 사용자가 Vercel 환경 변수에 입력한 마스터 키
 const API_KEY = process.env.DATA_GO_KR_API_KEY || 'e534803dfbbec3959cc365626b326777049c150c6d0ac6f23c214b9ff561a1fe';
 
-/**
- * 공공데이터포털 API 호출 래퍼 함수
- */
 async function fetchPublicData(url, params) {
-    const queryParams = new URLSearchParams({
-        serviceKey: API_KEY, // 일반 인증키(Decoding)에 대응. 만약 막히면 encodeURIComponent 없이 생짜 문자열 쿼리로 붙여야 할 수 있음.
-        ...params
-    });
-
-    // 공공데이터포털은 serviceKey가 인코딩 이슈를 많이 겪으므로 직접 문자열로 조립
     let queryString = '';
     for (const [key, value] of Object.entries(params)) {
         queryString += `&${key}=${value}`;
@@ -25,42 +18,25 @@ async function fetchPublicData(url, params) {
 
     try {
         const response = await fetch(finalUrl);
-        if (!response.ok) {
-            console.error(`공공 API 호출 에러: ${response.status} ${finalUrl}`);
-            return null;
-        }
-        
-        // 공공데이터포털 JSON 응답 구조: response.body.items.item
+        if (!response.ok) return [];
         const rawText = await response.text();
-        try {
-            const data = JSON.parse(rawText);
-            const items = data?.response?.body?.items?.item;
-            if (Array.isArray(items)) return items;
-            if (items) return [items]; // 단건일 경우 배열로 래핑
-            return [];
-        } catch (parseError) {
-            // 가끔 XML로 에러 메시지를 반환하는 경우가 있으므로 예외 처리
-            console.error('API 응답 파싱 실패(아마 XML로 반환됨):', rawText.substring(0, 100));
-            return [];
-        }
+        const data = JSON.parse(rawText);
+        const items = data?.response?.body?.items?.item;
+        
+        if (Array.isArray(items)) return items;
+        if (items) return [items];
+        return [];
     } catch (e) {
-        console.error('공공 API 네트워크 에러:', e.message);
         return [];
     }
 }
 
-/**
- * B-Code(법정동코드 10자리) 중 앞 5자리(LAWD_CD)를 추출합니다.
- */
 function getLawdCd(bCode) {
     if (!bCode || bCode.length < 5) return null;
     return bCode.substring(0, 5);
 }
 
-/**
- * 현재 연월(YYYYMM)과 이전 달(YYYYMM)을 구합니다.
- */
-function getRecentMonths(count = 2) {
+function getRecentMonths(count = 6) {
     const months = [];
     const date = new Date();
     for (let i = 0; i < count; i++) {
@@ -72,60 +48,98 @@ function getRecentMonths(count = 2) {
     return months;
 }
 
-/**
- * 특정 지역(법정동코드)의 최근 아파트/상가 실거래가를 조회합니다.
- * @param {string} bCode 법정동코드 10자리 (예: 1168010100)
- */
 export async function getRealEstateData(bCode) {
     const lawdCd = getLawdCd(bCode);
-    if (!lawdCd) {
-        console.warn('유효하지 않은 법정동 코드입니다.');
-        return null;
-    }
+    if (!lawdCd) return null;
 
-    const months = getRecentMonths(2); // 최근 2개월치 데이터 조회
+    const months = getRecentMonths(6); // 최근 6개월치 데이터 조회
     
-    let allAptSales = [];
-    let allCommercialSales = [];
+    // 4가지 핵심 부동산 API 엔드포인트
+    const API_ENDPOINTS = {
+        aptTrade: 'http://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade',
+        aptRent: 'http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent',
+        commTrade: 'http://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrade',
+        offiTrade: 'http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMSDataSvcOffiTrade'
+    };
 
-    // 아파트 매매 실거래가 (국토교통부 아파트매매 실거래 상세 자료)
-    // endpoint: http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev
-    const APT_URL = 'http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev';
+    // 타겟 법정동 이름 추출 (예: "서울특별시 강남구 역삼동" -> "역삼동")
+    // 여기서는 간단히 bCode만 넘겨받았으므로 필터링 로직을 느슨하게 가져가거나 향후 고도화 가능
+    // 현재는 해당 시/군/구(lawdCd) 전체 데이터 중 상위 10건씩 반환
 
-    // 상업업무용 부동산 매매 신고 자료
-    // endpoint: http://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrade
-    const COMM_URL = 'http://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrade';
+    let allData = { aptTrade: [], aptRent: [], commTrade: [], offiTrade: [] };
 
-    for (const yyyymm of months) {
-        const params = {
-            LAWD_CD: lawdCd,
-            DEAL_YMD: yyyymm,
-            numOfRows: 30, // 적당히 많이
-            pageNo: 1
-        };
+    // 6개월 * 4종목 API = 24번의 호출을 병렬로 처리 (Promise.all 활용하여 딜레이 최소화)
+    const fetchPromises = [];
 
-        const aptData = await fetchPublicData(APT_URL, params);
-        if (aptData) {
-            // 우리 동(읍면동) 데이터만 필터링 (api는 시군구 단위로 줌)
-            const bName = bCode ? bCode /* 실제로는 이름 매칭을 하거나, 도로명 등으로 거리 기반 필터링 권장 */ : '';
-            // 여기서는 시간 관계상 일단 전체 시군구 거래 중 상위 내용만 담거나, 필터링을 최소화합니다.
-            allAptSales = allAptSales.concat(aptData);
-        }
+    months.forEach(yyyymm => {
+        const params = { LAWD_CD: lawdCd, DEAL_YMD: yyyymm, numOfRows: 30, pageNo: 1 };
+        
+        fetchPromises.push(
+            fetchPublicData(API_ENDPOINTS.aptTrade, params).then(res => allData.aptTrade.push(...res)),
+            fetchPublicData(API_ENDPOINTS.aptRent, params).then(res => allData.aptRent.push(...res)),
+            fetchPublicData(API_ENDPOINTS.commTrade, params).then(res => allData.commTrade.push(...res)),
+            fetchPublicData(API_ENDPOINTS.offiTrade, params).then(res => allData.offiTrade.push(...res))
+        );
+    });
 
-        const commData = await fetchPublicData(COMM_URL, params);
-        if (commData) {
-            allCommercialSales = allCommercialSales.concat(commData);
-        }
-    }
+    await Promise.allSettled(fetchPromises); // 병렬 요청 완료 대기
 
-    // 결과 정제 (요약 정보만)
-    // 거래건수, 평균/최고/최저가 등
+    // 데이터 정제 및 파싱 (가장 최신 거래가 앞으로 오도록 함 - 일반적으로 응답이 최근일순이 아닐 수 있음, 금액기준 정렬도 고려)
+    // 여기서는 최신 정보를 위해 파싱만 깔끔하게 수행해 줌
+    const parseNumber = (str) => parseInt(String(str).replace(/,/g, ''), 10) || 0;
+
+    // 아파트 매매 파싱
+    const cleanAptTrade = allData.aptTrade.map(item => ({
+        name: item.aptNm || item.umdNm || '명칭없음',
+        area: item.excluUseAr,
+        price: item.dealAmount, // 문자열 '100,000' 형태
+        priceNum: parseNumber(item.dealAmount),
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
+        floor: item.floor
+    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10); // 가장 비싸게 거래된 10건(대표성)
+
+    // 아파트 전월세 파싱
+    const cleanAptRent = allData.aptRent.map(item => ({
+        name: item.aptNm || item.umdNm || '명칭없음',
+        area: item.excluUseAr,
+        deposit: item.deposit, // 보증금
+        monthlyRent: item.monthlyRent, // 월세 (0이면 전세)
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
+    })).sort((a, b) => parseNumber(b.deposit) - parseNumber(a.deposit)).slice(0, 10);
+
+    // 상업업무용 파싱
+    const cleanCommTrade = allData.commTrade.map(item => ({
+        name: `${item.umdNm} ${item.jibun}`.trim() || '상가/업무용',
+        type: item.buildingUse || '건물',
+        area: item.buildingAr,
+        price: item.dealAmount,
+        priceNum: parseNumber(item.dealAmount),
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
+    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10);
+
+    // 오피스텔 매매 파싱
+    const cleanOffiTrade = allData.offiTrade.map(item => ({
+        name: item.offiNm || item.umdNm || '오피스텔',
+        area: item.excluUseAr,
+        price: item.dealAmount,
+        priceNum: parseNumber(item.dealAmount),
+        date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
+    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10);
+
     return {
-        aptSales: allAptSales.slice(0, 10), // 최대 10건만 리턴해서 AI 입력 토큰 제한 방지
-        commercialSales: allCommercialSales.slice(0, 10),
-        aptTotalRecent: allAptSales.length,
-        commercialTotalRecent: allCommercialSales.length,
-        lawdCd: lawdCd,
-        months: months
+        lawdCd,
+        monthsSearched: months,
+        summary: {
+            aptTotal6Months: allData.aptTrade.length,
+            aptRentTotal6Months: allData.aptRent.length,
+            commTotal6Months: allData.commTrade.length,
+            offiTotal6Months: allData.offiTrade.length,
+        },
+        topTransactions: {
+            aptTrade: cleanAptTrade,
+            aptRent: cleanAptRent,
+            commTrade: cleanCommTrade,
+            offiTrade: cleanOffiTrade
+        }
     };
 }

@@ -10,6 +10,7 @@ import TransitScore from './TransitScore';
 import DemographicsPanel from './DemographicsPanel';
 import SeoulDataPanel from './SeoulDataPanel';
 import AISectionChat from './AISectionChat';
+import RealEstatePanel from './RealEstatePanel';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
@@ -403,14 +404,18 @@ export default function SingleReport({ data }) {
                 <div className="report-section">
                     <div className="section-header">
                         <div className="section-number" style={{ background: '#3b82f6', color: 'white' }}>{targetAnalysis ? '8-1' : '7-1'}</div>
-                        <h2>🏢 최신 부동산 실거래 동향</h2>
+                        <h2>🏢 최신 부동산 실거래 6개월 동향</h2>
                     </div>
                     <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '16px', fontSize: '14px', lineHeight: '1.8', whiteSpace: 'pre-line', color: '#1e3a8a' }}
                          dangerouslySetInnerHTML={{ __html: aiComments.realEstateTrend.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1d4ed8;">$1</strong>') }} />
+                    
+                    {/* 새롭게 제작한 4종 데이터 카드 뷰 패널 삽입 */}
+                    <RealEstatePanel data={realEstateData} />
+
                     <AISectionChat 
                         sectionName="부동산 실거래 트렌드" 
                         contextData={realEstateData} 
-                        suggestedQuestions={["최근 실거래 데이터를 바탕으로 대략적인 시세를 평가해줘.", "최근 거래 건수로 볼 때 상가 매매 시장 활성도는 어떨까?", "상가 임대/초기 자본 세팅 시 권리금 협상 꿀팁 좀 알려줄래?"]} 
+                        suggestedQuestions={["가장 비싸게 거래된 건물의 특징은 무엇일까?", "최근 상가 매매 대비 아파트 전월세 활성도는?", "조회된 실거래를 바탕으로 대략적인 시세를 평가해줘."]} 
                     />
                 </div>
             )}
