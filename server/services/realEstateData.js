@@ -90,10 +90,30 @@ export async function getRealEstateData(bCode, location, radius) {
 
     const parseNumber = (str) => parseInt(String(str).replace(/,/g, ''), 10) || 0;
 
+    const formatPrice = (priceStr) => {
+        if (!priceStr) return '';
+        const num = parseNumber(priceStr);
+        if (num === 0) return '0원';
+        if (num >= 10000) {
+            const uk = Math.floor(num / 10000);
+            const remainder = num % 10000;
+            return remainder === 0 ? `${uk}억` : `${uk}억 ${remainder.toLocaleString()}만`;
+        }
+        return `${num.toLocaleString()}만`;
+    };
+
+    const formatArea = (areaVal) => {
+        if (!areaVal) return '';
+        const num = parseFloat(areaVal);
+        if (isNaN(num)) return areaVal;
+        const pyeong = (num / 3.3058).toFixed(1);
+        return `${num}㎡ (${pyeong}평)`;
+    };
+
     let cleanAptTrade = allData.aptTrade.map(item => ({
         name: item.aptNm || item.umdNm || '명칭없음',
-        area: item.excluUseAr,
-        price: item.dealAmount,
+        area: formatArea(item.excluUseAr),
+        price: formatPrice(item.dealAmount),
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
         floor: item.floor,
@@ -103,9 +123,9 @@ export async function getRealEstateData(bCode, location, radius) {
 
     let cleanAptRent = allData.aptRent.map(item => ({
         name: item.aptNm || item.umdNm || '명칭없음',
-        area: item.excluUseAr,
-        deposit: item.deposit,
-        monthlyRent: item.monthlyRent,
+        area: formatArea(item.excluUseAr),
+        deposit: formatPrice(item.deposit),
+        monthlyRent: formatPrice(item.monthlyRent),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
         umdNm: item.umdNm || '',
         jibun: item.jibun || ''
@@ -114,8 +134,8 @@ export async function getRealEstateData(bCode, location, radius) {
     let cleanCommTrade = allData.commTrade.map(item => ({
         name: `${item.umdNm} ${item.jibun}`.trim() || '상가/업무용',
         type: item.buildingUse || '건물',
-        area: item.buildingAr,
-        price: item.dealAmount,
+        area: formatArea(item.buildingAr),
+        price: formatPrice(item.dealAmount),
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
         umdNm: item.umdNm || '',
@@ -124,8 +144,8 @@ export async function getRealEstateData(bCode, location, radius) {
 
     let cleanOffiTrade = allData.offiTrade.map(item => ({
         name: item.offiNm || item.umdNm || '오피스텔',
-        area: item.excluUseAr,
-        price: item.dealAmount,
+        area: formatArea(item.excluUseAr),
+        price: formatPrice(item.dealAmount),
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
         umdNm: item.umdNm || '',

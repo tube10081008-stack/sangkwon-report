@@ -78,14 +78,14 @@ export default function RealEstatePanel({ data }) {
                                         <div style={{ fontWeight: 'bold', fontSize: '15px', color: '#334155' }}>{tx.name}</div>
                                     </div>
                                     <div style={{ fontSize: '13px', color: '#64748b' }}>
-                                        {tx.area}㎡ {tx.floor ? `· ${tx.floor}층` : ''} {tx.type ? `· ${tx.type}` : ''}
+                                        {tx.area} {tx.floor ? `· ${tx.floor}층` : ''} {tx.type ? `· ${tx.type}` : ''}
                                     </div>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '16px' }}>
                                         {activeTab === 'aptRent' 
-                                            ? (tx.monthlyRent > 0 ? `보증금 ${tx.deposit}만 / 월 ${tx.monthlyRent}만` : `전세 ${tx.deposit}만원`) 
-                                            : `${tx.price} 만원`}
+                                            ? (tx.monthlyRent !== '0원' ? `보증금 ${tx.deposit} / 월 ${tx.monthlyRent}` : `전세 ${tx.deposit}`) 
+                                            : `${tx.price}`}
                                     </div>
                                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>계약일: {tx.date}</div>
                                 </div>
