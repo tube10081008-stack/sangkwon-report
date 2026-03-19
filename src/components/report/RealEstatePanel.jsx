@@ -57,7 +57,7 @@ export default function RealEstatePanel({ data }) {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {currentTransactions.map((tx, idx) => (
+                        {currentTransactions.slice(0, 10).map((tx, idx) => (
                             <div key={idx} style={{ 
                                 background: '#ffffff', 
                                 border: '1px solid #cbd5e1', 

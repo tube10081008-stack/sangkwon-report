@@ -96,7 +96,7 @@ export async function getRealEstateData(bCode) {
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`,
         floor: item.floor
-    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10); // 가장 비싸게 거래된 10건(대표성)
+    })).sort((a, b) => b.priceNum - a.priceNum); // 전체 데이터 반환 (AI 컨텍스트용)
 
     // 아파트 전월세 파싱
     const cleanAptRent = allData.aptRent.map(item => ({
@@ -105,7 +105,7 @@ export async function getRealEstateData(bCode) {
         deposit: item.deposit, // 보증금
         monthlyRent: item.monthlyRent, // 월세 (0이면 전세)
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => parseNumber(b.deposit) - parseNumber(a.deposit)).slice(0, 10);
+    })).sort((a, b) => parseNumber(b.deposit) - parseNumber(a.deposit));
 
     // 상업업무용 파싱
     const cleanCommTrade = allData.commTrade.map(item => ({
@@ -115,7 +115,7 @@ export async function getRealEstateData(bCode) {
         price: item.dealAmount,
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10);
+    })).sort((a, b) => b.priceNum - a.priceNum);
 
     // 오피스텔 매매 파싱
     const cleanOffiTrade = allData.offiTrade.map(item => ({
@@ -124,7 +124,7 @@ export async function getRealEstateData(bCode) {
         price: item.dealAmount,
         priceNum: parseNumber(item.dealAmount),
         date: `${item.dealYear}.${item.dealMonth}.${item.dealDay}`
-    })).sort((a, b) => b.priceNum - a.priceNum).slice(0, 10);
+    })).sort((a, b) => b.priceNum - a.priceNum);
 
     return {
         lawdCd,

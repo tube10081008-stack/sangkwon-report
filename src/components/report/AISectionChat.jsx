@@ -135,7 +135,7 @@ export default function AISectionChat({ sectionName, suggestedQuestions, context
                                 color: '#64748b', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px'
                             }}>
                                 <span className="spinner" style={{ display: 'inline-block', width: '14px', height: '14px', border: '2px solid #cbd5e1', borderTopColor: '#6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
-                                Gemini 2.5 Flash가 상권 데이터를 분석하며 답변을 작성 중입니다...
+                                AI가 상권 데이터를 분석하며 답변을 작성 중입니다...
                             </div>
                         </div>
                     )}
