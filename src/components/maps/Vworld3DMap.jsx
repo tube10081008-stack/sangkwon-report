@@ -47,7 +47,7 @@ export default function Vworld3DMap({ center }) {
     };
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '400px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+        <div style={{ position: 'relative', width: '100%', height: '600px', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
             {/* 검색창 UI 오버레이 */}
             <div style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 1000 }}>
                 <form 

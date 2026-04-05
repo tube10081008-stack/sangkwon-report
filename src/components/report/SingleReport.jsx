@@ -216,9 +216,9 @@ export default function SingleReport({ data }) {
                 </p>
 
                 <div className="vworld-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                    <div className="vworld-card">
+                    <div className="vworld-card" style={{ gridColumn: '1 / -1' }}>
                         <h4 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '10px', color: '#334155' }}>👀 3D 상권 뷰어 (스카이라인)</h4>
-                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>주변 건물의 높낮이와 밀집도를 통해 오피스/상업 권역을 직관적으로 확인하세요.</p>
+                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '12px' }}>주변 건물의 높낮이와 밀집도를 통해 오피스/상업 권역을 직관적으로 확인하고, 마우스로 자유롭게 조망하세요.</p>
                         <Vworld3DMap center={[location.longitude, location.latitude]} />
                     </div>
                     <div className="vworld-card">
