@@ -35,6 +35,35 @@ router.get('/geocode', async (req, res) => {
 });
 
 /**
+ * POST /api/analyze/heatmap
+ * 히트맵 전용 데이터만 빠르게 재렌더링
+ */
+router.post('/analyze/heatmap', async (req, res) => {
+    try {
+        const { lat, lng, radius = 500 } = req.body;
+        if (!lat || !lng) {
+            return res.status(400).json({ error: '위경도 값이 필요합니다.' });
+        }
+        
+        // 1. 상가업소 조회
+        const stores = await getStoresInRadius(lat, lng, radius);
+        
+        // 2. 히트맵 데이터만 추출 (AI 코멘트 없음)
+        const analysis = analyzeDistrict(stores, null);
+        
+        res.json({
+            success: true,
+            data: {
+                multiHeatmaps: analysis.multiHeatmaps,
+                heatmapData: analysis.heatmapData
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/**
  * POST /api/analyze/single
  * 단일 상권 분석
  */

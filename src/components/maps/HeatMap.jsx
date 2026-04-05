@@ -238,6 +238,9 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
     const circleRef = useRef(null);
     const [activeTab, setActiveTab] = useState('all');
     const [viewRadius, setViewRadius] = useState(radius);
+    const [localHeatmaps, setLocalHeatmaps] = useState(multiHeatmaps);
+    const [localPoints, setLocalPoints] = useState(points);
+    const [isFetching, setIsFetching] = useState(false);
 
     const centerLat = center?.[0];
     const centerLng = center?.[1];
@@ -285,20 +288,40 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
         };
     }, [centerLat, centerLng, radius]);
 
-    // 반경 변경 시 줌 + 원 업데이트
+    // 반경 변경 시 줌 + 원 업데이트 + 데이터 재요청
     useEffect(() => {
         const map = mapInstanceRef.current;
         if (!map) return;
 
         const opt = RADIUS_OPTIONS.find(r => r.value === viewRadius);
         if (opt) {
-            map.setView(center, opt.zoom, { animate: true, duration: 0.5 });
+            map.setView([centerLat, centerLng], opt.zoom, { animate: true, duration: 0.5 });
         }
 
         if (circleRef.current) {
             circleRef.current.setRadius(viewRadius);
         }
-    }, [viewRadius, center]);
+
+        if (viewRadius !== radius) {
+            setIsFetching(true);
+            fetch('/api/analyze/heatmap', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lat: centerLat, lng: centerLng, radius: viewRadius })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data) {
+                    setLocalHeatmaps(data.data.multiHeatmaps);
+                    setLocalPoints(data.data.heatmapData);
+                }
+            })
+            .finally(() => setIsFetching(false));
+        } else {
+            setLocalHeatmaps(multiHeatmaps);
+            setLocalPoints(points);
+        }
+    }, [viewRadius, centerLat, centerLng, radius, multiHeatmaps, points]);
 
     // 탭 전환 시 히트맵 레이어 교체
     useEffect(() => {
@@ -306,15 +329,15 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
         if (!map) return;
         if (layerRef.current) { layerRef.current.remove(); layerRef.current = null; }
 
-        const data = multiHeatmaps || {};
+        const data = localHeatmaps || {};
         let layer;
 
         switch (activeTab) {
             case 'all':
                 if (data.all?.points?.length > 0) {
                     layer = createSmoothHeatLayer(map, data.all.points, 'heat');
-                } else if (points?.length > 0) {
-                    layer = createSmoothHeatLayer(map, points, 'heat');
+                } else if (localPoints?.length > 0) {
+                    layer = createSmoothHeatLayer(map, localPoints, 'heat');
                 }
                 break;
             case 'top3':
@@ -335,9 +358,9 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
         }
 
         layerRef.current = layer || null;
-    }, [activeTab, multiHeatmaps, points]);
+    }, [activeTab, localHeatmaps, localPoints]);
 
-    const activeHeatmap = multiHeatmaps?.[activeTab];
+    const activeHeatmap = localHeatmaps?.[activeTab];
 
     return (
         <div className="heatmap-wrapper">
@@ -345,7 +368,7 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <div className="heatmap-tabs" style={{ margin: 0 }}>
                     {TABS.map(tab => {
-                        const hm = multiHeatmaps?.[tab.key];
+                        const hm = localHeatmaps?.[tab.key];
                         const label = hm?.label || tab.key;
                         return (
                             <button
@@ -363,9 +386,9 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
             {activeHeatmap?.description && (
                 <p className="heatmap-desc">{activeHeatmap.description}</p>
             )}
-            {activeTab === 'top3' && multiHeatmaps?.top3?.categories && (
+            {activeTab === 'top3' && localHeatmaps?.top3?.categories && (
                 <div className="heatmap-legend">
-                    {multiHeatmaps.top3.categories.map((cat, i) => (
+                    {localHeatmaps.top3.categories.map((cat, i) => (
                         <span key={i} className="legend-item">
                             <span className="legend-dot" style={{ background: cat.color }} />
                             {cat.category} ({cat.count.toLocaleString()}개)

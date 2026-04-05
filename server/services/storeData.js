@@ -133,6 +133,9 @@ const CATEGORY_DISPLAY_MAP = {
 };
 
 function mapCategoryName(originalName) {
+    if (!originalName) return '기타';
+    if (originalName.includes('비알')) return '카페·음료';
+    if (originalName.includes('기타 간이') || originalName.includes('기타간이')) return '간식·분식';
     return CATEGORY_DISPLAY_MAP[originalName] || originalName;
 }
 
