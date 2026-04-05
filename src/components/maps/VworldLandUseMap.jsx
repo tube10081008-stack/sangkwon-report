@@ -16,12 +16,19 @@ export default function VworldLandUseMap({ center, radius = 500 }) {
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
 
+    const centerLat = center?.[0];
+    const centerLng = center?.[1];
+
     useEffect(() => {
-        if (!mapRef.current || !center) return;
-        if (mapInstanceRef.current) mapInstanceRef.current.remove();
+        if (!mapRef.current || centerLat === undefined || centerLng === undefined) return;
+        
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([centerLat, centerLng]);
+            return;
+        }
 
         // 1. Leaflet 베이스맵 초기화
-        const map = L.map(mapRef.current, { center, zoom: 16, zoomControl: true });
+        const map = L.map(mapRef.current, { center: [centerLat, centerLng], zoom: 16, zoomControl: true });
 
         // 기존 Vworld 2D 기본 지도 타일 레이어 (선택 사항)
         // L.tileLayer('https://xdworld.vworld.kr/2d/Base/service/{z}/{x}/{y}.png', {
@@ -55,7 +62,7 @@ export default function VworldLandUseMap({ center, radius = 500 }) {
         wmsLayer.addTo(map);
 
         // 3. 분석 대상 반경 원 그리기
-        L.circle(center, {
+        L.circle([centerLat, centerLng], {
             radius, 
             color: '#6366f1', 
             fillColor: 'transparent', 
@@ -72,7 +79,7 @@ export default function VworldLandUseMap({ center, radius = 500 }) {
             `,
             iconSize: [16, 30], iconAnchor: [8, 30], className: ''
         });
-        L.marker(center, { icon: centerIcon }).addTo(map);
+        L.marker([centerLat, centerLng], { icon: centerIcon }).addTo(map);
 
         mapInstanceRef.current = map;
 
@@ -87,7 +94,7 @@ export default function VworldLandUseMap({ center, radius = 500 }) {
                 mapInstanceRef.current = null;
             }
         };
-    }, [center, radius]);
+    }, [centerLat, centerLng, radius]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

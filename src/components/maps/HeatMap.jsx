@@ -239,18 +239,27 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
     const [activeTab, setActiveTab] = useState('all');
     const [viewRadius, setViewRadius] = useState(radius);
 
-    // 지도 초기화
+    const centerLat = center?.[0];
+    const centerLng = center?.[1];
+
+    // 지도 초기화 (최초 1회만 생성 후 재활용)
     useEffect(() => {
-        if (mapInstanceRef.current) mapInstanceRef.current.remove();
-        if (!mapRef.current || !center) return;
+        if (!mapRef.current || centerLat === undefined || centerLng === undefined) return;
+
+        // 지도가 이미 생성되어 있다면 위치만 업데이트
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([centerLat, centerLng]);
+            if (circleRef.current) circleRef.current.setLatLng([centerLat, centerLng]);
+            return;
+        }
 
         const initialZoom = RADIUS_OPTIONS.find(r => r.value === radius)?.zoom || 15;
-        const map = L.map(mapRef.current, { center, zoom: initialZoom, zoomControl: true, scrollWheelZoom: true });
+        const map = L.map(mapRef.current, { center: [centerLat, centerLng], zoom: initialZoom, zoomControl: true, scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
         }).addTo(map);
 
-        const circle = L.circle(center, {
+        const circle = L.circle([centerLat, centerLng], {
             radius: viewRadius, color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.04, weight: 2, dashArray: '8, 8'
         }).addTo(map);
         circleRef.current = circle;
@@ -259,7 +268,7 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
             html: '<div style="width:14px;height:14px;border-radius:50%;background:#6366f1;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
             iconSize: [14, 14], iconAnchor: [7, 7], className: ''
         });
-        L.marker(center, { icon: centerIcon }).addTo(map)
+        L.marker([centerLat, centerLng], { icon: centerIcon }).addTo(map)
             .bindTooltip('분석 중심점', { direction: 'top', offset: [0, -10] });
 
         mapInstanceRef.current = map;
@@ -269,9 +278,12 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
 
         return () => {
             observer.disconnect();
-            if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
         };
-    }, [center]);
+    }, [centerLat, centerLng, radius]);
 
     // 반경 변경 시 줌 + 원 업데이트
     useEffect(() => {

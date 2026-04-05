@@ -32,12 +32,18 @@ export default function VworldBuildingAgeMap({ center, radius = 500 }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const centerLat = center?.[0];
+    const centerLng = center?.[1];
+
     useEffect(() => {
-        if (!mapRef.current || !center) return;
-        if (mapInstanceRef.current) mapInstanceRef.current.remove();
+        if (!mapRef.current || centerLat === undefined || centerLng === undefined) return;
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView([centerLat, centerLng]);
+            return;
+        }
 
         // 베이스맵 초기화
-        const map = L.map(mapRef.current, { center, zoom: 16, zoomControl: true });
+        const map = L.map(mapRef.current, { center: [centerLat, centerLng], zoom: 16, zoomControl: true });
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
             maxZoom: 20
@@ -135,7 +141,7 @@ export default function VworldBuildingAgeMap({ center, radius = 500 }) {
         observer.observe(mapRef.current);
 
         return () => { observer.disconnect(); if (mapInstanceRef.current) mapInstanceRef.current.remove(); };
-    }, [center, radius]);
+    }, [centerLat, centerLng, radius]);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
