@@ -104,11 +104,41 @@ export default function Vworld3DMap({ center }) {
                 </form>
             </div>
 
+            {/* 정중앙 타겟팅 핀 (항상 카메라 중심점을 가리킴) */}
+            <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -100%)', // 핀의 끝이 정중앙에 오도록
+                zIndex: 900,
+                pointerEvents: 'none', // 맵 드래그 방해 안 함
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                filter: 'drop-shadow(0px 4px 6px rgba(0,0,0,0.3))'
+            }}>
+                <div style={{
+                    background: '#ef4444',
+                    color: 'white',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    marginBottom: '4px',
+                }}>
+                    타겟 건물
+                </div>
+                {/* 핀 모양 아이콘 */}
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#ef4444"/>
+                </svg>
+            </div>
+
             <iframe 
                 ref={iframeRef}
                 src={iframeSrc} 
                 title="Vworld 3D Map"
-                style={{ width: '100%', height: '100%', border: 'none' }}
+                style={{ width: '100%', height: '100%', border: 'none', background: '#f8fafc' }}
                 allow="geolocation"
             />
             {/* 3D 컨트롤러 오버레이 안내 */}
