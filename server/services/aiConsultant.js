@@ -115,9 +115,6 @@ function generateOverview(location, grade, score, totalStores, topCats) {
     }
     return `${location.address} (${location.region3}) 상권은 반경 내 총 **${totalStores.toLocaleString()}개** 업소가 운영 중이며, ` +
         `주요 업종은 ${topCats}입니다. 전반적으로 상권의 다양성과 활성도를 종합적으로 분석하였습니다.`;
-} (${location.region3}) 상권은 반경 내 총 **${totalStores.toLocaleString()}개** 업소가 운영 중이며, ` +
-        `종합 **${grade.grade}등급 (${score}점/100점)**으로 평가됩니다. ` +
-        `주요 업종은 ${topCats}이며, ${grade.description}`;
 }
 
 function identifyStrengths(indicators, categories, franchise) {
