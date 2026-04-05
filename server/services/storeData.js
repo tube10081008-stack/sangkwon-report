@@ -59,12 +59,27 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
                 break;
             }
 
-            totalCount = data.body.totalCount || 0;
             const items = data.body.items;
 
-            if (!Array.isArray(items) || items.length === 0) break;
+            let itemsArray = [];
+            // 공공데이터 API 특성상 1건일 경우 배열이 아닌 객체로 반환되는 이슈 방어
+            if (Array.isArray(items)) {
+                itemsArray = items;
+            } else if (items && typeof items === 'object') {
+                itemsArray = [items];
+            } else {
+                break; // 데이터 없음
+            }
 
-            allStores.push(...items);
+            if (itemsArray.length === 0) break;
+
+            allStores.push(...itemsArray);
+            
+            // 만약 반환된 아이템 개수가 요청한 numOfRows(1000)보다 적다면 마지막 페이지이므로 종료
+            if (itemsArray.length < numOfRows) {
+                break;
+            }
+            
             pageNo++;
 
             // API 과부하 방지
@@ -74,7 +89,7 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
             console.error(`페이지 ${pageNo} 조회 오류:`, error.message);
             break;
         }
-    } while (allStores.length < totalCount && pageNo <= 4); // 최대 4,000건(4페이지)
+    } while (pageNo <= 4); // 최대 4,000건(4페이지)까지 강제 루프
 
     // 데이터 품질 경고 로그
     if (allStores.length === 0) {
@@ -111,7 +126,10 @@ const CATEGORY_DISPLAY_MAP = {
     '도소매': '쇼핑·판매',
     '의료': '병원·의료',
     '전문직서비스': '일반사업·사무',
-    '정보통신': '일반사업·사무'
+    '정보통신': '일반사업·사무',
+    // 중분류(categoryM) 세부 매핑 보정
+    '비알코올': '카페·음료',
+    '기타 간이': '분식·간식'
 };
 
 function mapCategoryName(originalName) {
@@ -127,8 +145,8 @@ function processStoreData(rawStores) {
         name: store.bizesNm || '이름 없음',
         // 업종 분류 (표시명 매핑 적용)
         categoryL: mapCategoryName(store.indsLclsNm || '기타'),
-        categoryM: store.indsMclsNm || '기타',
-        categoryS: store.indsSclsNm || '기타',
+        categoryM: mapCategoryName(store.indsMclsNm || '기타'),
+        categoryS: mapCategoryName(store.indsSclsNm || '기타'),
         categoryLCode: store.indsLclsCd || '',
         categoryMCode: store.indsMclsCd || '',
         categorySCode: store.indsSclsCd || '',
