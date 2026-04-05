@@ -341,8 +341,8 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
 
     return (
         <div className="heatmap-wrapper">
-            {/* 히트맵 타입 탭 + 반경 컨트롤러 한 줄 */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+            {/* 상단 탭 한 줄 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <div className="heatmap-tabs" style={{ margin: 0 }}>
                     {TABS.map(tab => {
                         const hm = multiHeatmaps?.[tab.key];
@@ -357,28 +357,6 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
                             </button>
                         );
                     })}
-                </div>
-
-                {/* 반경 컨트롤러 */}
-                <div style={{
-                    display: 'flex', gap: '3px', background: '#f1f5f9', borderRadius: '10px', padding: '3px',
-                    border: '1px solid #e2e8f0'
-                }}>
-                    {RADIUS_OPTIONS.map(opt => (
-                        <button
-                            key={opt.value}
-                            onClick={() => setViewRadius(opt.value)}
-                            style={{
-                                padding: '5px 12px', fontSize: '12px', fontWeight: 600, border: 'none',
-                                borderRadius: '7px', cursor: 'pointer', transition: 'all 0.25s',
-                                background: viewRadius === opt.value ? '#6366f1' : 'transparent',
-                                color: viewRadius === opt.value ? 'white' : '#64748b',
-                                boxShadow: viewRadius === opt.value ? '0 2px 6px rgba(99,102,241,0.3)' : 'none'
-                            }}
-                        >
-                            {opt.label}
-                        </button>
-                    ))}
                 </div>
             </div>
 
@@ -395,7 +373,34 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
                     ))}
                 </div>
             )}
-            <div ref={mapRef} className="map-container" style={{ height: '480px' }} />
+            
+            <div style={{ position: 'relative' }}>
+                <div ref={mapRef} className="map-container" style={{ height: '480px', borderRadius: '12px' }} />
+                
+                {/* 맵 내부 우측 상단 플로팅 반경 컨트롤러 */}
+                <div style={{
+                    position: 'absolute', top: '10px', right: '10px', zIndex: 1000,
+                    display: 'flex', gap: '3px', background: 'rgba(255, 255, 255, 0.9)', 
+                    borderRadius: '10px', padding: '4px', border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}>
+                    {RADIUS_OPTIONS.map(opt => (
+                        <button
+                            key={opt.value}
+                            onClick={() => setViewRadius(opt.value)}
+                            style={{
+                                padding: '5px 12px', fontSize: '13px', fontWeight: 600, border: 'none',
+                                borderRadius: '7px', cursor: 'pointer', transition: 'all 0.25s',
+                                background: viewRadius === opt.value ? '#6366f1' : 'transparent',
+                                color: viewRadius === opt.value ? 'white' : '#475569',
+                                boxShadow: viewRadius === opt.value ? '0 2px 6px rgba(99,102,241,0.3)' : 'none'
+                            }}
+                        >
+                            {opt.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
