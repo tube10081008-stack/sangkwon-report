@@ -11,6 +11,38 @@
         }
         .spinner { width: 30px; height: 30px; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes bounce {
+            0%, 100% { transform: translate(-50%, -100%); }
+            50% { transform: translate(-50%, -110%); }
+        }
+        /* 좌표 고정 마커 오버레이 */
+        #target-marker {
+            position: absolute;
+            z-index: 999;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.4));
+            transition: left 0.05s linear, top 0.05s linear;
+        }
+        #target-marker .marker-label {
+            background: #ef4444;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif;
+            white-space: nowrap;
+            margin-bottom: 2px;
+        }
+        #target-marker .marker-pin {
+            width: 0; height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 16px solid #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -19,6 +51,12 @@
         <span>3D 지도를 불러오고 있습니다</span>
     </div>
     <div id="vmap"></div>
+
+    <!-- 좌표 고정 타겟 마커 (Vworld 엔진이 매 프레임 화면좌표로 변환) -->
+    <div id="target-marker" style="display:none;">
+        <div class="marker-label">📍 타겟 위치</div>
+        <div class="marker-pin"></div>
+    </div>
 
     <script>
         // 0. Vworld 엔진 내부 버그 패치 (removeEventListener 파라미터 누락 해결)
@@ -34,6 +72,105 @@
         var lat = parseFloat(urlParams.get('lat'));
         var apiKey = urlParams.get('apikey');
         var domain = window.location.hostname;
+
+        // 현재 타겟 좌표 (초기값 = 분석 중심점)
+        var targetLon = lon;
+        var targetLat = lat;
+
+        // Vworld 자체 3D API를 통한 좌표 고정 POI 마커 추가
+        function addTargetPOI(map, markerLon, markerLat) {
+            try {
+                // 방법1: vw.gs3d.Point (3D 포인트 그래픽)
+                if (window.vw && vw.gs3d && vw.gs3d.Point) {
+                    var gb = new vw.GraphicBoard('targetBoard');
+                    var pt = new vw.gs3d.Point(
+                        new vw.CoordZ(markerLon, markerLat, 30),
+                        { color: '#FF0000', size: 15 }
+                    );
+                    gb.add(pt);
+                    map.addGraphicBoard(gb);
+                    console.log('Vworld POI 마커 추가 성공 (gs3d.Point)');
+                    return;
+                }
+            } catch(e) {
+                console.warn('gs3d.Point 방식 실패:', e.message);
+            }
+
+            try {
+                // 방법2: vw.Marker 
+                if (window.vw && vw.Marker) {
+                    var marker = new vw.Marker(
+                        new vw.CoordZ(markerLon, markerLat, 30),
+                        { icon: 'https://map.vworld.kr/images/ol3/marker_default.png', label: '타겟' }
+                    );
+                    map.addMarker(marker);
+                    console.log('Vworld POI 마커 추가 성공 (vw.Marker)');
+                    return;
+                }
+            } catch(e) {
+                console.warn('vw.Marker 방식 실패:', e.message);
+            }
+
+            console.log('Vworld 자체 POI API 미지원 → DOM 오버레이 마커로 폴백');
+        }
+
+        // 글로벌 POI 마커 업데이트 (주소 검색 이동 시)
+        function moveTargetPOI(map, newLon, newLat) {
+            targetLon = newLon;
+            targetLat = newLat;
+            // Vworld POI 재생성 시도
+            addTargetPOI(map, newLon, newLat);
+        }
+
+        // 마커 위치 업데이트 루프 (매 프레임 Cesium 좌표→화면 픽셀 변환)
+        function startMarkerTracking() {
+            var marker = document.getElementById('target-marker');
+            if (!marker) return;
+
+            function updateMarkerPosition() {
+                try {
+                    // Vworld 3D 내부의 Cesium viewer 접근
+                    var viewer = null;
+                    if (window.vmapInstance && window.vmapInstance._viewer) {
+                        viewer = window.vmapInstance._viewer;
+                    } else if (window.vmapInstance && window.vmapInstance.viewer) {
+                        viewer = window.vmapInstance.viewer;
+                    }
+                    // Cesium 글로벌 접근 시도
+                    if (!viewer && window.Cesium) {
+                        // vmap div 내부의 cesium widget canvas 탐색
+                        var cesiumWidget = document.querySelector('.cesium-widget');
+                        if (cesiumWidget && cesiumWidget._cesiumWidget) {
+                            viewer = cesiumWidget._cesiumWidget.scene;
+                        }
+                    }
+
+                    if (viewer && window.Cesium) {
+                        var cartesian = Cesium.Cartesian3.fromDegrees(targetLon, targetLat, 0);
+                        var screenPos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, cartesian);
+                        if (screenPos) {
+                            marker.style.display = 'flex';
+                            marker.style.left = screenPos.x + 'px';
+                            marker.style.top = screenPos.y + 'px';
+                            marker.style.transform = 'translate(-50%, -100%)';
+                        } else {
+                            // 화면 밖에 있으면 숨김
+                            marker.style.display = 'none';
+                        }
+                    } else {
+                        // Cesium viewer에 접근할 수 없으면 숨김 상태 유지
+                        marker.style.display = 'none';
+                    }
+                } catch(e) {
+                    // 에러 무시 (엔진 로딩 중일 수 있음)
+                }
+                requestAnimationFrame(updateMarkerPosition);
+            }
+            // 엔진 로딩 후 3초 딜레이 → 추적 시작
+            setTimeout(function() {
+                requestAnimationFrame(updateMarkerPosition);
+            }, 3000);
+        }
 
         function initVworldMap() {
             var checkVw = setInterval(function() {
@@ -57,6 +194,13 @@
                         window.vmapInstance = map;
                         
                         document.getElementById('loading').style.display = 'none';
+
+                        // Vworld 자체 POI API로 좌표 고정 마커 추가
+                        addTargetPOI(map, lon, lat);
+
+                        // Cesium 화면좌표 기반 마커 트래킹 시작 (POI가 안 보일 경우의 폴백)
+                        startMarkerTracking();
+
                     } catch (err) {
                         console.error('Vworld Map Init Error:', err);
                         document.getElementById('loading').innerHTML = '3D 맵 엔진 초기화에 실패했습니다.';
@@ -75,9 +219,19 @@
         // 부모 창(리액트)으로부터의 검색/이동 메시지 수신
         window.addEventListener('message', function(e) {
             if (e.data && e.data.type === 'MOVE_CAMERA') {
+                var newLon = e.data.lon;
+                var newLat = e.data.lat;
+
+                // 타겟 좌표 갱신 → 마커가 새 위치를 자동 추적
+                targetLon = newLon;
+                targetLat = newLat;
+
+                // POI 마커도 새 좌표로 이동
+                if (window.vmapInstance) {
+                    moveTargetPOI(window.vmapInstance, newLon, newLat);
+                }
+
                 if (window.vmapInstance && window.vw && window.vw.CameraPosition) {
-                    var newLon = e.data.lon;
-                    var newLat = e.data.lat;
                     var movePo = new vw.CameraPosition(
                         new vw.CoordZ(newLon, newLat, 100),
                         new vw.Direction(0, -35, 0)
