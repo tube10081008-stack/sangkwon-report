@@ -4,6 +4,7 @@ import AccessDenied from './pages/AccessDenied';
 import Landing from './pages/Landing';
 import ReportPage from './pages/ReportPage';
 import SharedReportPage from './pages/SharedReportPage';
+import AgentDashboard from './pages/AgentDashboard';
 
 function App() {
     return (
@@ -13,6 +14,7 @@ function App() {
                 <Route path="/start-analysis" element={<Landing />} />
                 <Route path="/report" element={<ReportPage />} />
                 <Route path="/shared/:id" element={<SharedReportPage />} />
+                <Route path="/agent-hub" element={<AgentDashboard />} />
             </Routes>
         </Router>
     );

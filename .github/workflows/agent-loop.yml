@@ -1,0 +1,83 @@
+name: 🔄 상권 분석 AI 에이전트 루프
+
+on:
+  schedule:
+    # 매일 오전 8시 KST (UTC 23:00) 자동 실행
+    - cron: '0 23 * * *'
+  workflow_dispatch:
+    inputs:
+      district:
+        description: '검증할 구 (비워두면 오늘의 구 자동 선택)'
+        required: false
+        type: string
+
+env:
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  KAKAO_API_KEY: ${{ secrets.KAKAO_API_KEY }}
+  STORE_API_KEY: ${{ secrets.STORE_API_KEY }}
+  BUILDING_API_KEY: ${{ secrets.BUILDING_API_KEY }}
+  SEOUL_API_KEY_1: ${{ secrets.SEOUL_API_KEY_1 }}
+  SEOUL_API_KEY_2: ${{ secrets.SEOUL_API_KEY_2 }}
+  SEOUL_API_KEY_3: ${{ secrets.SEOUL_API_KEY_3 }}
+  DATA_GO_KR_API_KEY: ${{ secrets.DATA_GO_KR_API_KEY }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+jobs:
+  agent-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 🟢 Node.js 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 의존성 설치
+        run: npm ci
+
+      - name: 🔄 에이전트 루프 실행
+        run: |
+          node -e "
+            import('./server/agents/loopController.js').then(async ({ runLoop }) => {
+              const district = '${{ github.event.inputs.district }}' || null;
+              try {
+                const result = await runLoop(district);
+                console.log('루프 완료:', JSON.stringify({
+                  district: result.district,
+                  status: result.status,
+                  issues: result.inspectionReport?.totalIssuesFound || 0,
+                  autoFixed: result.autoFixResult?.applied?.length || 0,
+                  elapsed: result.elapsedSeconds
+                }, null, 2));
+              } catch (e) {
+                console.error('루프 실패:', e.message);
+                process.exit(1);
+              }
+            });
+          "
+
+      - name: 📤 변경사항 자동 커밋
+        run: |
+          git config user.name "AI Agent Bot"
+          git config user.email "agent-bot@sangkwon.ai"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "변경사항 없음"
+          else
+            DATE=$(date +%Y-%m-%d)
+            git commit -m "🤖 AI Agent Loop: 자동 수정 적용 ($DATE)"
+            git push
+          fi
+
+      - name: 📤 루프 히스토리 업로드
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: loop-history-${{ github.run_number }}
+          path: loop-history/
+          retention-days: 30

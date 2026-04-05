@@ -13,6 +13,17 @@ export function analyzeDistrict(stores, targetCategory = null) {
     const categorySummary = getCategorySummary(stores);
     const franchiseAnalysis = analyzeFranchises(stores);
 
+    // 데이터 품질 체크 — 극단값 방지
+    const dataQuality = {
+        sufficient: totalStores >= 10,
+        level: totalStores === 0 ? 'NONE' : totalStores < 10 ? 'VERY_LOW' : totalStores < 50 ? 'LOW' : totalStores < 200 ? 'MODERATE' : 'GOOD',
+        warning: totalStores === 0
+            ? '⚠️ 해당 반경 내 상가업소 데이터가 없습니다. 좌표 또는 반경을 조정해보세요.'
+            : totalStores < 10
+                ? '⚠️ 데이터가 매우 부족하여(10건 미만) 지표 신뢰도가 낮습니다.'
+                : null
+    };
+
     // 6대 핵심 지표 산출
     const diversityIndex = calculateDiversityIndex(categorySummary, totalStores);
     const saturationScore = calculateSaturationScore(categorySummary, totalStores);
@@ -45,15 +56,16 @@ export function analyzeDistrict(stores, targetCategory = null) {
 
     return {
         totalStores,
+        dataQuality,
         categorySummary,
         franchiseAnalysis,
         indicators: {
-            diversityIndex: { value: diversityIndex, label: '업종 다양성', description: '다양한 업종이 골고루 분포할수록 높음', max: 100 },
-            saturationScore: { value: saturationScore, label: '상권 밀집도', description: '업소 밀집 정도 (적정 수준이 좋음)', max: 100 },
-            competitionIntensity: { value: competitionIntensity, label: '경쟁 균형도', description: '특정 업종 쏠림 없이 균형잡힐수록 높음', max: 100 },
-            franchiseScore: { value: Math.min(100, 100 - franchiseRatio), label: '독립 상점 비율', description: '독립 상점 비율이 높을수록 진입 기회 많음', max: 100 },
-            densityScore: { value: densityScore, label: '상권 활성도', description: '적정 수준의 업소 밀도일수록 높음', max: 100 },
-            stabilityScore: { value: stabilityScore, label: '업종 안정성', description: '안정적인 업종(의료, 교육 등) 비율', max: 100 }
+            diversityIndex: { value: diversityIndex, label: '업종 다양성', description: '다양한 업종이 골고루 분포할수록 높음', max: 100, reliable: dataQuality.sufficient },
+            saturationScore: { value: saturationScore, label: '상권 밀집도', description: '업소 밀집 정도 (적정 수준이 좋음)', max: 100, reliable: dataQuality.sufficient },
+            competitionIntensity: { value: competitionIntensity, label: '경쟁 균형도', description: '특정 업종 쏠림 없이 균형잡힐수록 높음', max: 100, reliable: dataQuality.sufficient },
+            franchiseScore: { value: Math.min(100, 100 - franchiseRatio), label: '독립 상점 비율', description: '독립 상점 비율이 높을수록 진입 기회 많음', max: 100, reliable: dataQuality.sufficient },
+            densityScore: { value: densityScore, label: '상권 활성도', description: '적정 수준의 업소 밀도일수록 높음', max: 100, reliable: true },
+            stabilityScore: { value: stabilityScore, label: '업종 안정성', description: '안정적인 업종(의료, 교육 등) 비율', max: 100, reliable: dataQuality.sufficient }
         },
         overallScore,
         grade,

@@ -43,12 +43,12 @@
                         var mapOptions = {
                             controlsAutoArrange: true,
                             homePosition: new vw.CameraPosition(
-                                new vw.CoordZ(lon, lat, 400),
-                                new vw.Direction(0, -45, 0)
+                                new vw.CoordZ(lon, lat, 100),
+                                new vw.Direction(0, -35, 0)
                             ),
                             initPosition: new vw.CameraPosition(
-                                new vw.CoordZ(lon, lat, 400),
-                                new vw.Direction(0, -45, 0)
+                                new vw.CoordZ(lon, lat, 100),
+                                new vw.Direction(0, -35, 0)
                             )
                         };
                         var map = new vw.Map("vmap", mapOptions);
@@ -79,8 +79,8 @@
                     var newLon = e.data.lon;
                     var newLat = e.data.lat;
                     var movePo = new vw.CameraPosition(
-                        new vw.CoordZ(newLon, newLat, 400),
-                        new vw.Direction(0, -45, 0)
+                        new vw.CoordZ(newLon, newLat, 100),
+                        new vw.Direction(0, -35, 0)
                     );
                     if (typeof window.vmapInstance.moveTo === 'function') {
                         window.vmapInstance.moveTo(movePo);

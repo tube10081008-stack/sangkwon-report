@@ -75,7 +75,6 @@ function createSmoothHeatLayer(map, points, colorScheme = 'heat') {
         const ctx = heatCanvas.getContext('2d');
         ctx.clearRect(0, 0, heatCanvas.width, heatCanvas.height);
 
-        // 그리드 기반 집계 (성능 최적화)
         const gridStep = kSize * 1.2;
         const grid = {};
         points.forEach(p => {
@@ -95,7 +94,6 @@ function createSmoothHeatLayer(map, points, colorScheme = 'heat') {
         const maxI = Math.max(...cells.map(c => c.ti));
         if (maxI === 0) return;
 
-        // 가우시안 블롭 그리기
         cells.forEach(cell => {
             const cx = cell.sx / cell.n;
             const cy = cell.sy / cell.n;
@@ -106,7 +104,6 @@ function createSmoothHeatLayer(map, points, colorScheme = 'heat') {
             ctx.drawImage(kernel, cx - kSize, cy - kSize);
         });
 
-        // 알파 → 색상 컬러라이징
         const imageData = ctx.getImageData(0, 0, heatCanvas.width, heatCanvas.height);
         const data = imageData.data;
         for (let i = 0; i < data.length; i += 4) {
@@ -216,6 +213,15 @@ function createCategoryHeatLayers(map, categories) {
     };
 }
 
+// ===== 반경별 줌 레벨 매핑 =====
+const RADIUS_OPTIONS = [
+    { label: '300m', value: 300, zoom: 17 },
+    { label: '500m', value: 500, zoom: 16 },
+    { label: '1km', value: 1000, zoom: 15 },
+    { label: '5km', value: 5000, zoom: 13 },
+    { label: '10km', value: 10000, zoom: 12 },
+];
+
 // ===== 탭 구성 =====
 const TABS = [
     { key: 'all', icon: '🏪' },
@@ -229,21 +235,25 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const layerRef = useRef(null);
+    const circleRef = useRef(null);
     const [activeTab, setActiveTab] = useState('all');
+    const [viewRadius, setViewRadius] = useState(radius);
 
     // 지도 초기화
     useEffect(() => {
         if (mapInstanceRef.current) mapInstanceRef.current.remove();
         if (!mapRef.current || !center) return;
 
-        const map = L.map(mapRef.current, { center, zoom: 15, zoomControl: true, scrollWheelZoom: true });
+        const initialZoom = RADIUS_OPTIONS.find(r => r.value === radius)?.zoom || 15;
+        const map = L.map(mapRef.current, { center, zoom: initialZoom, zoomControl: true, scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
         }).addTo(map);
 
-        L.circle(center, {
-            radius, color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.04, weight: 2, dashArray: '8, 8'
+        const circle = L.circle(center, {
+            radius: viewRadius, color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.04, weight: 2, dashArray: '8, 8'
         }).addTo(map);
+        circleRef.current = circle;
 
         const centerIcon = L.divIcon({
             html: '<div style="width:14px;height:14px;border-radius:50%;background:#6366f1;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
@@ -261,7 +271,22 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
             observer.disconnect();
             if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
         };
-    }, [center, radius]);
+    }, [center]);
+
+    // 반경 변경 시 줌 + 원 업데이트
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map) return;
+
+        const opt = RADIUS_OPTIONS.find(r => r.value === viewRadius);
+        if (opt) {
+            map.setView(center, opt.zoom, { animate: true, duration: 0.5 });
+        }
+
+        if (circleRef.current) {
+            circleRef.current.setRadius(viewRadius);
+        }
+    }, [viewRadius, center]);
 
     // 탭 전환 시 히트맵 레이어 교체
     useEffect(() => {
@@ -304,21 +329,47 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
 
     return (
         <div className="heatmap-wrapper">
-            <div className="heatmap-tabs">
-                {TABS.map(tab => {
-                    const hm = multiHeatmaps?.[tab.key];
-                    const label = hm?.label || tab.key;
-                    return (
+            {/* 히트맵 타입 탭 + 반경 컨트롤러 한 줄 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+                <div className="heatmap-tabs" style={{ margin: 0 }}>
+                    {TABS.map(tab => {
+                        const hm = multiHeatmaps?.[tab.key];
+                        const label = hm?.label || tab.key;
+                        return (
+                            <button
+                                key={tab.key}
+                                className={`heatmap-tab ${activeTab === tab.key ? 'active' : ''}`}
+                                onClick={() => setActiveTab(tab.key)}
+                            >
+                                {tab.icon} {label.replace(/^[^\s]+\s/, '')}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* 반경 컨트롤러 */}
+                <div style={{
+                    display: 'flex', gap: '3px', background: '#f1f5f9', borderRadius: '10px', padding: '3px',
+                    border: '1px solid #e2e8f0'
+                }}>
+                    {RADIUS_OPTIONS.map(opt => (
                         <button
-                            key={tab.key}
-                            className={`heatmap-tab ${activeTab === tab.key ? 'active' : ''}`}
-                            onClick={() => setActiveTab(tab.key)}
+                            key={opt.value}
+                            onClick={() => setViewRadius(opt.value)}
+                            style={{
+                                padding: '5px 12px', fontSize: '12px', fontWeight: 600, border: 'none',
+                                borderRadius: '7px', cursor: 'pointer', transition: 'all 0.25s',
+                                background: viewRadius === opt.value ? '#6366f1' : 'transparent',
+                                color: viewRadius === opt.value ? 'white' : '#64748b',
+                                boxShadow: viewRadius === opt.value ? '0 2px 6px rgba(99,102,241,0.3)' : 'none'
+                            }}
                         >
-                            {tab.icon} {label.replace(/^[^\s]+\s/, '')}
+                            {opt.label}
                         </button>
-                    );
-                })}
+                    ))}
+                </div>
             </div>
+
             {activeHeatmap?.description && (
                 <p className="heatmap-desc">{activeHeatmap.description}</p>
             )}
@@ -332,7 +383,7 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
                     ))}
                 </div>
             )}
-            <div ref={mapRef} className="map-container" style={{ height: '420px' }} />
+            <div ref={mapRef} className="map-container" style={{ height: '480px' }} />
         </div>
     );
 }

@@ -107,7 +107,15 @@ export function generateStrategyGuide(analysis, location, targetCategory) {
 // ===== Helper Functions =====
 
 function generateOverview(location, grade, score, totalStores, topCats) {
+    if (totalStores === 0) {
+        return `${location.address} (${location.region3}) 상권은 반경 내 **조회된 업소가 없습니다**. 데이터가 부족하여 정확한 분석이 어렵습니다.`;
+    }
+    if (totalStores < 10) {
+        return `${location.address} (${location.region3}) 상권은 반경 내 총 **${totalStores.toLocaleString()}개** 업소만 확인되어 데이터가 부족합니다. 주요 업종은 ${topCats}이며, 지표 신뢰도가 낮으니 참고용으로만 활용해주세요.`;
+    }
     return `${location.address} (${location.region3}) 상권은 반경 내 총 **${totalStores.toLocaleString()}개** 업소가 운영 중이며, ` +
+        `주요 업종은 ${topCats}입니다. 전반적으로 상권의 다양성과 활성도를 종합적으로 분석하였습니다.`;
+} (${location.region3}) 상권은 반경 내 총 **${totalStores.toLocaleString()}개** 업소가 운영 중이며, ` +
         `종합 **${grade.grade}등급 (${score}점/100점)**으로 평가됩니다. ` +
         `주요 업종은 ${topCats}이며, ${grade.description}`;
 }
@@ -158,13 +166,7 @@ function identifyThreats(indicators, categories, total) {
 function generateRecommendations(grade, indicators, categories, targetAnalysis) {
     const recs = [];
 
-    if (grade.grade === 'S' || grade.grade === 'A') {
-        recs.push('✅ 이 상권은 전반적으로 우수한 환경입니다. 빠른 진입이 유리할 수 있습니다.');
-    } else if (grade.grade === 'B') {
-        recs.push('⚠️ 양호한 상권이나, 차별화된 서비스/상품으로 경쟁력을 확보해야 합니다.');
-    } else {
-        recs.push('🚨 신중한 판단이 필요합니다. 반드시 현장 답사 후 최종 결정하시기 바랍니다.');
-    }
+    recs.push('📌 상권의 활성도와 경쟁 환경을 종합적으로 고려하여 신중하게 접근하시기 바랍니다.');
 
     if (targetAnalysis) {
         const sat = targetAnalysis.saturationLevel;
@@ -359,17 +361,9 @@ function generateOpeningChecklist(targetCategory, location) {
 }
 
 function generateFinalAdvice(grade, score, targetCategory, location) {
-    if (grade.grade === 'S' || grade.grade === 'A') {
-        return `${location.address} 상권은 **${grade.grade}등급(${score}점)**으로, ${targetCategory} 창업에 매우 유리한 입지입니다. ` +
-            `빠른 진입과 적극적인 마케팅으로 선점 효과를 극대화하시기 바랍니다. 성공을 기원합니다! 🎉`;
-    } else if (grade.grade === 'B') {
-        return `${location.address} 상권은 **${grade.grade}등급(${score}점)**으로, 준비된 창업자에게는 좋은 기회가 될 수 있습니다. ` +
-            `차별화된 상품/서비스와 꾸준한 마케팅이 성공의 열쇠입니다. 준비를 철저히 하시면 충분히 승부할 수 있습니다! 💪`;
-    } else {
-        return `${location.address} 상권은 **${grade.grade}등급(${score}점)**으로, 신중한 접근이 필요합니다. ` +
-            `반드시 현장 답사와 주변 상인 인터뷰를 진행하고, 대안 지역과 비교 분석 후 최종 결정하시기 바랍니다. ` +
-            `철저한 준비가 리스크를 줄입니다. 화이팅! 🙏`;
-    }
+    return `${location.address} 상권에서 ${targetCategory} 창업을 고려 중이시라면, ` +
+        `반드시 현장 답사와 주변 상인 인터뷰를 진행하시기 바랍니다. ` +
+        `임대료, 권리금, 유동인구(주중/주말) 등을 직접 확인하신 후 최종 결정하시는 것을 권장합니다. 화이팅! 💪`;
 }
 
 function generateRealEstateTrend(data) {

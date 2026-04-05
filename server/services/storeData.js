@@ -74,7 +74,14 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
             console.error(`페이지 ${pageNo} 조회 오류:`, error.message);
             break;
         }
-    } while (allStores.length < totalCount && pageNo <= 4); // 최대 4,000건(4페이지)으로 제한하여 서버 Vercel 504 에러 및 브라우저 렉(Heatmap Freeze) 방지
+    } while (allStores.length < totalCount && pageNo <= 4); // 최대 4,000건(4페이지)
+
+    // 데이터 품질 경고 로그
+    if (allStores.length === 0) {
+        console.warn(`⚠️ [데이터 품질] 위치(${lat}, ${lng}) 반경 ${radius}m: 업소 0건. 좌표/반경 확인 필요.`);
+    } else if (allStores.length < 10) {
+        console.warn(`⚠️ [데이터 품질] 위치(${lat}, ${lng}) 반경 ${radius}m: 업소 ${allStores.length}건. 데이터 부족.`);
+    }
 
     return processStoreData(allStores);
 }
@@ -87,6 +94,24 @@ const CATEGORY_DISPLAY_MAP = {
     '과학·기술': '일반사업·사무',
     '시설관리·임대': '부동산·시설관리',
     '수리·개인': '생활서비스',
+    '음식': '외식·음료',
+    '소매': '쇼핑·판매',
+    '생활서비스': '생활서비스',
+    '교육': '교육·학원',
+    '부동산': '부동산·시설관리',
+    '관광·여가·오락': '문화·여가시설',
+    '숙박': '숙박시설',
+    '스포츠': '스포츠·레저',
+    '음식점·카페': '음식점·카페',
+    '소매·유통': '쇼핑·판매',
+    '교육·학원': '교육·학습',
+    '의료·건강': '병원·약국',
+    '여가·오락': '문화·여가시설',
+    '음식점': '외식·음료',
+    '도소매': '쇼핑·판매',
+    '의료': '병원·의료',
+    '전문직서비스': '일반사업·사무',
+    '정보통신': '일반사업·사무'
 };
 
 function mapCategoryName(originalName) {
@@ -160,37 +185,69 @@ export function getCategorySummary(stores) {
 }
 
 /**
- * 프랜차이즈 분석 (이름 기반 추정)
+ * 프랜차이즈 분석 (정규화 기반 매칭)
  */
 const KNOWN_FRANCHISES = [
+    // === 편의점 ===
     'CU', 'GS25', '세븐일레븐', '이마트24', '미니스톱',
+    // === 카페·커피 ===
     '스타벅스', '투썸플레이스', '이디야', '메가커피', '컴포즈커피', '빽다방', '할리스',
+    '카페베네', '엔젤리너스', '더벤티', '요거프레소', '탐앤탐스', '파스쿠찌',
+    '매머드익스프레스', '메가엔지씨커피', '메가MGC커피', '던킨',
+    // === 치킨 ===
     'BBQ', 'BHC', '교촌치킨', '네네치킨', '굽네치킨', '푸라닭',
-    '맥도날드', '버거킹', '롯데리아', '맘스터치', 'KFC',
-    '올리브영', '다이소', 'ABC마트',
-    '파리바게뜨', '뚜레쥬르', '성심당',
-    '이디야커피', '카페베네', '엔젤리너스',
-    '도미노피자', '피자헛', '미스터피자', '파파존스',
-    '본죽', '죽이야기',
+    '노랑통닭', '페리카나', '또래오래', '호식이두마리치킨', '큰집닭강정', '가마치통닭',
+    // === 버거·패스트푸드 ===
+    '맥도날드', '버거킹', '롯데리아', '맘스터치', 'KFC', '프랭크버거',
+    // === 피자 ===
+    '도미노피자', '피자헛', '미스터피자', '파파존스', '피자알볼로', '피자스쿨', '피자나라',
+    // === 베이커리 ===
+    '파리바게뜨', '뚜레쥬르', '성심당', '몽소',
+    // === 한식 ===
+    '명륜진사갈비', '큰맘할매순대국', '본죽', '죽이야기', '이차돌', '오봉집',
+    '토박이부대찌개', '본도시락', '한솥', '김밥천국', '김가네',
+    // === 생활·뷰티·리테일 ===
+    '올리브영', '다이소', 'ABC마트', '정관장', '스피드메이트',
+    'CJ올리브마켓', 'GS더프레시', '홈플러스', '이마트', '롯데마트',
+    // === 서점 ===
     '교보문고', '알라딘', '영풍문고',
-    '피자알볼로', '청기와',
-    'CJ올리브마켓', '홈플러스', '이마트', '롯데마트',
+    // === 금융 ===
     '신한은행', '국민은행', 'KB', 'NH', '우리은행', '하나은행', 'IBK',
-    'SK텔레콤', 'KT', 'LG유플러스'
+    // === 통신 ===
+    'SK텔레콤', 'KT', 'LG유플러스',
+    // === 기타 ===
+    '봉구비어', '선비꼬마김밥', '설빙'
 ];
+
+/**
+ * 상점 이름 정규화 (매칭 정확도 개선)
+ * 공백, 특수문자 제거 후 대문자 변환
+ */
+function normalizeName(name) {
+    return name
+        .replace(/\s+/g, '')        // 공백 제거
+        .replace(/[()[\]·.\/]+/g, '') // 특수문자 제거
+        .toUpperCase();
+}
 
 export function analyzeFranchises(stores) {
     const franchiseStores = [];
     const independentStores = [];
 
+    // 프랜차이즈 이름 정규화 캐싱 (매번 계산하지 않도록)
+    const normalizedFranchises = KNOWN_FRANCHISES.map(f => ({
+        original: f,
+        normalized: normalizeName(f)
+    }));
+
     stores.forEach(store => {
-        const name = store.name;
-        const isFranchise = KNOWN_FRANCHISES.some(f =>
-            name.includes(f) || name.toUpperCase().includes(f.toUpperCase())
+        const normalizedStoreName = normalizeName(store.name);
+        const matched = normalizedFranchises.find(f =>
+            normalizedStoreName.includes(f.normalized)
         );
 
-        if (isFranchise) {
-            franchiseStores.push(store);
+        if (matched) {
+            franchiseStores.push({ ...store, matchedBrand: matched.original });
         } else {
             independentStores.push(store);
         }
@@ -199,13 +256,9 @@ export function analyzeFranchises(stores) {
     // 프랜차이즈 브랜드별 집계
     const brandMap = {};
     franchiseStores.forEach(store => {
-        const matched = KNOWN_FRANCHISES.find(f =>
-            store.name.includes(f) || store.name.toUpperCase().includes(f.toUpperCase())
-        );
-        if (matched) {
-            if (!brandMap[matched]) brandMap[matched] = { name: matched, count: 0, category: store.categoryL };
-            brandMap[matched].count++;
-        }
+        const brand = store.matchedBrand;
+        if (!brandMap[brand]) brandMap[brand] = { name: brand, count: 0, category: store.categoryL };
+        brandMap[brand].count++;
     });
 
     return {

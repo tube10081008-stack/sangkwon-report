@@ -1,0 +1,3304 @@
+{
+  "loopNumber": 1,
+  "district": "은평구",
+  "timestamp": "2026-04-04T08:55:40.852Z",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 1,
+      "name": "Inspector",
+      "status": "completed",
+      "startedAt": "2026-04-04T08:55:40.852Z",
+      "completedAt": "2026-04-04T09:07:33.481Z",
+      "issuesFound": 84
+    },
+    {
+      "step": 2,
+      "name": "Advisor",
+      "status": "completed",
+      "startedAt": "2026-04-04T09:07:33.482Z",
+      "completedAt": "2026-04-04T09:09:41.034Z",
+      "autoFixable": 3,
+      "manualReview": 9
+    },
+    {
+      "step": 3,
+      "name": "AutoFixer",
+      "status": "completed",
+      "startedAt": "2026-04-04T09:09:41.035Z",
+      "completedAt": "2026-04-04T09:09:41.063Z",
+      "applied": 3
+    },
+    {
+      "step": 4,
+      "name": "Discord",
+      "status": "completed",
+      "startedAt": "2026-04-04T09:09:41.071Z",
+      "completedAt": "2026-04-04T09:09:41.074Z",
+      "sent": false
+    }
+  ],
+  "inspectionReport": {
+    "district": "은평구",
+    "timestamp": "2026-04-04T09:07:33.481Z",
+    "addressesTested": 10,
+    "totalIssuesFound": 84,
+    "summary": {
+      "critical": 2,
+      "high": 17,
+      "medium": 32,
+      "low": 33
+    },
+    "results": [
+      {
+        "address": "서울 은평구 연서로 365",
+        "totalIssues": 12,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 4,
+          "LOW": 6
+        },
+        "issues": [
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 다양성 지표가 극단값(0)을 기록",
+            "suggestion": "diversityIndex 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(0)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "경쟁 균형도 지표가 극단값(0)을 기록",
+            "suggestion": "competitionIntensity 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "독립 상점 비율 지표가 극단값(100)을 기록",
+            "suggestion": "franchiseScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(0)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 2건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "분석 데이터에 따르면 '업소 수: 0개'입니다. 따라서 '독립 상점 비율이 높아 개인 창업에 유리한 환경입니다'라는 강점은 상권 내 독립 상점이 존재하지 않으므로 논리적으로 모순됩니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "약점",
+                "issue": "업소 수가 0개이고 상위 업종 데이터가 비어있음에도 불구하고 '업종 다양성이 부족하여 특정 업종에 의존하는 경향이 있습니다' 및 '특정 업종의 과잉 경쟁이 우려됩니다'라는 약점을 제시한 것은 데이터와 상충됩니다. 업종 자체가 존재하지 않아 다양성이나 경쟁을 논할 수 없습니다.",
+                "severity": "HIGH"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "HIGH",
+            "type": "AI_COMMENT_QUALITY",
+            "description": "AI 코멘트 전반적 품질이 \"POOR\"로 평가됨",
+            "suggestion": "aiConsultant.js의 코멘트 생성 함수 전면 개선 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "DATA_COVERAGE_LOW",
+            "description": "업소 수(0개)가 해당 지역 규모 대비 부족",
+            "suggestion": "공공데이터 API 조회 반경 또는 페이지 수 확대 검토",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU, GS25, 세븐일레븐, 스타벅스, 이디야커피, 파리바게뜨, 롯데리아, 맥도날드",
+            "details": {
+              "missingBrands": [
+                "CU",
+                "GS25",
+                "세븐일레븐",
+                "스타벅스",
+                "이디야커피",
+                "파리바게뜨",
+                "롯데리아",
+                "맥도날드"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "GS25",
+                "세븐일레븐",
+                "스타벅스",
+                "이디야커피",
+                "파리바게뜨",
+                "롯데리아",
+                "맥도날드"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "DATA_QUALITY_POOR",
+            "description": "전반적 데이터 품질이 낮음",
+            "details": {
+              "notes": "제공된 데이터는 서울 은평구 연서로 365 (반경 500m) 지역의 상권 현황을 전혀 반영하지 못하고 있습니다. 총 업소 수가 0개로 보고된 것은 데이터 수집 또는 처리 과정에서 심각한 오류가 발생했음을 강력히 시사합니다. 해당 지역은 서울의 도심권으로 기본적인 주거 및 상업 시설이 밀집해 있을 것이며, 이에 따라 다양한 업종과 프랜차이즈 브랜드들이 존재할 것으로 예상됩니다. 현재 데이터는 모든 업소와 업종, 프랜차이즈가 누락된 상태로, 데이터의 신뢰성이 극히 낮으므로 즉각적인 재수집 및 철저한 검증이 필수적입니다."
+            },
+            "suggestion": "대체 데이터 소스 추가 또는 기존 API 파라미터 조정 필요",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 5건",
+            "details": [
+              {
+                "from": "음식점·카페",
+                "to": "음식점·카페",
+                "reason": "가장 기본적인 상가 업종으로, 사용자 친화적 명칭 유지 또는 세분화가 필요합니다. 현재 매핑 규칙에 포함되어 있지 않습니다. 🍔☕"
+              },
+              {
+                "from": "소매·유통",
+                "to": "쇼핑·판매",
+                "reason": "다양한 상품 판매 업종을 포괄하는 핵심 카테고리이나, 현재 매핑 규칙에 부재합니다. 🛍️🛒"
+              },
+              {
+                "from": "교육·학원",
+                "to": "교육·학습",
+                "reason": "학원, 학습지 등 교육 관련 서비스는 상가에서 중요한 비중을 차지하나, 현재 매핑에 누락되어 있습니다. 📚✍️"
+              },
+              {
+                "from": "의료·건강",
+                "to": "병원·약국",
+                "reason": "병원, 의원, 약국 등 의료 서비스는 상가 주요 업종이지만, 현재 매핑 규칙에 포함되지 않았습니다. 🏥💊"
+              },
+              {
+                "from": "여가·오락",
+                "to": "문화·여가시설",
+                "reason": "영화관, 노래방, PC방 등 여가 및 오락 시설은 상가에 필수적인 카테고리입니다. 🎬🎤"
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "음식점·카페": "음식점·카페",
+                "소매·유통": "쇼핑·판매",
+                "교육·학원": "교육·학습",
+                "의료·건강": "병원·약국",
+                "여가·오락": "문화·여가시설"
+              }
+            },
+            "area": "카테고리 매핑"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "MAPPING_INCORRECT",
+            "description": "카테고리 매핑 수정 필요: 1건",
+            "details": [
+              {
+                "from": "과학·기술",
+                "currentTo": "일반사업·사무",
+                "suggestedTo": "전문사업·기술",
+                "reason": "'과학·기술'의 전문성을 '일반' 사무와 구분하여 이해도를 높일 수 있도록 매핑명 조정을 제안합니다. '일반'이라는 표현이 전문성을 희석시킬 수 있습니다. 💡🔬"
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP 수정 필요",
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 0,
+          "overallScore": 14,
+          "grade": "D",
+          "topCategories": [],
+          "franchiseCount": 0,
+          "franchiseRatio": "0"
+        }
+      },
+      {
+        "address": "서울 은평구 통일로 855",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 1,
+          "HIGH": 0,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "area": "시스템",
+            "severity": "CRITICAL",
+            "type": "SYSTEM_ERROR",
+            "description": "분석 파이프라인 오류: 해당 주소를 찾을 수 없습니다. 정확한 도로명 또는 지번 주소를 입력해주세요.",
+            "suggestion": "서버 설정 및 API 키 점검"
+          }
+        ],
+        "analysisSnapshot": null
+      },
+      {
+        "address": "서울 은평구 불광로 130",
+        "totalIssues": 11,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 4,
+          "LOW": 5
+        },
+        "issues": [
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 다양성 지표가 극단값(0)을 기록",
+            "suggestion": "diversityIndex 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(0)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "경쟁 균형도 지표가 극단값(0)을 기록",
+            "suggestion": "competitionIntensity 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "독립 상점 비율 지표가 극단값(100)을 기록",
+            "suggestion": "franchiseScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(0)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 3건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "분석 데이터에 따르면 '업소 수: 0개'입니다. 업소가 전혀 존재하지 않는데 '독립 상점 비율이 높아 개인 창업에 유리한 환경입니다'라는 강점을 제시하는 것은 논리적 모순입니다. 독립 상점 자체가 없으므로 비율을 논할 수 없습니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "약점",
+                "issue": "분석 데이터에 따르면 '업소 수: 0개'입니다. 업소가 전혀 없으므로 '업종 다양성이 부족하여 특정 업종에 의존하는 경향이 있습니다' 또는 '특정 업종의 과잉 경쟁이 우려됩니다'라는 약점을 제시하는 것은 논리적으로 불가능합니다. 어떠한 업종도 존재하지 않으며 경쟁 또한 발생할 수 없습니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "약점",
+                "issue": "업소 수가 0개이므로 '특정 업종의 과잉 경쟁이 우려됩니다'라는 약점은 논리적으로 불가능합니다. 경쟁할 업소가 존재하지 않습니다.",
+                "severity": "HIGH"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "HIGH",
+            "type": "AI_COMMENT_QUALITY",
+            "description": "AI 코멘트 전반적 품질이 \"POOR\"로 평가됨",
+            "suggestion": "aiConsultant.js의 코멘트 생성 함수 전면 개선 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "DATA_COVERAGE_LOW",
+            "description": "업소 수(0개)가 해당 지역 규모 대비 부족",
+            "suggestion": "공공데이터 API 조회 반경 또는 페이지 수 확대 검토",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: 스타벅스, 맥도날드, 파리바게뜨, GS25, CU, 올리브영, 다이소, 이디야커피, 롯데리아",
+            "details": {
+              "missingBrands": [
+                "스타벅스",
+                "맥도날드",
+                "파리바게뜨",
+                "GS25",
+                "CU",
+                "올리브영",
+                "다이소",
+                "이디야커피",
+                "롯데리아"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "스타벅스",
+                "맥도날드",
+                "파리바게뜨",
+                "GS25",
+                "CU",
+                "올리브영",
+                "다이소",
+                "이디야커피",
+                "롯데리아"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "DATA_QUALITY_POOR",
+            "description": "전반적 데이터 품질이 낮음",
+            "details": {
+              "notes": "서울 은평구 불광로 130 반경 500m 지역은 불광역 인근으로 유동인구가 많고 상업시설이 밀집된 핵심 상권입니다. 총 업소 수가 0개라는 데이터는 현실과 완전히 동떨어진 심각한 오류이며, 데이터 수집 및 커버리지에 중대한 결함이 있음을 강력히 시사합니다. 이 데이터는 해당 지역의 실제 상권 현황을 전혀 반영하지 못하며, 모든 업종 및 프랜차이즈 정보가 누락되어 있어 분석에 전혀 활용할 수 없습니다. 즉각적인 데이터 재수집 및 면밀한 검증이 필요합니다."
+            },
+            "suggestion": "대체 데이터 소스 추가 또는 기존 API 파라미터 조정 필요",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "MAPPING_INCORRECT",
+            "description": "카테고리 매핑 수정 필요: 1건",
+            "details": [
+              {
+                "from": "과학·기술",
+                "currentTo": "일반사업·사무",
+                "suggestedTo": "전문서비스",
+                "reason": "'과학·기술'은 연구, 개발, IT, 엔지니어링 등 전문적이고 고부가가치 산업 분야를 포괄합니다. '일반사업·사무'는 매우 포괄적인 용어로 해당 카테고리의 고유한 전문성과 특성을 충분히 반영하지 못하고 사용자에게 혼란을 줄 수 있습니다. '전문서비스' 또는 'IT·기술서비스', '연구·기술' 등으로 세분화하거나 명확히 매핑하여 사용자 이해도를 높이는 것이 적절합니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP 수정 필요",
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 0,
+          "overallScore": 14,
+          "grade": "D",
+          "topCategories": [],
+          "franchiseCount": 0,
+          "franchiseRatio": "0"
+        }
+      },
+      {
+        "address": "서울 은평구 갈현로 264",
+        "totalIssues": 12,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 4,
+          "LOW": 6
+        },
+        "issues": [
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 다양성 지표가 극단값(0)을 기록",
+            "suggestion": "diversityIndex 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(0)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "경쟁 균형도 지표가 극단값(0)을 기록",
+            "suggestion": "competitionIntensity 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "독립 상점 비율 지표가 극단값(100)을 기록",
+            "suggestion": "franchiseScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(0)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 3건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "분석 데이터에 '업소 수: 0개'로 명시되어 있음에도 불구하고, AI 코멘트는 '독립 상점 비율이 높아 개인 창업에 유리한 환경입니다.'라는 강점을 제시했습니다. 업소가 전혀 없는 상황에서는 독립 상점 비율 자체가 의미가 없으며, 이는 데이터와 직접적으로 모순됩니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "약점",
+                "issue": "데이터에서 '업소 수: 0개'임을 분명히 밝히고 있음에도 불구하고, AI 코멘트는 '업종 다양성이 부족하여 특정 업종에 의존하는 경향이 있습니다.'라고 언급했습니다. 업소가 존재하지 않는 상권에서는 업종 자체도 없으므로, 다양성이나 특정 업종 의존성을 논하는 것은 논리적 오류입니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "약점",
+                "issue": "'업소 수: 0개'라는 데이터에 반하여, AI 코멘트가 '특정 업종의 과잉 경쟁이 우려됩니다.'라는 약점을 제시했습니다. 업소가 전무한 상황에서는 어떠한 특정 업종도, 그리고 그에 따른 경쟁도 발생할 수 없습니다.",
+                "severity": "HIGH"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "HIGH",
+            "type": "AI_COMMENT_QUALITY",
+            "description": "AI 코멘트 전반적 품질이 \"POOR\"로 평가됨",
+            "suggestion": "aiConsultant.js의 코멘트 생성 함수 전면 개선 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "DATA_COVERAGE_LOW",
+            "description": "업소 수(0개)가 해당 지역 규모 대비 부족",
+            "suggestion": "공공데이터 API 조회 반경 또는 페이지 수 확대 검토",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU, GS25, 7-Eleven, 스타벅스, 이디야커피, 투썸플레이스, 파리바게뜨, 뚜레쥬르, 맥도날드, 롯데리아, BBQ, BHC",
+            "details": {
+              "missingBrands": [
+                "CU",
+                "GS25",
+                "7-Eleven",
+                "스타벅스",
+                "이디야커피",
+                "투썸플레이스",
+                "파리바게뜨",
+                "뚜레쥬르",
+                "맥도날드",
+                "롯데리아",
+                "BBQ",
+                "BHC"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "GS25",
+                "7-Eleven",
+                "스타벅스",
+                "이디야커피",
+                "투썸플레이스",
+                "파리바게뜨",
+                "뚜레쥬르",
+                "맥도날드",
+                "롯데리아",
+                "BBQ",
+                "BHC"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "DATA_QUALITY_POOR",
+            "description": "전반적 데이터 품질이 낮음",
+            "details": {
+              "notes": "제공된 데이터는 서울 은평구 갈현로 264 반경 500m 지역의 상권 특성을 전혀 반영하지 못하는 심각한 오류가 있는 것으로 판단됩니다. 서울의 일반적인 주거/상업 복합 지역임을 고려할 때, 총 업소 수가 0개라는 것은 데이터 수집 실패 또는 분석 시스템의 근본적인 문제점을 시사합니다. 따라서 현재 데이터로는 해당 지역의 상권 분석이 불가능하며, 데이터 신뢰도가 매우 낮습니다. 재수집 또는 시스템 점검이 시급합니다."
+            },
+            "suggestion": "대체 데이터 소스 추가 또는 기존 API 파라미터 조정 필요",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 4건",
+            "details": [
+              {
+                "from": "음식점",
+                "to": "외식·음료",
+                "reason": "가장 보편적인 상가 업종으로, 사용자에게 직관적인 명칭이 필요합니다."
+              },
+              {
+                "from": "도소매",
+                "to": "쇼핑·판매",
+                "reason": "다양한 상품 판매 업종을 포괄하며, 검색 용이성을 높입니다."
+              },
+              {
+                "from": "의료",
+                "to": "병원·의료",
+                "reason": "보건 및 의료 서비스 관련 업종을 명확히 구분하여 제공해야 합니다."
+              },
+              {
+                "from": "교육",
+                "to": "교육·학원",
+                "reason": "학원, 교육시설 등 학습 관련 업종을 통합하여 서비스 제공이 필요합니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "음식점": "외식·음료",
+                "도소매": "쇼핑·판매",
+                "의료": "병원·의료",
+                "교육": "교육·학원"
+              }
+            },
+            "area": "카테고리 매핑"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "MAPPING_INCORRECT",
+            "description": "카테고리 매핑 수정 필요: 1건",
+            "details": [
+              {
+                "from": "과학·기술",
+                "currentTo": "일반사업·사무",
+                "suggestedTo": "IT·전문기술"
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP 수정 필요",
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 0,
+          "overallScore": 14,
+          "grade": "D",
+          "topCategories": [],
+          "franchiseCount": 0,
+          "franchiseRatio": "0"
+        }
+      },
+      {
+        "address": "서울 은평구 은평로 120",
+        "totalIssues": 11,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 3,
+          "MEDIUM": 5,
+          "LOW": 3
+        },
+        "issues": [
+          {
+            "severity": "HIGH",
+            "type": "FRANCHISE_MISSING",
+            "description": "프랜차이즈 21개 브랜드 감지 누락",
+            "details": [
+              {
+                "name": "명륜진사갈비",
+                "matchedStores": [
+                  "명륜진사갈비"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "큰맘할매순대국",
+                "matchedStores": [
+                  "큰맘할매순대국"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "선비꼬마김밥",
+                "matchedStores": [
+                  "선비꼬마김밥은평"
+                ],
+                "category": "분식"
+              },
+              {
+                "name": "마라공방",
+                "matchedStores": [
+                  "마라공방은평"
+                ],
+                "category": "중식"
+              },
+              {
+                "name": "피자스쿨",
+                "matchedStores": [
+                  "피자스쿨녹번점"
+                ],
+                "category": "피자"
+              },
+              {
+                "name": "CU",
+                "matchedStores": [
+                  "씨유은평여왕점",
+                  "씨유녹번이편한세상"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "픽미픽미아이스",
+                "matchedStores": [
+                  "픽미픽미아이스응암소망점"
+                ],
+                "category": "무인 아이스크림/간식"
+              },
+              {
+                "name": "장충당",
+                "matchedStores": [
+                  "장충당녹번점"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "커브스",
+                "matchedStores": [
+                  "커브스녹번클럽"
+                ],
+                "category": "피트니스"
+              },
+              {
+                "name": "1001안경콘택트",
+                "matchedStores": [
+                  "1001안경콘택트은평"
+                ],
+                "category": "안경/콘택트"
+              },
+              {
+                "name": "토박이부대찌개",
+                "matchedStores": [
+                  "토박이부대찌개"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "백년백세삼계탕",
+                "matchedStores": [
+                  "백년백세삼계탕"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "GS25",
+                "matchedStores": [
+                  "지에스25녹번"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "꽈배기나라",
+                "matchedStores": [
+                  "꽈배기나라"
+                ],
+                "category": "간식"
+              },
+              {
+                "name": "메가엠지씨커피",
+                "matchedStores": [
+                  "메가엠지씨커피녹번점"
+                ],
+                "category": "카페"
+              },
+              {
+                "name": "피자나라치킨공주",
+                "matchedStores": [
+                  "피자나라치킨공주"
+                ],
+                "category": "피자/치킨"
+              },
+              {
+                "name": "미분당",
+                "matchedStores": [
+                  "미분당녹번점"
+                ],
+                "category": "베트남 쌀국수"
+              },
+              {
+                "name": "설빙고24",
+                "matchedStores": [
+                  "설빙고24녹번점"
+                ],
+                "category": "무인 아이스크림/간식"
+              },
+              {
+                "name": "긴자료코",
+                "matchedStores": [
+                  "긴자료코녹번점"
+                ],
+                "category": "일식"
+              },
+              {
+                "name": "GS 더 프레시",
+                "matchedStores": [
+                  "지에스더프레시녹번이"
+                ],
+                "category": "슈퍼마켓"
+              },
+              {
+                "name": "더벤티",
+                "matchedStores": [
+                  "더벤티녹번역점"
+                ],
+                "category": "카페"
+              }
+            ],
+            "suggestion": "KNOWN_FRANCHISES 배열에 다음 추가 필요: 명륜진사갈비, 큰맘할매순대국, 선비꼬마김밥, 마라공방, 피자스쿨, CU, 픽미픽미아이스, 장충당, 커브스, 1001안경콘택트, 토박이부대찌개, 백년백세삼계탕, GS25, 꽈배기나라, 메가엠지씨커피, 피자나라치킨공주, 미분당, 설빙고24, 긴자료코, GS 더 프레시, 더벤티",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "명륜진사갈비",
+                "큰맘할매순대국",
+                "선비꼬마김밥",
+                "마라공방",
+                "피자스쿨",
+                "CU",
+                "픽미픽미아이스",
+                "장충당",
+                "커브스",
+                "1001안경콘택트",
+                "토박이부대찌개",
+                "백년백세삼계탕",
+                "GS25",
+                "꽈배기나라",
+                "메가엠지씨커피",
+                "피자나라치킨공주",
+                "미분당",
+                "설빙고24",
+                "긴자료코",
+                "GS 더 프레시",
+                "더벤티"
+              ]
+            },
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "FRANCHISE_RATIO_LOW",
+            "description": "업소 463개 중 프랜차이즈 비율이 2.2%로 비정상적으로 낮음",
+            "suggestion": "KNOWN_FRANCHISES 목록 확장 또는 매칭 로직 개선 필요",
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "CATEGORY_MISCLASSIFIED",
+            "description": "업종 분류 오류 12건 발견 (정확도: HIGH)",
+            "details": [
+              {
+                "storeName": "파파존스녹번지점",
+                "currentCategory": "음식 > 기타 간이 > 버거",
+                "suggestedCategory": "음식 > 기타 간이 > 피자",
+                "reason": "파파존스는 피자 전문점으로 '버거'가 아닌 '피자'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "세쟌미술보습학원",
+                "currentCategory": "교육 > 일반 교육 > 입시·교과학원",
+                "suggestedCategory": "교육 > 기타 교육 > 미술학원",
+                "reason": "이름에 '미술'이 명시되어 있어 '입시·교과학원'이 아닌 '미술학원'으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "블박설치",
+                "currentCategory": "소매 > 기타 상품 소매 > 그 외 기타 상품 전문 소매업",
+                "suggestedCategory": "생활서비스 > 자동차 수리·세차 > 자동차 정비/수리",
+                "reason": "블박설치는 차량용 블랙박스 설치 서비스이므로 소매업보다는 '자동차 정비/수리' 서비스업으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "디엔에스운동센터",
+                "currentCategory": "교육 > 기타 교육 > 요가/필라테스 학원",
+                "suggestedCategory": "예술·스포츠 > 스포츠 서비스 > 헬스장",
+                "reason": "'운동센터'는 일반적으로 다양한 운동 기구를 갖춘 '헬스장'을 지칭하는 경우가 많으므로 더 포괄적인 '헬스장'으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "노량진종합어시장",
+                "currentCategory": "음식 > 한식 > 횟집",
+                "suggestedCategory": "소매 > 식료품 소매 > 수산물 소매업",
+                "reason": "노량진종합어시장은 주로 수산물을 도소매하는 시장으로, '횟집'은 부수적인 분류입니다. '수산물 소매업'으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "전담클럽은평",
+                "currentCategory": "소매 > 종합 소매 > 그 외 기타 종합 소매업",
+                "suggestedCategory": "소매 > 기타 상품 소매 > 전자담배 소매업",
+                "reason": "'전담클럽'은 전자담배 전문 판매점으로 '종합 소매업'이 아닌 '기타 상품 소매' 중 '전자담배 소매업'으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "녹번꼼장어",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 한식 > 해산물 구이/찜",
+                "reason": "꼼장어는 특정 해산물 요리 전문점이므로 '백반/한정식'보다는 '해산물 구이/찜'으로 분류하는 것이 더 정확합니다."
+              },
+              {
+                "storeName": "싱크대막힘뚫는법하수구막힘역류변기막힘누수고압세척AI설비",
+                "currentCategory": "부동산·시설관리 > 청소·방제 > 건축물 일반 청소업",
+                "suggestedCategory": "생활서비스 > 기타 가정용품 수리 > 설비/배관 공사업",
+                "reason": "이름에 싱크대, 하수구, 변기 막힘 및 누수, 설비 등의 내용이 명시되어 있어 일반 청소업보다는 '설비/배관 공사업' 또는 시설물 유지관리 서비스업으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "녹번점핑다이어트",
+                "currentCategory": "소매 > 식료품 소매 > 건강보조식품 소매업",
+                "suggestedCategory": "예술·스포츠 > 스포츠 서비스 > 헬스장",
+                "reason": "'점핑다이어트'는 운동 프로그램 및 시설을 제공하는 곳으로, '건강보조식품 소매업'이 아닌 '헬스장' 또는 피트니스 센터로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "픽미픽미아이스응암소망점",
+                "currentCategory": "소매 > 음료 소매 > 생수/음료 소매업",
+                "suggestedCategory": "소매 > 식료품 소매 > 아이스크림/빙과류 소매업",
+                "reason": "상호에 '아이스'가 포함되어 아이스크림이나 빙과류 판매점으로 추정되므로, '생수/음료 소매업'보다는 '아이스크림/빙과류 소매업'으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "대흥이용원",
+                "currentCategory": "생활서비스 > 이용·미용 > 미용실",
+                "suggestedCategory": "생활서비스 > 이용·미용 > 이발소",
+                "reason": "'이용원'은 남성 전문 '이발소'를 지칭하므로 '미용실'이 아닌 '이발소'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "고향농수산물",
+                "currentCategory": "소매 > 식료품 소매 > 채소/과일 소매업",
+                "suggestedCategory": "소매 > 식료품 소매 > 농수산물 전문 소매업",
+                "reason": "상호에 '농수산물'이 명시되어 있어 채소/과일뿐만 아니라 수산물 등 다양한 농수산물을 취급할 것으로 예상됩니다. '농수산물 전문 소매업'으로 분류하는 것이 더 적절합니다."
+              }
+            ],
+            "suggestion": "공공데이터 원본 분류 문제이므로 후처리 매핑 테이블 추가 검토",
+            "autoFixable": false,
+            "area": "업종 분류 정확성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(100)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 활성도 지표가 극단값(100)을 기록",
+            "suggestion": "densityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 1건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "AI 코멘트의 강점 섹션에서 '의료·교육 등 생활밀착형 업종이 많아 지역 기반이 안정적입니다.'라고 언급했으나, 제공된 분석 데이터 요약에는 '교육' 업종만 상위 3개 업종에 포함되어 있으며 '의료' 업종에 대한 구체적인 데이터가 없어 해당 주장의 근거가 불충분합니다.",
+                "severity": "MEDIUM"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "DATA_COVERAGE_LOW",
+            "description": "업소 수(463개)가 해당 지역 규모 대비 부족",
+            "suggestion": "공공데이터 API 조회 반경 또는 페이지 수 확대 검토",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: GS25, CU, 세븐일레븐, 교촌치킨, BHC, BBQ, 메가커피, 맥도날드",
+            "details": {
+              "missingBrands": [
+                "GS25",
+                "CU",
+                "세븐일레븐",
+                "교촌치킨",
+                "BHC",
+                "BBQ",
+                "메가커피",
+                "맥도날드"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "GS25",
+                "CU",
+                "세븐일레븐",
+                "교촌치킨",
+                "BHC",
+                "BBQ",
+                "메가커피",
+                "맥도날드"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "DATA_QUALITY_POOR",
+            "description": "전반적 데이터 품질이 낮음",
+            "details": {
+              "notes": "서울 은평구 응암동 769번지 반경 500m 상권 데이터는 전반적으로 커버리지가 매우 낮아 보입니다. 총 업소 수 463개는 서울의 주거 밀집 지역임을 감안할 때 현저히 적은 수치이며, 상당수의 업소가 누락되었을 가능성이 높습니다. 특히 편의점(GS25, CU, 세븐일레븐 등)과 주요 치킨 프랜차이즈(교촌치킨, BHC, BBQ 등)가 감지된 프랜차이즈 목록에 전혀 없다는 점은 데이터 수집의 심각한 오류 또는 누락을 시사합니다. 이 외에도 금융업이나 대형 슈퍼마켓/SSM, PC방/노래방과 같은 주요 여가시설 업종의 부재 또는 과소 대표 또한 의심됩니다. 현재 데이터만으로는 해당 상권을 정확히 분석하기 어렵고, 실제 상권 현황과 큰 차이가 있을 것으로 판단됩니다. 데이터 수집 및 분류 방식에 대한 전반적인 재검토가 필수적입니다."
+            },
+            "suggestion": "대체 데이터 소스 추가 또는 기존 API 파라미터 조정 필요",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 1건",
+            "details": [
+              {
+                "from": "부동산",
+                "to": "부동산·시설관리",
+                "reason": "현재 '부동산' 카테고리가 42개로 존재하나, '시설관리·임대'가 '부동산·시설관리'로 매핑되는 점을 고려할 때, '부동산' 또한 더 광범위한 '부동산·시설관리'로 통합하여 분류 체계의 일관성과 사용자 이해도를 높일 수 있습니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "부동산": "부동산·시설관리"
+              }
+            },
+            "area": "카테고리 매핑"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "MAPPING_INCORRECT",
+            "description": "카테고리 매핑 수정 필요: 1건",
+            "details": [
+              {
+                "from": "과학·기술",
+                "currentTo": "일반사업·사무",
+                "suggestedTo": "전문서비스"
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP 수정 필요",
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 463,
+          "overallScore": 94,
+          "grade": "S",
+          "topCategories": [
+            "음식",
+            "소매",
+            "교육",
+            "일반사업·사무",
+            "생활서비스"
+          ],
+          "franchiseCount": 10,
+          "franchiseRatio": "2.2"
+        }
+      },
+      {
+        "address": "서울 은평구 응암로 200",
+        "totalIssues": 7,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 4,
+          "LOW": 2
+        },
+        "issues": [
+          {
+            "severity": "HIGH",
+            "type": "FRANCHISE_MISSING",
+            "description": "프랜차이즈 13개 브랜드 감지 누락",
+            "details": [
+              {
+                "name": "CU",
+                "matchedStores": [
+                  "씨유은평증산로점",
+                  "씨유새절역점",
+                  "씨유응암신응교점"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "크린프랜드",
+                "matchedStores": [
+                  "크린프랜드"
+                ],
+                "category": "세탁"
+              },
+              {
+                "name": "익선병아리김밥",
+                "matchedStores": [
+                  "익선병아리김밥은평"
+                ],
+                "category": "음식점 (김밥)"
+              },
+              {
+                "name": "몽소",
+                "matchedStores": [
+                  "베이커리몽소"
+                ],
+                "category": "베이커리"
+              },
+              {
+                "name": "정관장",
+                "matchedStores": [
+                  "정관장"
+                ],
+                "category": "건강식품"
+              },
+              {
+                "name": "메가MGC커피",
+                "matchedStores": [
+                  "메가엠지씨커피새절역점"
+                ],
+                "category": "카페"
+              },
+              {
+                "name": "이차돌",
+                "matchedStores": [
+                  "이차돌응암"
+                ],
+                "category": "음식점 (고기)"
+              },
+              {
+                "name": "곱분이곱창",
+                "matchedStores": [
+                  "곱분이곱창"
+                ],
+                "category": "음식점 (곱창)"
+              },
+              {
+                "name": "펀비어킹",
+                "matchedStores": [
+                  "펀비어킹"
+                ],
+                "category": "주점"
+              },
+              {
+                "name": "봉구비어",
+                "matchedStores": [
+                  "봉구비어응암"
+                ],
+                "category": "주점"
+              },
+              {
+                "name": "노랑통닭",
+                "matchedStores": [
+                  "노랑통닭"
+                ],
+                "category": "음식점 (치킨)"
+              },
+              {
+                "name": "오늘은보글부대찌개",
+                "matchedStores": [
+                  "오늘은보글부대"
+                ],
+                "category": "음식점 (한식)"
+              },
+              {
+                "name": "짝태앤노가리",
+                "matchedStores": [
+                  "짝태앤노가리"
+                ],
+                "category": "주점"
+              }
+            ],
+            "suggestion": "KNOWN_FRANCHISES 배열에 다음 추가 필요: CU, 크린프랜드, 익선병아리김밥, 몽소, 정관장, 메가MGC커피, 이차돌, 곱분이곱창, 펀비어킹, 봉구비어, 노랑통닭, 오늘은보글부대찌개, 짝태앤노가리",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "크린프랜드",
+                "익선병아리김밥",
+                "몽소",
+                "정관장",
+                "메가MGC커피",
+                "이차돌",
+                "곱분이곱창",
+                "펀비어킹",
+                "봉구비어",
+                "노랑통닭",
+                "오늘은보글부대찌개",
+                "짝태앤노가리"
+              ]
+            },
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "FRANCHISE_RATIO_LOW",
+            "description": "업소 1449개 중 프랜차이즈 비율이 1.9%로 비정상적으로 낮음",
+            "suggestion": "KNOWN_FRANCHISES 목록 확장 또는 매칭 로직 개선 필요",
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 활성도 지표가 극단값(100)을 기록",
+            "suggestion": "densityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(100)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 1건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "분석 데이터 요약에는 '생활서비스(164개)'만 언급되어 있는데, AI 코멘트에서 '의료·교육 등 생활밀착형 업종이 많아 지역 기반이 안정적입니다.'라고 명시하며 '의료·교육' 업종의 구체적인 데이터 없이 많다고 단정했습니다. 이는 주어진 데이터 범위를 넘어선 해석이거나 근거가 부족한 진술입니다.",
+                "severity": "MEDIUM"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU (편의점), 메가커피 (카페), 뚜레쥬르 (베이커리), 교촌치킨/BBQ (치킨)",
+            "details": {
+              "missingBrands": [
+                "CU (편의점)",
+                "메가커피 (카페)",
+                "뚜레쥬르 (베이커리)",
+                "교촌치킨/BBQ (치킨)"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU (편의점)",
+                "메가커피 (카페)",
+                "뚜레쥬르 (베이커리)",
+                "교촌치킨/BBQ (치킨)"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "MAPPING_INCORRECT",
+            "description": "카테고리 매핑 수정 필요: 1건",
+            "details": [
+              {
+                "from": "과학·기술",
+                "currentTo": "일반사업·사무",
+                "suggestedTo": "전문서비스",
+                "reason": "과학·기술 분야는 연구개발, IT, 엔지니어링 등 고도의 전문성을 강조하는 특성이 있습니다. '일반사업·사무'는 너무 포괄적이어서 해당 분야의 핵심 특성을 충분히 반영하지 못할 수 있습니다. '전문서비스'가 사용자에게 서비스의 전문성과 성격을 더 명확하게 전달하는 데 적합합니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP 수정 필요",
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1449,
+          "overallScore": 91,
+          "grade": "S",
+          "topCategories": [
+            "음식",
+            "소매",
+            "생활서비스",
+            "교육",
+            "일반사업·사무"
+          ],
+          "franchiseCount": 27,
+          "franchiseRatio": "1.9"
+        }
+      },
+      {
+        "address": "서울 은평구 가좌로 235",
+        "totalIssues": 8,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 3,
+          "LOW": 3
+        },
+        "issues": [
+          {
+            "severity": "HIGH",
+            "type": "FRANCHISE_MISSING",
+            "description": "프랜차이즈 16개 브랜드 감지 누락",
+            "details": [
+              {
+                "name": "씨유",
+                "matchedStores": [
+                  "씨유은평증산로점",
+                  "씨유새절역점"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "페리카나치킨",
+                "matchedStores": [
+                  "페리카나치킨"
+                ],
+                "category": "치킨전문점"
+              },
+              {
+                "name": "비에이치씨",
+                "matchedStores": [
+                  "비에이치씨은평"
+                ],
+                "category": "치킨전문점"
+              },
+              {
+                "name": "요거프레소",
+                "matchedStores": [
+                  "요거프레소새절역점"
+                ],
+                "category": "카페/디저트"
+              },
+              {
+                "name": "정관장",
+                "matchedStores": [
+                  "정관장"
+                ],
+                "category": "건강식품"
+              },
+              {
+                "name": "메가엠지씨커피",
+                "matchedStores": [
+                  "메가엠지씨커피새절역점"
+                ],
+                "category": "카페"
+              },
+              {
+                "name": "이차돌",
+                "matchedStores": [
+                  "이차돌응암"
+                ],
+                "category": "고기전문점"
+              },
+              {
+                "name": "헬로엘리스마켓24",
+                "matchedStores": [
+                  "헬로엘리스마켓24새절역점"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "파브스커피",
+                "matchedStores": [
+                  "파브스커피"
+                ],
+                "category": "카페"
+              },
+              {
+                "name": "크린프랜드",
+                "matchedStores": [
+                  "크린프랜드"
+                ],
+                "category": "셀프빨래방"
+              },
+              {
+                "name": "익선병아리김밥",
+                "matchedStores": [
+                  "익선병아리김밥은평"
+                ],
+                "category": "분식/김밥"
+              },
+              {
+                "name": "블루밍스윗",
+                "matchedStores": [
+                  "블루밍스윗새절점"
+                ],
+                "category": "디저트카페"
+              },
+              {
+                "name": "몽소",
+                "matchedStores": [
+                  "베이커리몽소"
+                ],
+                "category": "베이커리"
+              },
+              {
+                "name": "고빙고",
+                "matchedStores": [
+                  "고빙고새절점"
+                ],
+                "category": "빙수/디저트"
+              },
+              {
+                "name": "차이몬스터",
+                "matchedStores": [
+                  "차이몬스터"
+                ],
+                "category": "중식"
+              },
+              {
+                "name": "커피위드구루",
+                "matchedStores": [
+                  "커피위드구루"
+                ],
+                "category": "카페"
+              }
+            ],
+            "suggestion": "KNOWN_FRANCHISES 배열에 다음 추가 필요: 씨유, 페리카나치킨, 비에이치씨, 요거프레소, 정관장, 메가엠지씨커피, 이차돌, 헬로엘리스마켓24, 파브스커피, 크린프랜드, 익선병아리김밥, 블루밍스윗, 몽소, 고빙고, 차이몬스터, 커피위드구루",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "씨유",
+                "페리카나치킨",
+                "비에이치씨",
+                "요거프레소",
+                "정관장",
+                "메가엠지씨커피",
+                "이차돌",
+                "헬로엘리스마켓24",
+                "파브스커피",
+                "크린프랜드",
+                "익선병아리김밥",
+                "블루밍스윗",
+                "몽소",
+                "고빙고",
+                "차이몬스터",
+                "커피위드구루"
+              ]
+            },
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "FRANCHISE_RATIO_LOW",
+            "description": "업소 1000개 중 프랜차이즈 비율이 1.4%로 비정상적으로 낮음",
+            "suggestion": "KNOWN_FRANCHISES 목록 확장 또는 매칭 로직 개선 필요",
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "CATEGORY_MISCLASSIFIED",
+            "description": "업종 분류 오류 16건 발견 (정확도: MEDIUM)",
+            "details": [
+              {
+                "storeName": "하이벳",
+                "currentCategory": "소매 > 의약·화장품 소매 > 의료기기 소매업",
+                "suggestedCategory": "생활서비스 > 기타 생활서비스 > 동물병원",
+                "reason": "'하이벳'은 'High Vet'으로 해석되어 동물병원 또는 동물 관련 업종을 의미할 가능성이 높습니다. 의료기기 소매업은 사람의 의료기기 판매를 주로 의미하므로 부적절합니다."
+              },
+              {
+                "storeName": "비티심리상담센터",
+                "currentCategory": "교육 > 교육 지원 > 교육컨설팅업",
+                "suggestedCategory": "생활서비스 > 기타 생활서비스 > 심리상담/치료",
+                "reason": "'심리상담센터'는 정신 건강 및 심리적 지원을 제공하는 곳으로, '교육컨설팅업'과는 서비스의 본질이 다릅니다. '심리상담/치료'가 더 정확한 분류입니다."
+              },
+              {
+                "storeName": "탑광고",
+                "currentCategory": "일반사업·사무 > 인쇄·제품제작 > 명함/간판/광고물 제작",
+                "suggestedCategory": "일반사업·사무 > 광고 > 광고 대행업",
+                "reason": "'탑광고'라는 이름은 단순히 광고물 제작을 넘어, 광고 기획 및 대행 서비스를 제공할 가능성이 높습니다. '광고 대행업'이 더 포괄적이고 이름의 의미에 부합합니다."
+              },
+              {
+                "storeName": "도매타운",
+                "currentCategory": "소매 > 의약·화장품 소매 > 화장품 소매업",
+                "suggestedCategory": "도매 > 화장품 도매 > 화장품 도매업",
+                "reason": "이름에 '도매'가 명시되어 있어 소매업보다는 도매업으로 분류하는 것이 정확합니다."
+              },
+              {
+                "storeName": "굽모닝숯불바베큐",
+                "currentCategory": "음식 > 주점 > 요리 주점",
+                "suggestedCategory": "음식 > 한식 > 돼지고기 구이/찜",
+                "reason": "'숯불바베큐'는 주로 식사를 목적으로 하는 음식점이며, '주점'은 주류 판매가 주가 되거나 주류를 곁들이는 곳을 의미합니다. 바베큐 전문점은 '고기 구이/찜'이 더 적절합니다."
+              },
+              {
+                "storeName": "밥도둑술도둑",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 주점 > 요리 주점",
+                "reason": "이름에 '술도둑'이 명시되어 있어 식사와 함께 주류 판매가 활발한 '요리 주점'으로 분류하는 것이 더 적절합니다. '백반/한정식'은 주로 식사에 중점을 둡니다."
+              },
+              {
+                "storeName": "플라워팟",
+                "currentCategory": "교육 > 기타 교육 > 기타 기술/직업 훈련학원",
+                "suggestedCategory": "교육 > 기타 교육 > 기타 예술/스포츠 교육기관",
+                "reason": "'플라워팟'은 '꽃집' 또는 '꽃꽂이 교육'을 연상시킵니다. '기타 기술/직업 훈련학원'은 적절하지 않으며, 꽃꽂이 교육이라면 '기타 예술/스포츠 교육기관'이 더 적합합니다."
+              },
+              {
+                "storeName": "소소명상실",
+                "currentCategory": "교육 > 기타 교육 > 요가/필라테스 학원",
+                "suggestedCategory": "생활서비스 > 기타 생활서비스 > 심리상담/치료",
+                "reason": "'명상실'은 요가나 필라테스와는 다른 심리적 안정이나 정신 수련을 목적으로 합니다. '심리상담/치료'와 더 연관성이 높으며, 명상 서비스는 일반적으로 이 범주에 포함됩니다."
+              },
+              {
+                "storeName": "현대건업",
+                "currentCategory": "소매 > 철물·건설자재 소매 > 철물/공구 소매업",
+                "suggestedCategory": "부동산·시설관리 > 기타 부동산 서비스 > 건설업",
+                "reason": "'건업'은 '건설업' 또는 건설 관련 포괄적인 서비스를 의미하는 경우가 많습니다. 단순히 '철물/공구 소매업'으로 한정하기보다는 '건설업'으로 분류하는 것이 이름의 의미에 더 부합합니다."
+              },
+              {
+                "storeName": "쩜순이네닭강정",
+                "currentCategory": "음식 > 기타 간이 > 치킨",
+                "suggestedCategory": "음식 > 기타 간이 > 기타 간이 음식점",
+                "reason": "'닭강정'은 '치킨'과 유사하지만 조리 방식과 판매 형태가 다릅니다. '치킨'은 주로 프라이드/양념 치킨을 의미하며, 닭강정은 '기타 간이 음식점'이 더 포괄적이고 정확한 분류일 수 있습니다."
+              },
+              {
+                "storeName": "원투스리세븐프로덕션",
+                "currentCategory": "일반사업·사무 > 전문 디자인 > 시각 디자인업",
+                "suggestedCategory": "예술·스포츠 > 방송/영상/공연 > 방송/영상/공연 제작 및 관련 서비스업",
+                "reason": "'프로덕션'은 일반적으로 영상, 방송, 공연 등의 '제작'을 의미합니다. '시각 디자인업'보다는 '방송/영상/공연 제작 및 관련 서비스업'이 더 적절합니다."
+              },
+              {
+                "storeName": "모퉁이포차",
+                "currentCategory": "음식 > 일식 > 일식 회/초밥",
+                "suggestedCategory": "음식 > 주점 > 요리 주점",
+                "reason": "'포차(포장마차)'는 주류 판매가 주가 되거나 주류를 곁들이는 '주점'의 성격이 강합니다. '일식 회/초밥'과는 서비스 형태가 다릅니다. '요리 주점'이 더 적절합니다."
+              },
+              {
+                "storeName": "지니어스컴퍼니",
+                "currentCategory": "부동산 > 부동산 서비스 > 부동산 중개/대리업",
+                "suggestedCategory": "일반사업·사무 > 기타 사업지원 서비스업",
+                "reason": "'지니어스컴퍼니'는 매우 포괄적인 이름으로, '부동산 중개/대리업'으로 특정하기 어렵습니다. 회사 이름만으로는 업종을 유추하기 어려울 때 '기타 사업지원 서비스업' 등 포괄적인 서비스업으로 분류하는 것이 일반적입니다."
+              },
+              {
+                "storeName": "미용하는강아지",
+                "currentCategory": "소매 > 애완동물·용품 소매 > 애완동물/애완용품 소매업",
+                "suggestedCategory": "생활서비스 > 기타 생활서비스 > 애완동물 서비스업",
+                "reason": "'미용하는강아지'라는 이름은 애완동물 '미용' 서비스를 주로 제공하는 업체임을 시사합니다. '애완동물/애완용품 소매업'은 용품 판매에 중점을 두는 분류이므로, 서비스업으로 변경하는 것이 더 정확합니다."
+              },
+              {
+                "storeName": "디자인큐나인",
+                "currentCategory": "일반사업·사무 > 광고 > 광고 대행업",
+                "suggestedCategory": "일반사업·사무 > 전문 디자인 > 시각 디자인업",
+                "reason": "이름에 '디자인'이 명시되어 있으므로, '광고 대행'보다는 '시각 디자인업' 등 '전문 디자인' 관련 서비스로 분류하는 것이 더 적합합니다."
+              },
+              {
+                "storeName": "기쁨법무사사무소",
+                "currentCategory": "일반사업·사무 > 법무관련 > 변호사",
+                "suggestedCategory": "일반사업·사무 > 법무관련 > 법무사/변리사/행정사",
+                "reason": "'법무사사무소'는 '법무사'가 운영하는 곳으로, '변호사'와는 업무 영역과 자격이 다릅니다. '법무사/변리사/행정사' 분류가 더 정확합니다."
+              }
+            ],
+            "suggestion": "공공데이터 원본 분류 문제이므로 후처리 매핑 테이블 추가 검토",
+            "autoFixable": false,
+            "area": "업종 분류 정확성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 활성도 지표가 극단값(100)을 기록",
+            "suggestion": "densityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(100)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 2건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "분석 데이터에 상권의 면적 또는 반경 정보가 없어 업소 '밀도'를 판단할 수 없음에도 불구하고 '적정 수준의 업소 밀도'라는 주장이 제시되었습니다. 이는 데이터에 근거하지 않은 추론입니다.",
+                "severity": "MEDIUM"
+              },
+              {
+                "section": "강점",
+                "issue": "상위 업종 중 '생활서비스(128개)'만 명시되어 있고 의료·교육 등 특정 업종의 구체적인 개수 데이터가 없음에도 불구하고 '의료·교육 등 생활밀착형 업종이 많다'고 단정하여 주장하였습니다. 이는 데이터 해석의 비약입니다.",
+                "severity": "MEDIUM"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU, Starbucks, 올리브영",
+            "details": {
+              "missingBrands": [
+                "CU",
+                "Starbucks",
+                "올리브영"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "Starbucks",
+                "올리브영"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 1건",
+            "details": [
+              {
+                "from": "부동산",
+                "to": "부동산·시설관리",
+                "reason": "기존 '부동산' 카테고리와 '부동산·시설관리' 카테고리가 유사하고 일부 중첩될 수 있습니다. '시설관리·임대'가 '부동산·시설관리'로 매핑되는 점을 고려할 때, '부동산' 또한 통합하여 사용자 이해도를 높이고 분류 체계를 간소화하는 것이 좋습니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "부동산": "부동산·시설관리"
+              }
+            },
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1000,
+          "overallScore": 90,
+          "grade": "S",
+          "topCategories": [
+            "음식",
+            "소매",
+            "생활서비스",
+            "일반사업·사무",
+            "부동산"
+          ],
+          "franchiseCount": 14,
+          "franchiseRatio": "1.4"
+        }
+      },
+      {
+        "address": "서울 은평구 수색로 188",
+        "totalIssues": 11,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 3,
+          "MEDIUM": 4,
+          "LOW": 4
+        },
+        "issues": [
+          {
+            "severity": "HIGH",
+            "type": "FRANCHISE_MISSING",
+            "description": "프랜차이즈 10개 브랜드 감지 누락",
+            "details": [
+              {
+                "name": "더벤티",
+                "matchedStores": [
+                  "더벤티상암DMC역점"
+                ],
+                "category": "카페/음료"
+              },
+              {
+                "name": "오봉집",
+                "matchedStores": [
+                  "오봉집"
+                ],
+                "category": "한식주점/보쌈"
+              },
+              {
+                "name": "라사천마라탕",
+                "matchedStores": [
+                  "라사천마라탕"
+                ],
+                "category": "중식/마라탕"
+              },
+              {
+                "name": "매머드익스프레스",
+                "matchedStores": [
+                  "매머드익스프레스"
+                ],
+                "category": "카페/음료"
+              },
+              {
+                "name": "족발야시장",
+                "matchedStores": [
+                  "족발야시장"
+                ],
+                "category": "한식/족발보쌈"
+              },
+              {
+                "name": "CU",
+                "matchedStores": [
+                  "씨유마포DMC점"
+                ],
+                "category": "편의점"
+              },
+              {
+                "name": "던킨",
+                "matchedStores": [
+                  "던킨상암DMC역사점"
+                ],
+                "category": "베이커리/카페"
+              },
+              {
+                "name": "탐앤탐스",
+                "matchedStores": [
+                  "탐앤탐스커피"
+                ],
+                "category": "카페/음료"
+              },
+              {
+                "name": "큰집닭강정",
+                "matchedStores": [
+                  "큰집닭강정DMC점"
+                ],
+                "category": "치킨/닭강정"
+              },
+              {
+                "name": "본도시락",
+                "matchedStores": [
+                  "본도시락디지털미디어시티역점"
+                ],
+                "category": "한식/도시락"
+              }
+            ],
+            "suggestion": "KNOWN_FRANCHISES 배열에 다음 추가 필요: 더벤티, 오봉집, 라사천마라탕, 매머드익스프레스, 족발야시장, CU, 던킨, 탐앤탐스, 큰집닭강정, 본도시락",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "더벤티",
+                "오봉집",
+                "라사천마라탕",
+                "매머드익스프레스",
+                "족발야시장",
+                "CU",
+                "던킨",
+                "탐앤탐스",
+                "큰집닭강정",
+                "본도시락"
+              ]
+            },
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "FRANCHISE_RATIO_LOW",
+            "description": "업소 425개 중 프랜차이즈 비율이 4.2%로 비정상적으로 낮음",
+            "suggestion": "KNOWN_FRANCHISES 목록 확장 또는 매칭 로직 개선 필요",
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "CATEGORY_MISCLASSIFIED",
+            "description": "업종 분류 오류 21건 발견 (정확도: MEDIUM)",
+            "details": [
+              {
+                "storeName": "비터스윗프로덕션",
+                "currentCategory": "음식 > 한식 > 횟집",
+                "suggestedCategory": "일반사업·사무 > 기타 사업 서비스 > 기타 사업 지원 서비스업",
+                "reason": "업소명 '프로덕션'은 제작사를 의미하며, '횟집'과는 전혀 관련이 없습니다. 일반 사업 서비스 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "샤브로21",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 한식 > 국/탕/찌개류",
+                "reason": "'샤브로21'은 샤브샤브 전문점임을 암시하며, '백반/한정식'보다는 '국/탕/찌개류'로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "다이어메이커상암",
+                "currentCategory": "음식 > 주점 > 요리 주점",
+                "suggestedCategory": "생활서비스 > 기타 개인 > 식단 관리 서비스",
+                "reason": "'다이어메이커'는 다이어트 관련 사업을 의미하며, '요리 주점'과는 관련이 없습니다. 식단 관리 또는 건강 관련 서비스 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "다이나믹뮤직스튜리오",
+                "currentCategory": "교육 > 일반 교육 > 입시·교과학원",
+                "suggestedCategory": "교육 > 기타 교육 > 예능 학원 (음악)",
+                "reason": "'뮤직 스튜디오'는 음악 교육 또는 음악 제작 관련 사업을 의미하며, '입시·교과학원'과는 다릅니다. 예능 학원(음악)으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "꼬닭",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 기타 간이 > 치킨",
+                "reason": "'꼬닭'은 닭고기 전문점임을 암시하며, '백반/한정식'보다는 '치킨' 전문점으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "제나아이래쉬",
+                "currentCategory": "생활서비스 > 이용·미용 > 피부 관리실",
+                "suggestedCategory": "생활서비스 > 이용·미용 > 기타 미용업",
+                "reason": "'아이래쉬'는 속눈썹 연장/펌 등 속눈썹 시술 전문점을 의미하며, '피부 관리실'보다 '기타 미용업'으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "마포냉삼겹파김치",
+                "currentCategory": "음식 > 한식 > 국수/칼국수",
+                "suggestedCategory": "음식 > 한식 > 돼지고기 구이/찜",
+                "reason": "'냉삼겹파김치'는 냉동 삼겹살 구이 전문점임을 암시하며, '국수/칼국수'와는 전혀 다릅니다. '돼지고기 구이/찜'으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "철도운전기술",
+                "currentCategory": "일반사업·사무 > 기타 전문 과학 > 사업/무형 재산권 중개업",
+                "suggestedCategory": "일반사업·사무 > 기술 서비스 > 엔지니어링 서비스업",
+                "reason": "'철도운전기술'은 철도 관련 기술 또는 교육 사업을 의미하며, '사업/무형 재산권 중개업'과는 관련이 없습니다. 기술 서비스 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "진돈",
+                "currentCategory": "음식 > 일식 > 일식 회/초밥",
+                "suggestedCategory": "음식 > 일식 > 돈까스/일식 튀김",
+                "reason": "'진돈'은 이름에서 돈카츠 등 돼지고기 기반의 일식 요리를 연상시킵니다. '일식 회/초밥'보다는 '돈까스/일식 튀김' 등으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "렌쥴리에듀테인먼트",
+                "currentCategory": "소매 > 오락용품 소매 > 서점",
+                "suggestedCategory": "교육 > 기타 교육 > 그 외 기타 교육기관",
+                "reason": "'에듀테인먼트'는 교육과 엔터테인먼트가 결합된 형태의 사업을 의미하며, '서점'과는 직접적인 관련이 없습니다. 교육 기관 또는 학습용품/장난감 소매업 등으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "한국발포폴리에틸렌보온재공업협동조합",
+                "currentCategory": "일반사업·사무 > 기타 전문 과학 > 사업/무형 재산권 중개업",
+                "suggestedCategory": "일반사업·사무 > 기타 사업 서비스 > 사업자단체/협회",
+                "reason": "'협동조합'은 특정 산업 분야의 사업자 단체를 의미하며, '사업/무형 재산권 중개업'과는 전혀 다릅니다. '사업자단체/협회'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "한국이벤트산업협동조합",
+                "currentCategory": "부동산·시설관리 > 기타 사업 서비스 > 전시/컨벤션/행사 대행 서비스업",
+                "suggestedCategory": "일반사업·사무 > 기타 사업 서비스 > 사업자단체/협회",
+                "reason": "'협동조합'은 특정 산업 분야의 사업자 단체를 의미하며, '전시/컨벤션/행사 대행 서비스업'과는 다릅니다. '사업자단체/협회'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "한국활성탄소공업협동조합",
+                "currentCategory": "일반사업·사무 > 기타 전문 과학 > 사업/무형 재산권 중개업",
+                "suggestedCategory": "일반사업·사무 > 기타 사업 서비스 > 사업자단체/협회",
+                "reason": "'협동조합'은 특정 산업 분야의 사업자 단체를 의미하며, '사업/무형 재산권 중개업'과는 다릅니다. '사업자단체/협회'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "에이치에스솔루션즈",
+                "currentCategory": "음식 > 중식 > 중국집",
+                "suggestedCategory": "일반사업·사무 > 본사·경영 컨설팅 > 경영 컨설팅업",
+                "reason": "'솔루션즈'는 솔루션 제공 기업을 의미하며, '중국집'과는 전혀 관련이 없습니다. 일반 사업 서비스 또는 컨설팅 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "한국LED플라즈마조명산업협동조합",
+                "currentCategory": "일반사업·사무 > 기타 전문 과학 > 사업/무형 재산권 중개업",
+                "suggestedCategory": "일반사업·사무 > 기타 사업 서비스 > 사업자단체/협회",
+                "reason": "'협동조합'은 특정 산업 분야의 사업자 단체를 의미하며, '사업/무형 재산권 중개업'과는 다릅니다. '사업자단체/협회'로 분류되어야 합니다."
+              },
+              {
+                "storeName": "제로그래비티존",
+                "currentCategory": "일반사업·사무 > 본사·경영 컨설팅 > 경영 컨설팅업",
+                "suggestedCategory": "예술·스포츠 > 스포츠 서비스 > 기타 스포츠 서비스업",
+                "reason": "'제로그래비티존'은 무중력 체험 등 활동적인 공간이나 기술 관련 사업을 연상시키며, '경영 컨설팅업'과는 거리가 있습니다. 엔터테인먼트 또는 스포츠/활동 서비스 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "다큐진상암",
+                "currentCategory": "일반사업·사무 > 인쇄·제품제작 > 명함/간판/광고물 제작",
+                "suggestedCategory": "예술·스포츠 > 공연/방송 > 영상/영화/방송 프로그램 제작",
+                "reason": "'다큐진'은 다큐멘터리 제작 등 영상 콘텐츠 제작을 의미하는 것으로 보이며, '명함/간판/광고물 제작'과는 다릅니다. 영상/영화/방송 프로그램 제작 등으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "씨비에스디엠씨주",
+                "currentCategory": "생활서비스 > 기타 개인 > 예식장업",
+                "suggestedCategory": "일반사업·사무 > 정보통신 > 방송/영상/음향 제작",
+                "reason": "'CBS'는 방송사를 의미하며, '예식장업'과는 전혀 관련이 없습니다. 방송/영상 제작 관련 업종으로 분류하는 것이 적절합니다."
+              },
+              {
+                "storeName": "아이라이트뷰티은평수색점",
+                "currentCategory": "생활서비스 > 이용·미용 > 네일숍",
+                "suggestedCategory": "생활서비스 > 이용·미용 > 기타 미용업",
+                "reason": "'아이라이트뷰티'는 눈썹, 속눈썹 등 아이 메이크업/시술 서비스를 주로 제공하는 곳으로 보이며, '네일숍'이라는 단일 분류보다는 '기타 미용업' 등으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "소담촌수색",
+                "currentCategory": "음식 > 동남아시아 > 기타 동남아식 전문",
+                "suggestedCategory": "음식 > 동남아시아 > 베트남식 전문",
+                "reason": "'소담촌'은 샤브샤브와 월남쌈을 전문으로 하는 곳으로, 월남쌈은 베트남식에 해당합니다. 따라서 '기타 동남아식 전문'보다 '베트남식 전문'으로 분류하는 것이 더 적절합니다."
+              },
+              {
+                "storeName": "저스트카츠수색점",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 일식 > 돈까스/일식 튀김",
+                "reason": "'카츠'는 돈카츠 등 일본식 튀김 요리를 의미합니다. '한식 > 백반/한정식'이 아니라 '일식 > 돈까스/일식 튀김'으로 분류되어야 합니다."
+              }
+            ],
+            "suggestion": "공공데이터 원본 분류 문제이므로 후처리 매핑 테이블 추가 검토",
+            "autoFixable": false,
+            "area": "업종 분류 정확성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(100)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 활성도 지표가 극단값(100)을 기록",
+            "suggestion": "densityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(100)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 3건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "강점 섹션에서 '다양한 업종이 균형 있게 분포' 및 '특정 업종에 편중되지 않아'라고 언급되었으나, 분석 데이터(음식 135개, 소매 85개, 생활서비스 48개)를 보면 음식 업종의 비중이 상대적으로 높아 '균형' 또는 '편중 없음'으로 보기에는 해석의 여지가 있습니다.",
+                "severity": "MEDIUM"
+              },
+              {
+                "section": "강점",
+                "issue": "'적정 수준의 업소 밀도'라는 주장은 상권의 면적 정보가 제공되지 않아 객관적인 데이터로 뒷받침되지 않은 추정입니다. 이는 근거 없는 주장으로 볼 수 있습니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "강점",
+                "issue": "'의료·교육 등 생활밀착형 업종이 많아'라는 주장은 분석 데이터에서 '생활서비스(48개)'로만 분류되어 있어, 구체적으로 의료·교육 업종이 얼마나 되는지 알 수 없습니다. 이는 데이터에 근거하지 않은 상세 설명입니다.",
+                "severity": "MEDIUM"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "DATA_COVERAGE_LOW",
+            "description": "업소 수(425개)가 해당 지역 규모 대비 부족",
+            "suggestion": "공공데이터 API 조회 반경 또는 페이지 수 확대 검토",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU, 세븐일레븐, 이마트24, 파리바게뜨, 뚜레쥬르, 맥도날드, 롯데리아, 스타벅스",
+            "details": {
+              "missingBrands": [
+                "CU",
+                "세븐일레븐",
+                "이마트24",
+                "파리바게뜨",
+                "뚜레쥬르",
+                "맥도날드",
+                "롯데리아",
+                "스타벅스"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "세븐일레븐",
+                "이마트24",
+                "파리바게뜨",
+                "뚜레쥬르",
+                "맥도날드",
+                "롯데리아",
+                "스타벅스"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "HIGH",
+            "type": "DATA_QUALITY_POOR",
+            "description": "전반적 데이터 품질이 낮음",
+            "details": {
+              "notes": "제공된 데이터는 서울 은평구 수색로 188 반경 500m 지역의 상권 현황을 불완전하게 반영하고 있습니다. 총 업소 수(425개)는 수색역 인근 핵심 상권의 500m 반경 규모를 고려할 때 다소 적게 파악된 것으로 보입니다. 또한, '숙박', '여가/오락 시설(예: PC방, 노래방, 헬스장)', '금융 기관(예: 은행)'과 같이 역세권 및 주거밀집 지역에서 일반적으로 기대되는 주요 업종들이 누락되었거나 현저히 적게 포함되어 있을 가능성이 높습니다. 프랜차이즈 감지에서도 CU, 세븐일레븐, 이마트24 등 주요 편의점, 파리바게뜨, 뚜레쥬르와 같은 대형 베이커리, 맥도날드, 롯데리아 등 핵심 패스트푸드 브랜드, 그리고 스타벅스 등 주요 커피 전문점의 부재는 데이터 수집의 누락을 강하게 시사합니다. 전반적으로 상권 데이터의 커버리지가 미흡하여 해당 지역의 실제 상권 규모와 구성을 정확히 파악하기 어렵습니다."
+            },
+            "suggestion": "대체 데이터 소스 추가 또는 기존 API 파라미터 조정 필요",
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 1건",
+            "details": [
+              {
+                "from": "부동산",
+                "to": "부동산·시설관리",
+                "reason": "원본 카테고리 분포에 '부동산' 카테고리(30개)가 존재하며, 이는 '시설관리·임대'가 매핑되는 '부동산·시설관리'와 유사하여 사용자에게 혼동을 줄 수 있습니다. 사용자 이해도를 높이고 대분류 카테고리 구조의 일관성을 강화하기 위해 '부동산'을 '부동산·시설관리'로 통합 매핑하여 명확성을 더하는 것을 제안합니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "부동산": "부동산·시설관리"
+              }
+            },
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 425,
+          "overallScore": 95,
+          "grade": "S",
+          "topCategories": [
+            "음식",
+            "소매",
+            "생활서비스",
+            "일반사업·사무",
+            "부동산"
+          ],
+          "franchiseCount": 18,
+          "franchiseRatio": "4.2"
+        }
+      },
+      {
+        "address": "서울 은평구 녹번로 50",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 1,
+          "HIGH": 0,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "area": "시스템",
+            "severity": "CRITICAL",
+            "type": "SYSTEM_ERROR",
+            "description": "분석 파이프라인 오류: 해당 주소를 찾을 수 없습니다. 정확한 도로명 또는 지번 주소를 입력해주세요.",
+            "suggestion": "서버 설정 및 API 키 점검"
+          }
+        ],
+        "analysisSnapshot": null
+      },
+      {
+        "address": "서울 은평구 서오릉로 40",
+        "totalIssues": 10,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 4,
+          "LOW": 4
+        },
+        "issues": [
+          {
+            "severity": "HIGH",
+            "type": "FRANCHISE_MISSING",
+            "description": "프랜차이즈 10개 브랜드 감지 누락",
+            "details": [
+              {
+                "name": "프랭크버거",
+                "matchedStores": [
+                  "프랭크버거"
+                ],
+                "category": "햄버거"
+              },
+              {
+                "name": "스피드메이트",
+                "matchedStores": [
+                  "스피드메이트녹번점"
+                ],
+                "category": "자동차정비"
+              },
+              {
+                "name": "요미요미",
+                "matchedStores": [
+                  "요미요미은평응암미술학원"
+                ],
+                "category": "아동미술학원"
+              },
+              {
+                "name": "고릴라PC방",
+                "matchedStores": [
+                  "고릴라PC방역촌역점"
+                ],
+                "category": "PC방"
+              },
+              {
+                "name": "귀한족발",
+                "matchedStores": [
+                  "귀한족발역촌역점"
+                ],
+                "category": "족발/보쌈"
+              },
+              {
+                "name": "명동찌개마을",
+                "matchedStores": [
+                  "명동찌개마을"
+                ],
+                "category": "한식"
+              },
+              {
+                "name": "가마치통닭",
+                "matchedStores": [
+                  "가마치통닭"
+                ],
+                "category": "치킨"
+              },
+              {
+                "name": "청담족발",
+                "matchedStores": [
+                  "청담족발"
+                ],
+                "category": "족발/보쌈"
+              },
+              {
+                "name": "하모니마트",
+                "matchedStores": [
+                  "하모니마트"
+                ],
+                "category": "마트/슈퍼마켓"
+              },
+              {
+                "name": "글라스바바",
+                "matchedStores": [
+                  "글라스바바"
+                ],
+                "category": "안경점"
+              }
+            ],
+            "suggestion": "KNOWN_FRANCHISES 배열에 다음 추가 필요: 프랭크버거, 스피드메이트, 요미요미, 고릴라PC방, 귀한족발, 명동찌개마을, 가마치통닭, 청담족발, 하모니마트, 글라스바바",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "프랭크버거",
+                "스피드메이트",
+                "요미요미",
+                "고릴라PC방",
+                "귀한족발",
+                "명동찌개마을",
+                "가마치통닭",
+                "청담족발",
+                "하모니마트",
+                "글라스바바"
+              ]
+            },
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "FRANCHISE_RATIO_LOW",
+            "description": "업소 1142개 중 프랜차이즈 비율이 2.3%로 비정상적으로 낮음",
+            "suggestion": "KNOWN_FRANCHISES 목록 확장 또는 매칭 로직 개선 필요",
+            "area": "프랜차이즈 감지"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "CATEGORY_MISCLASSIFIED",
+            "description": "업종 분류 오류 9건 발견 (정확도: MEDIUM)",
+            "details": [
+              {
+                "storeName": "우진설비",
+                "currentCategory": "생활서비스 > 기타 가정용품 수리 > 그 외 기타 개인/가정용품 수리업",
+                "suggestedCategory": "생활서비스 > 주택관리/보수 > 설비/배관 시공",
+                "reason": "상호 '설비'는 주로 주택 및 건물의 배관, 난방 등 시설 관련 서비스를 의미하며, 단순히 개인/가정용품 수리보다는 '설비/배관 시공'에 더 적합합니다."
+              },
+              {
+                "storeName": "서리등커피부엌",
+                "currentCategory": "음식 > 주점 > 생맥주 전문",
+                "suggestedCategory": "음식 > 비알코올 > 카페",
+                "reason": "'커피부엌'이라는 이름은 커피와 간단한 식사류를 제공하는 '카페' 업종에 더 가깝습니다. '생맥주 전문' 주점과는 상이합니다."
+              },
+              {
+                "storeName": "통큰아귀",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 한식 > 해산물 구이/찜",
+                "reason": "'아귀'는 아귀찜, 아귀탕 등 특정 해산물 요리를 전문으로 하는 업소를 의미하며, 일반적인 '백반/한정식'보다 '해산물 구이/찜'으로 구체화하는 것이 적절합니다."
+              },
+              {
+                "storeName": "우주핵폭탄",
+                "currentCategory": "소매 > 종합 소매 > 슈퍼마켓",
+                "suggestedCategory": "소매 > 기타 소매 > 기타 전문 소매업",
+                "reason": "'우주핵폭탄'이라는 이름은 일반적인 슈퍼마켓과 전혀 연관성이 없으며, 매우 특이한 특정 테마나 품목을 다루는 '기타 전문 소매업'일 가능성이 높습니다."
+              },
+              {
+                "storeName": "에어컨가스충전",
+                "currentCategory": "생활서비스 > 컴퓨터 수리 > 컴퓨터/노트북/프린터 수리업",
+                "suggestedCategory": "생활서비스 > 기타 가정용품 수리 > 냉난방기구 수리업",
+                "reason": "'에어컨가스충전'은 에어컨 관련 서비스로, '컴퓨터 수리'와는 완전히 다른 분류입니다. '냉난방기구 수리업'이 올바른 분류입니다."
+              },
+              {
+                "storeName": "프로방스앤카페",
+                "currentCategory": "소매 > 섬유·의복·신발 소매 > 침구류/커튼 소매업",
+                "suggestedCategory": "음식 > 비알코올 > 카페",
+                "reason": "이름에 명시된 '카페'는 커피, 음료 등을 제공하는 업소를 의미합니다. '침구류/커튼 소매업'과는 직접적인 연관성이 낮으며, 주 업종을 '카페'로 보는 것이 합리적입니다."
+              },
+              {
+                "storeName": "포동까스",
+                "currentCategory": "음식 > 한식 > 백반/한정식",
+                "suggestedCategory": "음식 > 일식 > 돈까스 전문",
+                "reason": "'까스'는 돈까스를 의미하며, 이는 보통 '일식 > 돈까스 전문'으로 분류됩니다. 일반적인 한식 '백반/한정식'과는 차이가 있습니다."
+              },
+              {
+                "storeName": "서울서부경찰서복지위원회",
+                "currentCategory": "음식 > 비알코올 > 카페",
+                "suggestedCategory": "일반사업·사무 > 기타 사업지원 > 기타 사업지원 서비스업",
+                "reason": "'서울서부경찰서복지위원회'는 상업적인 '카페'가 아닌, 경찰서 소속의 복지 관련 위원회 명칭입니다. 기관의 성격을 고려하여 '기타 사업지원 서비스업'이 더 적절합니다."
+              },
+              {
+                "storeName": "토토와화장품",
+                "currentCategory": "예술·스포츠 > 유원지·오락 > 복권 발행/판매업",
+                "suggestedCategory": "소매 > 의약·화장품 소매 > 화장품 소매업",
+                "reason": "이름에 '화장품'이 명시되어 있음에도 불구하고 '복권 발행/판매업'으로만 분류되어 있습니다. '화장품 소매업'이 누락되었거나 복합 업종을 반영해야 합니다."
+              }
+            ],
+            "suggestion": "공공데이터 원본 분류 문제이므로 후처리 매핑 테이블 추가 검토",
+            "autoFixable": false,
+            "area": "업종 분류 정확성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 밀집도 지표가 극단값(100)을 기록",
+            "suggestion": "saturationScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "상권 활성도 지표가 극단값(100)을 기록",
+            "suggestion": "densityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "LOW",
+            "type": "EXTREME_INDICATOR",
+            "description": "업종 안정성 지표가 극단값(100)을 기록",
+            "suggestion": "stabilityScore 산출 로직의 경계값 처리 검토",
+            "area": "점수 산출 합리성"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "AI_COMMENT_INCONSISTENCY",
+            "description": "AI 코멘트와 데이터 간 불일치 2건",
+            "details": [
+              {
+                "section": "강점",
+                "issue": "'의료·교육 등 생활밀착형 업종이 많아 지역 기반이 안정적입니다.'라는 주장을 뒷받침할 분석 데이터(상위 업종 등)가 전혀 제시되지 않아 사실 여부를 확인할 수 없습니다.",
+                "severity": "HIGH"
+              },
+              {
+                "section": "강점",
+                "issue": "'특정 업종에 편중되지 않아 신규 진입 기회가 열려 있습니다.'라고 언급되었으나, 분석 데이터에서 음식 업종(361개)이 소매(190개)나 일반사업·사무(149개)에 비해 현저히 많아 특정 업종(음식) 편중으로 해석될 여지가 있습니다. 이는 '다양한 업종이 균형 있게 분포'한다는 강점과 상충될 수 있습니다.",
+                "severity": "MEDIUM"
+              }
+            ],
+            "suggestion": "aiConsultant.js의 코멘트 생성 로직에 데이터 기반 조건문 보강 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "HIGH",
+            "type": "AI_COMMENT_QUALITY",
+            "description": "AI 코멘트 전반적 품질이 \"POOR\"로 평가됨",
+            "suggestion": "aiConsultant.js의 코멘트 생성 함수 전면 개선 필요",
+            "area": "AI 코멘트 품질"
+          },
+          {
+            "severity": "MEDIUM",
+            "type": "BRAND_COVERAGE_GAP",
+            "description": "주요 브랜드 누락 의심: CU, 스타벅스, 맥도날드, 올리브영, 다이소",
+            "details": {
+              "missingBrands": [
+                "CU",
+                "스타벅스",
+                "맥도날드",
+                "올리브영",
+                "다이소"
+              ]
+            },
+            "suggestion": "KNOWN_FRANCHISES 배열 확장 필요",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "array": "KNOWN_FRANCHISES",
+              "additions": [
+                "CU",
+                "스타벅스",
+                "맥도날드",
+                "올리브영",
+                "다이소"
+              ]
+            },
+            "area": "데이터 커버리지"
+          },
+          {
+            "severity": "LOW",
+            "type": "MAPPING_MISSING",
+            "description": "카테고리 매핑 추가 필요: 2건",
+            "details": [
+              {
+                "from": "전문직서비스",
+                "to": "일반사업·사무",
+                "reason": "변호사, 회계사, 세무사 등 전문직 서비스는 '과학·기술'과 유사하게 전문성을 띠면서도 일반적인 사업·사무 범주에 속하므로, 명시적인 매핑 규칙 추가를 통해 사용자 이해도 및 분류 일관성을 높일 수 있습니다."
+              },
+              {
+                "from": "정보통신",
+                "to": "일반사업·사무",
+                "reason": "IT 서비스, 소프트웨어 개발 등의 정보통신 업종은 '과학·기술'과 함께 '일반사업·사무'의 중요한 부분을 차지하며, 명확한 매핑 규칙이 사용자 이해도를 높이는 데 기여할 것입니다."
+              }
+            ],
+            "suggestion": "CATEGORY_DISPLAY_MAP에 새 매핑 추가",
+            "autoFixable": true,
+            "fixTarget": {
+              "file": "server/services/storeData.js",
+              "object": "CATEGORY_DISPLAY_MAP",
+              "additions": {
+                "전문직서비스": "일반사업·사무",
+                "정보통신": "일반사업·사무"
+              }
+            },
+            "area": "카테고리 매핑"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1142,
+          "overallScore": 95,
+          "grade": "S",
+          "topCategories": [
+            "음식",
+            "소매",
+            "일반사업·사무",
+            "생활서비스",
+            "교육"
+          ],
+          "franchiseCount": 26,
+          "franchiseRatio": "2.3"
+        }
+      }
+    ]
+  },
+  "improvementPlan": {
+    "district": "은평구",
+    "timestamp": "2026-04-04T09:09:41.034Z",
+    "totalIssues": 84,
+    "improvements": [
+      {
+        "type": "EXTREME_INDICATOR",
+        "severity": "LOW",
+        "autoFixable": false,
+        "issueCount": 27,
+        "title": "상권 지표 극단값 개선: 데이터 유효성 및 계산 로직 강화",
+        "description": "현재 상권 분석 시스템에서 업종 다양성, 상권 밀집도, 경쟁 균형도, 업종 안정성 지표가 0을, 독립 상점 비율이 100을 기록하는 극단값이 빈번하게 발생하고 있습니다. 이는 📉 데이터 부족, 상권 내 상점 수 부족, 또는 지표 계산 로직에서 엣지 케이스 처리가 미흡하기 때문으로 분석됩니다.\n\n개선 방안은 크게 세 가지입니다:\n1.  **데이터 유효성 강화**: `storeData.js`에서 원천 데이터의 유효성을 검증하고, 분석에 필요한 최소한의 데이터가 확보되지 않았을 경우 적절한 플래그를 추가합니다. 🎯\n2.  **지표 계산 로직 보강**: `analyzer.js`에서 지표 계산 시, 0으로 나누기 오류 방지, 데이터 부족 시 `null` 값 반환, 또는 지표 해석에 유의해야 함을 나타내는 보정 로직을 추가하여 극단값이 무분별하게 출력되는 것을 방지합니다. 💡\n3.  **AI 코멘트 맥락 강화**: `aiConsultant.js`와 `geminiService.js`에서 극단값 또는 `null` 지표에 대해 \"데이터 부족으로 인한 해석 한계\"와 같은 명확한 맥락을 사용자에게 제공하도록 규칙 및 프롬프트를 개선합니다. 💬 이를 통해 사용자의 오해를 줄이고 시스템 신뢰도를 높일 수 있습니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js",
+          "server/services/aiConsultant.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상점 데이터 조회 후, 해당 상권의 유효 상점 수와 업종 다양성을 사전 검증하는 로직을 추가합니다. 특정 임계값 미만일 경우 `isDataSparse: true`와 같은 플래그를 반환하여 `analyzer.js`가 이를 참조하도록 합니다. 📊"
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "모든 지표 계산 로직을 검토하여 분모가 0이 되는 경우, 데이터 배열이 비어있는 경우를 명시적으로 처리합니다. 이 경우, 지표 값으로 0 대신 `null` 또는 `NaN`을 반환하도록 수정하고, `isReliable: false`와 같은 신뢰도 플래그를 추가합니다. 특히, 상점 수가 0 또는 1인 상권에 대한 지표(다양성, 밀집도, 경쟁 균형도, 안정성) 처리 로직을 강화합니다. 🛠️"
+          },
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "`analyzer.js`에서 반환된 지표가 `null`이거나 `isReliable: false` 플래그를 가질 경우, '데이터 부족으로 지표 해석에 유의하세요' 또는 '상점 수가 적어 지표 신뢰도가 낮습니다'와 같은 안내 문구를 포함한 코멘트를 생성하도록 규칙을 확장합니다. ✍️"
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "modify",
+            "description": "Gemini API 호출 시, 지표 값과 함께 `isDataSparse` 또는 `isReliable` 플래그를 프롬프트에 포함하여, Gemini가 이러한 맥락을 고려한 더욱 정확하고 유용한 해석을 제공하도록 유도합니다. 🧠"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "16-24 hours"
+      },
+      {
+        "type": "AI_COMMENT_INCONSISTENCY",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 8,
+        "title": "AI 코멘트-데이터 불일치 해소 및 신뢰성 강화 방안",
+        "description": "AI 코멘트와 실제 데이터 간의 불일치는 사용자 신뢰도를 크게 저해합니다. 📉 특히 8건의 반복 발생은 시스템 로직의 근본적인 검토가 필요함을 시사합니다.\n\n핵심 원인은 AI 코멘트 생성 로직(`aiConsultant.js`)이 참조하는 데이터 또는 규칙이 실제 데이터 처리(`analyzer.js`, `storeData.js`)와 동기화되지 않았을 가능성이 높습니다. 데이터 스냅샷 불일치, 규칙 오류, 혹은 비즈니스 로직 변경 미반영 등이 있을 수 있습니다. 🕵️‍♀️\n\n**개선 방안:**\n\n1.  **데이터 일관성 강화**: `analyzer.js`에서 최종 산출된 지표와 등급을 `aiConsultant.js`로 직접 전달하여 데이터 불일치 가능성을 최소화합니다. 이를 통해 `aiConsultant.js`는 항상 최신의, 검증된 데이터를 기반으로 코멘트를 생성하게 됩니다.\n2.  **규칙 기반 로직 재검토 및 검증**: `aiConsultant.js` 내의 코멘트 생성 규칙들을 현재의 `analyzer.js` 지표 및 `storeData.js` 데이터를 기준으로 전면 재검토하고 업데이트합니다. 불일치가 발생했던 8건의 케이스를 중심으로 규칙을 수정하고 명확한 조건문을 추가합니다.\n3.  **테스트 케이스 확장 및 자동화**: 불일치 발생 케이스들을 기반으로 통합 테스트를 추가하여 회귀를 방지하고, 새로운 규칙을 검증하는 자동화된 테스트 환경을 구축합니다. 이는 향후 발생할 수 있는 잠재적 불일치를 사전에 방지하는 데 필수적입니다. 🧪\n\n이러한 개선을 통해 AI 코멘트의 정확성과 사용자 신뢰도를 대폭 향상시킬 수 있습니다. ✨",
+        "targetFiles": [
+          "server/services/aiConsultant.js",
+          "server/services/analyzer.js",
+          "server/tests/aiConsultant.test.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "코멘트 생성 함수가 `analyzer.js`에서 반환된 최종 분석 결과 객체를 직접 인자로 받도록 시그니처 변경. 기존 규칙 기반 로직을 최신 비즈니스 로직과 데이터 정의에 맞춰 전면 재검토 및 업데이트. 디버깅을 위한 상세 로깅 (입력 데이터, 생성된 코멘트) 추가."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "6대 지표 산출 및 등급 부여 후, 이 모든 결과를 `aiConsultant.js`에서 쉽게 활용할 수 있는 단일하고 일관된 JSON 객체 형태로 반환하도록 로직 조정."
+          },
+          {
+            "file": "server/tests/aiConsultant.test.js",
+            "changeType": "add",
+            "description": "다양한 시나리오 (특히 기존 불일치 발생 케이스)에 대해 `aiConsultant.js`가 `analyzer.js`의 특정 출력에 대해 예상되는 AI 코멘트를 정확히 생성하는지 검증하는 통합 테스트 케이스 추가."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "20-28h"
+      },
+      {
+        "type": "AI_COMMENT_QUALITY",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 4,
+        "title": "AI 코멘트 품질 향상을 위한 Gemini 프롬프트 엔지니어링 및 데이터 통합",
+        "description": "AI 코멘트 품질이 'POOR'로 지속 평가되는 문제는 현재 규칙 기반(aiConsultant.js) 로직만으로는 복잡한 상권 분석 결과에 대한 심층적이고 유연한 코멘트 생성에 한계가 있음을 시사합니다. Gemini API(geminiService.js)를 활용하고 있음에도 품질 문제가 발생한다는 것은 Gemini에 제공되는 컨텍스트와 프롬프트가 충분히 정교하지 않거나, analyzer.js에서 산출된 핵심 지표와 등급 정보가 효과적으로 활용되지 않고 있을 가능성이 높습니다.\n\n개선 방안은 aiConsultant.js의 역할을 데이터 준비 및 컨텍스트 취합기로 전환하고, analyzer.js의 6대 지표 및 등급 정보를 포함한 모든 관련 데이터를 구조화된 형태로 geminiService.js로 전달하는 것입니다. geminiService.js는 이렇게 풍부하고 정제된 컨텍스트를 기반으로, 상권 분석 전문성을 반영한 더욱 상세하고 통찰력 있는 AI 코멘트를 생성할 수 있도록 프롬프트를 고도화합니다.\n\n이를 통해 단순히 데이터 나열이 아닌, 분석 결과에 대한 심층적인 해석과 미래 방향성을 제시하는 코멘트 품질을 달성하고, 사용자에게 실질적인 가치를 제공할 수 있을 것입니다.",
+        "targetFiles": [
+          "server/services/aiConsultant.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "규칙 기반 코멘트 생성 로직을 제거하고, 상가업소 데이터(storeData.js), 6대 지표 및 등급(analyzer.js) 등 모든 관련 분석 결과를 구조화된 JSON 또는 객체 형태로 취합하는 컨텍스트 빌더 로직으로 변경합니다. 이 컨텍스트는 Gemini API 호출을 위한 입력 데이터로 활용됩니다."
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "modify",
+            "description": "aiConsultant.js에서 전달받은 풍부한 구조화된 컨텍스트를 활용하여 Gemini API 호출 시 더욱 상세하고 정교한 프롬프트를 구성합니다. 상권 분석 전문가 페르소나, 코멘트의 목표(예: 장점, 단점, 개선 방안 제시), 톤앤매너, 구체적인 6대 지표 및 등급 정보 활용 지시를 포함합니다. 필요시, 몇 가지 고품질 코멘트 예시(few-shot learning)를 프롬프트에 추가하여 Gemini의 응답 품질을 높입니다."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "2-3 days"
+      },
+      {
+        "type": "DATA_COVERAGE_LOW",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "📊 상가업소 데이터 커버리지 및 분석 정확도 개선",
+        "description": "현재 시스템에서 발생하는 '업소 수 부족' 문제는 `server/services/storeData.js`에서 조회되는 데이터의 양과 범위가 부족하여 발생합니다. 이는 이후 `analyzer.js`의 지표 산출과 `aiConsultant.js`의 코멘트 정확도에 직접적인 영향을 미칩니다. \n\n이 개선안은 다음 세 가지 주요 방향으로 접근합니다:\n\n1.  **데이터 소스 강화 및 조회 로직 개선**: `storeData.js`에서 더 많은 상가 정보를 확보하고, 지역 규모에 맞는 유연한 조회 전략을 도입합니다. 🔍\n2.  **분석 로직의 견고화**: `analyzer.js`에서 데이터 부족 상황을 인지하고, 이에 맞는 지표 계산 또는 예외 처리를 수행합니다. 📈\n3.  **AI 코멘트의 맥락적 정확성 향상**: `aiConsultant.js`가 데이터 부족 상황을 반영하여 보다 적절하고 유용한 코멘트를 생성하도록 합니다. 💬\n\n이를 통해 시스템의 데이터 신뢰도를 높이고, 사용자에게 더 정확하고 의미 있는 분석 결과를 제공할 수 있습니다. 🚀",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js",
+          "server/services/aiConsultant.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 소스 확장**: 기존 데이터 외 추가 공공 데이터 API (예: 소상공인시장진흥공단 상권정보) 또는 상업용 데이터셋 연동을 고려합니다. (초기 단계에서는 연동 가능한 무료 API 탐색)\n2.  **조회 범위 및 로직 유연화**: 📍 특정 지역에서 업소 수가 0개 또는 극히 적을 경우, 조회 반경을 동적으로 확장하거나, 인접 지역 데이터를 보완적으로 조회하는 로직을 추가합니다.\n3.  **데이터 필터링 최적화**: 너무 엄격한 필터링 조건을 완화하여 더 많은 업소를 포함하되, 분석에 의미 있는 데이터만 선별하도록 로직을 재검토합니다.\n4.  **로그 상세화**: 업소 수 0개 발생 시, 조회 조건(지역, 반경 등)과 함께 상세 로그를 기록하여 문제 원인 분석을 용이하게 합니다."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 부족 상황 처리**: `storeData.js`로부터 받은 업소 수가 특정 임계치(예: 10개 미만) 이하일 경우, 6대 지표 산출 시 '데이터 부족' 상태로 표시하거나, 해당 지표를 계산하지 않고 N/A 또는 특정 값으로 처리하는 로직을 추가합니다.\n2.  **지역 규모 대비 판단 로직 개선**: '지역 규모 대비 부족' 판단 기준을 더 유연하게 조정합니다. 예를 들어, 소규모 지역이거나 특정 업종의 특성을 반영하여 절대적인 수치보다는 인구 대비, 유동 인구 대비 등 상대적 지표를 활용하도록 개선합니다."
+          },
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 부족 코멘트 규칙 추가**: `analyzer.js`에서 '데이터 부족'으로 판단된 경우, AI 코멘트에서 단순히 '업소 수 부족'이 아니라, '현재 데이터만으로는 정확한 상권 분석이 어렵습니다. 추가 데이터 확보 또는 현장 조사를 권장합니다.' 와 같은 맥락적인 코멘트를 생성하는 규칙을 추가합니다.\n2.  **Gemini API 활용**: 데이터 부족 상황에 대한 더 정교한 설명을 위해 `geminiService.js`를 통해 Gemini API에 맥락을 전달하고, 사용자 친화적인 설명 및 보완책을 제안받도록 로직을 확장합니다. (예: '해당 지역은 데이터가 부족하여 ... 예상됩니다.')"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "20-40 hours"
+      },
+      {
+        "type": "BRAND_COVERAGE_GAP",
+        "severity": "MEDIUM",
+        "autoFixable": true,
+        "issueCount": 8,
+        "title": "BRAND_COVERAGE_GAP 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 8건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "franchiseAdditions": [
+            "CU",
+            "GS25",
+            "세븐일레븐",
+            "스타벅스",
+            "이디야커피",
+            "파리바게뜨",
+            "롯데리아",
+            "맥도날드",
+            "올리브영",
+            "다이소",
+            "7-Eleven",
+            "투썸플레이스",
+            "뚜레쥬르",
+            "BBQ",
+            "BHC",
+            "교촌치킨",
+            "메가커피",
+            "CU (편의점)",
+            "메가커피 (카페)",
+            "뚜레쥬르 (베이커리)",
+            "교촌치킨/BBQ (치킨)",
+            "Starbucks",
+            "이마트24"
+          ]
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      },
+      {
+        "type": "DATA_QUALITY_POOR",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "데이터 유효성 검사 및 정제 로직 강화",
+        "description": "현재 '전반적 데이터 품질이 낮음' 이슈는 상권 분석 시스템의 신뢰도에 치명적인 영향을 미칩니다. 이 문제를 해결하기 위해 데이터의 입수 단계부터 정제 및 유효성 검사 로직을 강화하는 것이 핵심입니다. 특히, `storeData.js`에서 데이터를 조회한 직후, 필수 필드 누락, 데이터 형식 오류, 비정상적인 값 범위 등을 검증하여 문제가 있는 데이터를 필터링하거나 표준화하는 과정이 필요합니다. 💡 이 단계에서 데이터 품질을 확보하면 `analyzer.js`의 지표 산출 정확성을 높이고, `aiConsultant.js`의 코멘트 신뢰도를 향상시킬 수 있습니다.\n\n데이터 유효성 검사는 단순히 데이터를 걸러내는 것을 넘어, 특정 조건에 따라 데이터를 보정(예: 결측치 기본값 할당, 단위 통일)하는 로직을 포함할 수 있습니다. 예를 들어, 상가 업소 데이터 중 '영업 상태'나 '카테고리' 등 핵심 지표에 누락이나 오타가 있을 경우, 이를 감지하고 올바른 값으로 매핑하거나, 분석에서 제외하는 처리 방식을 도입합니다. 🔍 이를 통해 후속 분석 단계에서 발생할 수 있는 오류를 사전에 방지하고, 최종 사용자에게 제공되는 정보의 품질을 대폭 개선할 수 있습니다.\n\n또한, 데이터 품질이 낮은 원인을 파악하기 위해 검증 실패 시 상세한 로그를 기록하는 기능을 추가해야 합니다. 어떤 종류의 데이터가, 어떤 이유로, 얼마나 많이 품질 문제를 일으키는지 파악하면, 향후 데이터 소스 개선이나 데이터 수집 로직 최적화에 중요한 단서를 제공할 수 있습니다. 📊 이러한 접근은 일회성 개선을 넘어 지속적인 데이터 품질 관리 체계를 구축하는 첫걸음이 될 것입니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상가업소 데이터 조회 후, 필수 필드 누락, 데이터 형식 오류, 값 범위 유효성 등을 검증하는 `validateAndCleanStoreData` 함수 추가 및 적용. 유효하지 않은 데이터는 필터링하거나 표준화 처리. 상세 로깅 포함."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "`storeData.js`로부터 전달받은 데이터가 이미 유효성 검사를 거쳤음을 가정하고, 추가적인 방어 로직보다는 핵심 지표 산출 로직에 집중하도록 변경. 필요시 데이터의 최종 유효성 재확인 로직 추가."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "24-40 hours"
+      },
+      {
+        "type": "MAPPING_MISSING",
+        "severity": "LOW",
+        "autoFixable": true,
+        "issueCount": 6,
+        "title": "MAPPING_MISSING 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 6건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "categoryMappings": {
+            "음식점·카페": "음식점·카페",
+            "소매·유통": "쇼핑·판매",
+            "교육·학원": "교육·학습",
+            "의료·건강": "병원·약국",
+            "여가·오락": "문화·여가시설",
+            "음식점": "외식·음료",
+            "도소매": "쇼핑·판매",
+            "의료": "병원·의료",
+            "교육": "교육·학원",
+            "부동산": "부동산·시설관리",
+            "전문직서비스": "일반사업·사무",
+            "정보통신": "일반사업·사무"
+          }
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      },
+      {
+        "type": "MAPPING_INCORRECT",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "카테고리 매핑 오류 개선 방안",
+        "description": "현재 발생하고 있는 '카테고리 매핑 오류'는 상권 분석의 핵심 지표 산출에 직접적인 영향을 미치므로 즉각적인 개선이 필요합니다. 문제의 근원은 `server/services/storeData.js`에서 상가업소 데이터를 조회하고 내부 시스템 카테고리로 매핑하는 과정에서 발생할 가능성이 높습니다.\n\n개선 방안으로, `storeData.js` 내부에 하드코딩된 매핑 로직이 있다면 이를 외부 설정 파일(예: `server/config/categoryMapping.json`)로 분리하고, 전용 매핑 유틸리티 함수를 구현하여 모든 카테고리 변환이 중앙에서 관리되도록 합니다. 이를 통해 데이터 소스의 변경이나 새로운 카테고리 추가 시에도 유지보수가 용이해집니다.\n\n또한, 매핑 실패 시 명확한 오류 로깅 메커니즘을 추가하여, 미정의 카테고리가 발견될 경우 즉시 알림을 받을 수 있도록 합니다. 이는 향후 동일한 유형의 문제가 재발하는 것을 방지하고 신속한 대응을 가능하게 할 것입니다. 이 개선은 분석 시스템의 데이터 정확도를 크게 향상시킬 것입니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/config/categoryMapping.json",
+          "server/utils/categoryMapper.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상가업소 데이터 조회 후 카테고리 매핑 로직을 외부 모듈 또는 설정 파일을 활용하도록 수정. 매핑 유틸리티를 호출하여 일관된 카테고리 변환을 수행하고, 매핑 실패 시 로깅 추가."
+          },
+          {
+            "file": "server/config/categoryMapping.json",
+            "changeType": "add",
+            "description": "외부 데이터 소스의 카테고리 명칭과 내부 시스템의 카테고리 명칭을 일대일 또는 다대일로 매핑하는 JSON 설정 파일 추가. 이 파일을 통해 카테고리 매핑 규칙을 중앙 관리."
+          },
+          {
+            "file": "server/utils/categoryMapper.js",
+            "changeType": "add",
+            "description": "categoryMapping.json 파일을 읽어 카테고리 매핑을 수행하는 전용 유틸리티 모듈 구현. 매핑 함수는 입력 카테고리를 받아 내부 시스템 카테고리로 변환하며, 매핑 규칙에 없는 경우 기본값 반환 또는 오류 로깅."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "8 hours"
+      },
+      {
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "autoFixable": false,
+        "issueCount": 2,
+        "title": "✨ 주소 유효성 검증 및 지오코딩 로직 강화",
+        "description": "분석 파이프라인에서 발생하는 '주소를 찾을 수 없음' 오류는 입력 주소의 부정확성 또는 외부 지오코딩 서비스의 실패로 인해 발생합니다. 🚧 `server/services/storeData.js`에서 주소 유효성 검증 및 지오코딩 로직을 강화하여, 잘못된 주소 입력으로 인한 시스템 오류를 방지하고 사용자에게 더욱 명확한 피드백을 제공하는 것이 핵심입니다. 이를 위해, 주소 입력 정규화, 외부 지오코딩 API 연동 강화 및 상세 오류 처리를 구현할 것입니다. 🚀",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "주소 입력 파라미터에 대한 선행 유효성 검사 추가 (필수값 여부, 형식). 🔍 기존 주소 처리 로직 전단에 외부 지오코딩 서비스(예: 카카오 주소 API, 도로명주소 API) 호출 로직을 삽입하여, 입력된 주소를 좌표로 변환하고 유효성을 검증합니다. 변환 실패 시, 구체적인 오류 코드와 메시지를 반환하도록 수정하고, 상세 로그를 기록합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "지오코딩 실패 시, 파이프라인을 즉시 중단하고 `INVALID_ADDRESS`와 같은 명확한 에러 코드를 포함하는 예외를 발생시키도록 로직을 변경합니다. ❌ 이를 통해 상위 호출자(컨트롤러, analyzer 등)가 오류 유형을 명확히 인지하고 사용자에게 적절한 메시지를 전달할 수 있도록 합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "주소 정규화(Normalization) 헬퍼 함수 추가: 주소 입력 전 불필요한 공백 제거, 특수 문자 처리, 일반적인 약어 통일 등 전처리 로직을 추가하여 지오코딩 성공률을 높입니다. 🧹"
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "주소 처리 실패 시, 입력된 주소와 지오코딩 서비스의 응답(오류 메시지)을 포함하는 상세 에러 로깅을 추가하여 문제 발생 시 신속한 디버깅 및 분석을 가능하게 합니다. 📋"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "8 hours"
+      },
+      {
+        "type": "FRANCHISE_MISSING",
+        "severity": "HIGH",
+        "autoFixable": true,
+        "issueCount": 5,
+        "title": "FRANCHISE_MISSING 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 5건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "franchiseAdditions": [
+            "명륜진사갈비",
+            "큰맘할매순대국",
+            "선비꼬마김밥",
+            "마라공방",
+            "피자스쿨",
+            "CU",
+            "픽미픽미아이스",
+            "장충당",
+            "커브스",
+            "1001안경콘택트",
+            "토박이부대찌개",
+            "백년백세삼계탕",
+            "GS25",
+            "꽈배기나라",
+            "메가엠지씨커피",
+            "피자나라치킨공주",
+            "미분당",
+            "설빙고24",
+            "긴자료코",
+            "GS 더 프레시",
+            "더벤티",
+            "크린프랜드",
+            "익선병아리김밥",
+            "몽소",
+            "정관장",
+            "메가MGC커피",
+            "이차돌",
+            "곱분이곱창",
+            "펀비어킹",
+            "봉구비어",
+            "노랑통닭",
+            "오늘은보글부대찌개",
+            "짝태앤노가리",
+            "씨유",
+            "페리카나치킨",
+            "비에이치씨",
+            "요거프레소",
+            "헬로엘리스마켓24",
+            "파브스커피",
+            "블루밍스윗",
+            "고빙고",
+            "차이몬스터",
+            "커피위드구루",
+            "오봉집",
+            "라사천마라탕",
+            "매머드익스프레스",
+            "족발야시장",
+            "던킨",
+            "탐앤탐스",
+            "큰집닭강정",
+            "본도시락",
+            "프랭크버거",
+            "스피드메이트",
+            "요미요미",
+            "고릴라PC방",
+            "귀한족발",
+            "명동찌개마을",
+            "가마치통닭",
+            "청담족발",
+            "하모니마트",
+            "글라스바바"
+          ]
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      },
+      {
+        "type": "FRANCHISE_RATIO_LOW",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "프랜차이즈 업소 식별 로직 개선 및 데이터 유효성 강화",
+        "description": "제시된 FRANCHISE_RATIO_LOW 이슈는 상권 분석 시스템의 핵심 지표 중 하나인 프랜차이즈 비율이 비정상적으로 낮게 산출되는 문제를 보여줍니다. 이는 프랜차이즈 업소를 정확하게 식별하지 못하고 있거나, 데이터 조회 과정에서 문제가 발생했을 가능성이 높습니다. 따라서 'server/services/storeData.js' 파일에서 프랜차이즈 업소를 식별하는 로직을 집중적으로 개선하고, 데이터 유효성 검증 및 로깅을 강화하여 문제의 근본 원인을 해결해야 합니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/config/franchiseConfig.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "현재 프랜차이즈 식별 로직을 검토하고 강화합니다. 이는 업소명에 대한 보다 정교한 패턴 매칭(예: 정규표현식 활용), 프랜차이즈 브랜드명 목록 확장, 또는 사업자 등록 정보와의 교차 검증 로직 추가를 포함합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "프랜차이즈 식별 과정에서 어떤 업소는 프랜차이즈로 분류되고 어떤 업소는 일반 업소로 분류되는지에 대한 상세 로깅을 추가합니다. 이를 통해 오분류된 사례를 추적하고 로직 개선에 활용할 수 있습니다."
+          },
+          {
+            "file": "server/config/franchiseConfig.js",
+            "changeType": "add",
+            "description": "프랜차이즈 식별에 사용되는 브랜드 목록, 키워드, 또는 패턴 정의를 별도의 설정 파일로 분리하여 관리합니다. 이는 로직 변경 없이도 프랜차이즈 식별 기준을 유연하게 업데이트할 수 있도록 합니다."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "12시간"
+      },
+      {
+        "type": "CATEGORY_MISCLASSIFIED",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 4,
+        "title": "업종 분류 정확도 향상 및 Gemini 기반 검증 시스템 도입 🚀",
+        "description": "현재 시스템에서 발생하는 업종 분류 오류는 상권 분석의 핵심 지표 및 AI 코멘트의 정확도에 심각한 영향을 미칩니다. 📊 `server/services/storeData.js` 내 기존 분류 로직의 정교화를 통해 1차 분류 정확도를 높이고, 특히 `MEDIUM` 정확도로 분류된 오류들을 우선적으로 개선합니다. 나아가, `server/services/geminiService.js`를 활용하여 Gemini AI에 업종 분류/검증 질의 기능을 추가함으로써, 규칙 기반 분류의 한계를 보완하고 AI의 강력한 문맥 이해 능력을 통해 분류 정확도를 획기적으로 향상시킬 것을 제안합니다. 이 개선안은 데이터 품질을 직접적으로 개선하여 downstream 서비스의 신뢰도를 높일 것입니다. ✨",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "기존 업종 분류 로직 (키워드 매칭, 정규식 패턴, 맵핑 테이블 등)을 상세 분석 및 개선합니다. 특히 모호하거나 복합적인 업종명에 대한 처리 로직을 강화하고, 분류 정확도가 낮은 케이스에 대한 폴백 전략을 재정비합니다. 🛠️"
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "업종 1차 분류 후, 분류 결과의 신뢰도가 낮거나 특정 조건에 해당하는 경우 `geminiService.js`의 새로운 API를 호출하여 Gemini AI로부터 업종 분류 또는 검증 결과를 받아 최종 분류에 반영하는 로직을 추가합니다. 🎯"
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "add",
+            "description": "Gemini API를 활용하여 주어진 상호명과 설명을 기반으로 최적의 업종 카테고리를 분류하거나, 기존 분류에 대한 유효성을 검증하는 전용 함수 (`classifyBusinessCategory(storeName, description)`)를 구현합니다. 프롬프트 엔지니어링을 통해 정확도를 극대화합니다. 🤖"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "24-40시간"
+      }
+    ],
+    "autoFixable": [
+      {
+        "type": "BRAND_COVERAGE_GAP",
+        "severity": "MEDIUM",
+        "autoFixable": true,
+        "issueCount": 8,
+        "title": "BRAND_COVERAGE_GAP 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 8건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "franchiseAdditions": [
+            "CU",
+            "GS25",
+            "세븐일레븐",
+            "스타벅스",
+            "이디야커피",
+            "파리바게뜨",
+            "롯데리아",
+            "맥도날드",
+            "올리브영",
+            "다이소",
+            "7-Eleven",
+            "투썸플레이스",
+            "뚜레쥬르",
+            "BBQ",
+            "BHC",
+            "교촌치킨",
+            "메가커피",
+            "CU (편의점)",
+            "메가커피 (카페)",
+            "뚜레쥬르 (베이커리)",
+            "교촌치킨/BBQ (치킨)",
+            "Starbucks",
+            "이마트24"
+          ]
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      },
+      {
+        "type": "MAPPING_MISSING",
+        "severity": "LOW",
+        "autoFixable": true,
+        "issueCount": 6,
+        "title": "MAPPING_MISSING 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 6건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "categoryMappings": {
+            "음식점·카페": "음식점·카페",
+            "소매·유통": "쇼핑·판매",
+            "교육·학원": "교육·학습",
+            "의료·건강": "병원·약국",
+            "여가·오락": "문화·여가시설",
+            "음식점": "외식·음료",
+            "도소매": "쇼핑·판매",
+            "의료": "병원·의료",
+            "교육": "교육·학원",
+            "부동산": "부동산·시설관리",
+            "전문직서비스": "일반사업·사무",
+            "정보통신": "일반사업·사무"
+          }
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      },
+      {
+        "type": "FRANCHISE_MISSING",
+        "severity": "HIGH",
+        "autoFixable": true,
+        "issueCount": 5,
+        "title": "FRANCHISE_MISSING 자동 수정",
+        "description": "데이터 추가/수정으로 해결 가능한 이슈 5건",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "patches": {
+          "franchiseAdditions": [
+            "명륜진사갈비",
+            "큰맘할매순대국",
+            "선비꼬마김밥",
+            "마라공방",
+            "피자스쿨",
+            "CU",
+            "픽미픽미아이스",
+            "장충당",
+            "커브스",
+            "1001안경콘택트",
+            "토박이부대찌개",
+            "백년백세삼계탕",
+            "GS25",
+            "꽈배기나라",
+            "메가엠지씨커피",
+            "피자나라치킨공주",
+            "미분당",
+            "설빙고24",
+            "긴자료코",
+            "GS 더 프레시",
+            "더벤티",
+            "크린프랜드",
+            "익선병아리김밥",
+            "몽소",
+            "정관장",
+            "메가MGC커피",
+            "이차돌",
+            "곱분이곱창",
+            "펀비어킹",
+            "봉구비어",
+            "노랑통닭",
+            "오늘은보글부대찌개",
+            "짝태앤노가리",
+            "씨유",
+            "페리카나치킨",
+            "비에이치씨",
+            "요거프레소",
+            "헬로엘리스마켓24",
+            "파브스커피",
+            "블루밍스윗",
+            "고빙고",
+            "차이몬스터",
+            "커피위드구루",
+            "오봉집",
+            "라사천마라탕",
+            "매머드익스프레스",
+            "족발야시장",
+            "던킨",
+            "탐앤탐스",
+            "큰집닭강정",
+            "본도시락",
+            "프랭크버거",
+            "스피드메이트",
+            "요미요미",
+            "고릴라PC방",
+            "귀한족발",
+            "명동찌개마을",
+            "가마치통닭",
+            "청담족발",
+            "하모니마트",
+            "글라스바바"
+          ]
+        },
+        "priority": "HIGH",
+        "estimatedEffort": "자동 (< 1분)"
+      }
+    ],
+    "manualReview": [
+      {
+        "type": "EXTREME_INDICATOR",
+        "severity": "LOW",
+        "autoFixable": false,
+        "issueCount": 27,
+        "title": "상권 지표 극단값 개선: 데이터 유효성 및 계산 로직 강화",
+        "description": "현재 상권 분석 시스템에서 업종 다양성, 상권 밀집도, 경쟁 균형도, 업종 안정성 지표가 0을, 독립 상점 비율이 100을 기록하는 극단값이 빈번하게 발생하고 있습니다. 이는 📉 데이터 부족, 상권 내 상점 수 부족, 또는 지표 계산 로직에서 엣지 케이스 처리가 미흡하기 때문으로 분석됩니다.\n\n개선 방안은 크게 세 가지입니다:\n1.  **데이터 유효성 강화**: `storeData.js`에서 원천 데이터의 유효성을 검증하고, 분석에 필요한 최소한의 데이터가 확보되지 않았을 경우 적절한 플래그를 추가합니다. 🎯\n2.  **지표 계산 로직 보강**: `analyzer.js`에서 지표 계산 시, 0으로 나누기 오류 방지, 데이터 부족 시 `null` 값 반환, 또는 지표 해석에 유의해야 함을 나타내는 보정 로직을 추가하여 극단값이 무분별하게 출력되는 것을 방지합니다. 💡\n3.  **AI 코멘트 맥락 강화**: `aiConsultant.js`와 `geminiService.js`에서 극단값 또는 `null` 지표에 대해 \"데이터 부족으로 인한 해석 한계\"와 같은 명확한 맥락을 사용자에게 제공하도록 규칙 및 프롬프트를 개선합니다. 💬 이를 통해 사용자의 오해를 줄이고 시스템 신뢰도를 높일 수 있습니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js",
+          "server/services/aiConsultant.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상점 데이터 조회 후, 해당 상권의 유효 상점 수와 업종 다양성을 사전 검증하는 로직을 추가합니다. 특정 임계값 미만일 경우 `isDataSparse: true`와 같은 플래그를 반환하여 `analyzer.js`가 이를 참조하도록 합니다. 📊"
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "모든 지표 계산 로직을 검토하여 분모가 0이 되는 경우, 데이터 배열이 비어있는 경우를 명시적으로 처리합니다. 이 경우, 지표 값으로 0 대신 `null` 또는 `NaN`을 반환하도록 수정하고, `isReliable: false`와 같은 신뢰도 플래그를 추가합니다. 특히, 상점 수가 0 또는 1인 상권에 대한 지표(다양성, 밀집도, 경쟁 균형도, 안정성) 처리 로직을 강화합니다. 🛠️"
+          },
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "`analyzer.js`에서 반환된 지표가 `null`이거나 `isReliable: false` 플래그를 가질 경우, '데이터 부족으로 지표 해석에 유의하세요' 또는 '상점 수가 적어 지표 신뢰도가 낮습니다'와 같은 안내 문구를 포함한 코멘트를 생성하도록 규칙을 확장합니다. ✍️"
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "modify",
+            "description": "Gemini API 호출 시, 지표 값과 함께 `isDataSparse` 또는 `isReliable` 플래그를 프롬프트에 포함하여, Gemini가 이러한 맥락을 고려한 더욱 정확하고 유용한 해석을 제공하도록 유도합니다. 🧠"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "16-24 hours"
+      },
+      {
+        "type": "AI_COMMENT_INCONSISTENCY",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 8,
+        "title": "AI 코멘트-데이터 불일치 해소 및 신뢰성 강화 방안",
+        "description": "AI 코멘트와 실제 데이터 간의 불일치는 사용자 신뢰도를 크게 저해합니다. 📉 특히 8건의 반복 발생은 시스템 로직의 근본적인 검토가 필요함을 시사합니다.\n\n핵심 원인은 AI 코멘트 생성 로직(`aiConsultant.js`)이 참조하는 데이터 또는 규칙이 실제 데이터 처리(`analyzer.js`, `storeData.js`)와 동기화되지 않았을 가능성이 높습니다. 데이터 스냅샷 불일치, 규칙 오류, 혹은 비즈니스 로직 변경 미반영 등이 있을 수 있습니다. 🕵️‍♀️\n\n**개선 방안:**\n\n1.  **데이터 일관성 강화**: `analyzer.js`에서 최종 산출된 지표와 등급을 `aiConsultant.js`로 직접 전달하여 데이터 불일치 가능성을 최소화합니다. 이를 통해 `aiConsultant.js`는 항상 최신의, 검증된 데이터를 기반으로 코멘트를 생성하게 됩니다.\n2.  **규칙 기반 로직 재검토 및 검증**: `aiConsultant.js` 내의 코멘트 생성 규칙들을 현재의 `analyzer.js` 지표 및 `storeData.js` 데이터를 기준으로 전면 재검토하고 업데이트합니다. 불일치가 발생했던 8건의 케이스를 중심으로 규칙을 수정하고 명확한 조건문을 추가합니다.\n3.  **테스트 케이스 확장 및 자동화**: 불일치 발생 케이스들을 기반으로 통합 테스트를 추가하여 회귀를 방지하고, 새로운 규칙을 검증하는 자동화된 테스트 환경을 구축합니다. 이는 향후 발생할 수 있는 잠재적 불일치를 사전에 방지하는 데 필수적입니다. 🧪\n\n이러한 개선을 통해 AI 코멘트의 정확성과 사용자 신뢰도를 대폭 향상시킬 수 있습니다. ✨",
+        "targetFiles": [
+          "server/services/aiConsultant.js",
+          "server/services/analyzer.js",
+          "server/tests/aiConsultant.test.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "코멘트 생성 함수가 `analyzer.js`에서 반환된 최종 분석 결과 객체를 직접 인자로 받도록 시그니처 변경. 기존 규칙 기반 로직을 최신 비즈니스 로직과 데이터 정의에 맞춰 전면 재검토 및 업데이트. 디버깅을 위한 상세 로깅 (입력 데이터, 생성된 코멘트) 추가."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "6대 지표 산출 및 등급 부여 후, 이 모든 결과를 `aiConsultant.js`에서 쉽게 활용할 수 있는 단일하고 일관된 JSON 객체 형태로 반환하도록 로직 조정."
+          },
+          {
+            "file": "server/tests/aiConsultant.test.js",
+            "changeType": "add",
+            "description": "다양한 시나리오 (특히 기존 불일치 발생 케이스)에 대해 `aiConsultant.js`가 `analyzer.js`의 특정 출력에 대해 예상되는 AI 코멘트를 정확히 생성하는지 검증하는 통합 테스트 케이스 추가."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "20-28h"
+      },
+      {
+        "type": "AI_COMMENT_QUALITY",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 4,
+        "title": "AI 코멘트 품질 향상을 위한 Gemini 프롬프트 엔지니어링 및 데이터 통합",
+        "description": "AI 코멘트 품질이 'POOR'로 지속 평가되는 문제는 현재 규칙 기반(aiConsultant.js) 로직만으로는 복잡한 상권 분석 결과에 대한 심층적이고 유연한 코멘트 생성에 한계가 있음을 시사합니다. Gemini API(geminiService.js)를 활용하고 있음에도 품질 문제가 발생한다는 것은 Gemini에 제공되는 컨텍스트와 프롬프트가 충분히 정교하지 않거나, analyzer.js에서 산출된 핵심 지표와 등급 정보가 효과적으로 활용되지 않고 있을 가능성이 높습니다.\n\n개선 방안은 aiConsultant.js의 역할을 데이터 준비 및 컨텍스트 취합기로 전환하고, analyzer.js의 6대 지표 및 등급 정보를 포함한 모든 관련 데이터를 구조화된 형태로 geminiService.js로 전달하는 것입니다. geminiService.js는 이렇게 풍부하고 정제된 컨텍스트를 기반으로, 상권 분석 전문성을 반영한 더욱 상세하고 통찰력 있는 AI 코멘트를 생성할 수 있도록 프롬프트를 고도화합니다.\n\n이를 통해 단순히 데이터 나열이 아닌, 분석 결과에 대한 심층적인 해석과 미래 방향성을 제시하는 코멘트 품질을 달성하고, 사용자에게 실질적인 가치를 제공할 수 있을 것입니다.",
+        "targetFiles": [
+          "server/services/aiConsultant.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "규칙 기반 코멘트 생성 로직을 제거하고, 상가업소 데이터(storeData.js), 6대 지표 및 등급(analyzer.js) 등 모든 관련 분석 결과를 구조화된 JSON 또는 객체 형태로 취합하는 컨텍스트 빌더 로직으로 변경합니다. 이 컨텍스트는 Gemini API 호출을 위한 입력 데이터로 활용됩니다."
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "modify",
+            "description": "aiConsultant.js에서 전달받은 풍부한 구조화된 컨텍스트를 활용하여 Gemini API 호출 시 더욱 상세하고 정교한 프롬프트를 구성합니다. 상권 분석 전문가 페르소나, 코멘트의 목표(예: 장점, 단점, 개선 방안 제시), 톤앤매너, 구체적인 6대 지표 및 등급 정보 활용 지시를 포함합니다. 필요시, 몇 가지 고품질 코멘트 예시(few-shot learning)를 프롬프트에 추가하여 Gemini의 응답 품질을 높입니다."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "2-3 days"
+      },
+      {
+        "type": "DATA_COVERAGE_LOW",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "📊 상가업소 데이터 커버리지 및 분석 정확도 개선",
+        "description": "현재 시스템에서 발생하는 '업소 수 부족' 문제는 `server/services/storeData.js`에서 조회되는 데이터의 양과 범위가 부족하여 발생합니다. 이는 이후 `analyzer.js`의 지표 산출과 `aiConsultant.js`의 코멘트 정확도에 직접적인 영향을 미칩니다. \n\n이 개선안은 다음 세 가지 주요 방향으로 접근합니다:\n\n1.  **데이터 소스 강화 및 조회 로직 개선**: `storeData.js`에서 더 많은 상가 정보를 확보하고, 지역 규모에 맞는 유연한 조회 전략을 도입합니다. 🔍\n2.  **분석 로직의 견고화**: `analyzer.js`에서 데이터 부족 상황을 인지하고, 이에 맞는 지표 계산 또는 예외 처리를 수행합니다. 📈\n3.  **AI 코멘트의 맥락적 정확성 향상**: `aiConsultant.js`가 데이터 부족 상황을 반영하여 보다 적절하고 유용한 코멘트를 생성하도록 합니다. 💬\n\n이를 통해 시스템의 데이터 신뢰도를 높이고, 사용자에게 더 정확하고 의미 있는 분석 결과를 제공할 수 있습니다. 🚀",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js",
+          "server/services/aiConsultant.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 소스 확장**: 기존 데이터 외 추가 공공 데이터 API (예: 소상공인시장진흥공단 상권정보) 또는 상업용 데이터셋 연동을 고려합니다. (초기 단계에서는 연동 가능한 무료 API 탐색)\n2.  **조회 범위 및 로직 유연화**: 📍 특정 지역에서 업소 수가 0개 또는 극히 적을 경우, 조회 반경을 동적으로 확장하거나, 인접 지역 데이터를 보완적으로 조회하는 로직을 추가합니다.\n3.  **데이터 필터링 최적화**: 너무 엄격한 필터링 조건을 완화하여 더 많은 업소를 포함하되, 분석에 의미 있는 데이터만 선별하도록 로직을 재검토합니다.\n4.  **로그 상세화**: 업소 수 0개 발생 시, 조회 조건(지역, 반경 등)과 함께 상세 로그를 기록하여 문제 원인 분석을 용이하게 합니다."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 부족 상황 처리**: `storeData.js`로부터 받은 업소 수가 특정 임계치(예: 10개 미만) 이하일 경우, 6대 지표 산출 시 '데이터 부족' 상태로 표시하거나, 해당 지표를 계산하지 않고 N/A 또는 특정 값으로 처리하는 로직을 추가합니다.\n2.  **지역 규모 대비 판단 로직 개선**: '지역 규모 대비 부족' 판단 기준을 더 유연하게 조정합니다. 예를 들어, 소규모 지역이거나 특정 업종의 특성을 반영하여 절대적인 수치보다는 인구 대비, 유동 인구 대비 등 상대적 지표를 활용하도록 개선합니다."
+          },
+          {
+            "file": "server/services/aiConsultant.js",
+            "changeType": "modify",
+            "description": "1.  **데이터 부족 코멘트 규칙 추가**: `analyzer.js`에서 '데이터 부족'으로 판단된 경우, AI 코멘트에서 단순히 '업소 수 부족'이 아니라, '현재 데이터만으로는 정확한 상권 분석이 어렵습니다. 추가 데이터 확보 또는 현장 조사를 권장합니다.' 와 같은 맥락적인 코멘트를 생성하는 규칙을 추가합니다.\n2.  **Gemini API 활용**: 데이터 부족 상황에 대한 더 정교한 설명을 위해 `geminiService.js`를 통해 Gemini API에 맥락을 전달하고, 사용자 친화적인 설명 및 보완책을 제안받도록 로직을 확장합니다. (예: '해당 지역은 데이터가 부족하여 ... 예상됩니다.')"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "20-40 hours"
+      },
+      {
+        "type": "DATA_QUALITY_POOR",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "데이터 유효성 검사 및 정제 로직 강화",
+        "description": "현재 '전반적 데이터 품질이 낮음' 이슈는 상권 분석 시스템의 신뢰도에 치명적인 영향을 미칩니다. 이 문제를 해결하기 위해 데이터의 입수 단계부터 정제 및 유효성 검사 로직을 강화하는 것이 핵심입니다. 특히, `storeData.js`에서 데이터를 조회한 직후, 필수 필드 누락, 데이터 형식 오류, 비정상적인 값 범위 등을 검증하여 문제가 있는 데이터를 필터링하거나 표준화하는 과정이 필요합니다. 💡 이 단계에서 데이터 품질을 확보하면 `analyzer.js`의 지표 산출 정확성을 높이고, `aiConsultant.js`의 코멘트 신뢰도를 향상시킬 수 있습니다.\n\n데이터 유효성 검사는 단순히 데이터를 걸러내는 것을 넘어, 특정 조건에 따라 데이터를 보정(예: 결측치 기본값 할당, 단위 통일)하는 로직을 포함할 수 있습니다. 예를 들어, 상가 업소 데이터 중 '영업 상태'나 '카테고리' 등 핵심 지표에 누락이나 오타가 있을 경우, 이를 감지하고 올바른 값으로 매핑하거나, 분석에서 제외하는 처리 방식을 도입합니다. 🔍 이를 통해 후속 분석 단계에서 발생할 수 있는 오류를 사전에 방지하고, 최종 사용자에게 제공되는 정보의 품질을 대폭 개선할 수 있습니다.\n\n또한, 데이터 품질이 낮은 원인을 파악하기 위해 검증 실패 시 상세한 로그를 기록하는 기능을 추가해야 합니다. 어떤 종류의 데이터가, 어떤 이유로, 얼마나 많이 품질 문제를 일으키는지 파악하면, 향후 데이터 소스 개선이나 데이터 수집 로직 최적화에 중요한 단서를 제공할 수 있습니다. 📊 이러한 접근은 일회성 개선을 넘어 지속적인 데이터 품질 관리 체계를 구축하는 첫걸음이 될 것입니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/analyzer.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상가업소 데이터 조회 후, 필수 필드 누락, 데이터 형식 오류, 값 범위 유효성 등을 검증하는 `validateAndCleanStoreData` 함수 추가 및 적용. 유효하지 않은 데이터는 필터링하거나 표준화 처리. 상세 로깅 포함."
+          },
+          {
+            "file": "server/services/analyzer.js",
+            "changeType": "modify",
+            "description": "`storeData.js`로부터 전달받은 데이터가 이미 유효성 검사를 거쳤음을 가정하고, 추가적인 방어 로직보다는 핵심 지표 산출 로직에 집중하도록 변경. 필요시 데이터의 최종 유효성 재확인 로직 추가."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "24-40 hours"
+      },
+      {
+        "type": "MAPPING_INCORRECT",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "카테고리 매핑 오류 개선 방안",
+        "description": "현재 발생하고 있는 '카테고리 매핑 오류'는 상권 분석의 핵심 지표 산출에 직접적인 영향을 미치므로 즉각적인 개선이 필요합니다. 문제의 근원은 `server/services/storeData.js`에서 상가업소 데이터를 조회하고 내부 시스템 카테고리로 매핑하는 과정에서 발생할 가능성이 높습니다.\n\n개선 방안으로, `storeData.js` 내부에 하드코딩된 매핑 로직이 있다면 이를 외부 설정 파일(예: `server/config/categoryMapping.json`)로 분리하고, 전용 매핑 유틸리티 함수를 구현하여 모든 카테고리 변환이 중앙에서 관리되도록 합니다. 이를 통해 데이터 소스의 변경이나 새로운 카테고리 추가 시에도 유지보수가 용이해집니다.\n\n또한, 매핑 실패 시 명확한 오류 로깅 메커니즘을 추가하여, 미정의 카테고리가 발견될 경우 즉시 알림을 받을 수 있도록 합니다. 이는 향후 동일한 유형의 문제가 재발하는 것을 방지하고 신속한 대응을 가능하게 할 것입니다. 이 개선은 분석 시스템의 데이터 정확도를 크게 향상시킬 것입니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/config/categoryMapping.json",
+          "server/utils/categoryMapper.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "상가업소 데이터 조회 후 카테고리 매핑 로직을 외부 모듈 또는 설정 파일을 활용하도록 수정. 매핑 유틸리티를 호출하여 일관된 카테고리 변환을 수행하고, 매핑 실패 시 로깅 추가."
+          },
+          {
+            "file": "server/config/categoryMapping.json",
+            "changeType": "add",
+            "description": "외부 데이터 소스의 카테고리 명칭과 내부 시스템의 카테고리 명칭을 일대일 또는 다대일로 매핑하는 JSON 설정 파일 추가. 이 파일을 통해 카테고리 매핑 규칙을 중앙 관리."
+          },
+          {
+            "file": "server/utils/categoryMapper.js",
+            "changeType": "add",
+            "description": "categoryMapping.json 파일을 읽어 카테고리 매핑을 수행하는 전용 유틸리티 모듈 구현. 매핑 함수는 입력 카테고리를 받아 내부 시스템 카테고리로 변환하며, 매핑 규칙에 없는 경우 기본값 반환 또는 오류 로깅."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "8 hours"
+      },
+      {
+        "type": "SYSTEM_ERROR",
+        "severity": "CRITICAL",
+        "autoFixable": false,
+        "issueCount": 2,
+        "title": "✨ 주소 유효성 검증 및 지오코딩 로직 강화",
+        "description": "분석 파이프라인에서 발생하는 '주소를 찾을 수 없음' 오류는 입력 주소의 부정확성 또는 외부 지오코딩 서비스의 실패로 인해 발생합니다. 🚧 `server/services/storeData.js`에서 주소 유효성 검증 및 지오코딩 로직을 강화하여, 잘못된 주소 입력으로 인한 시스템 오류를 방지하고 사용자에게 더욱 명확한 피드백을 제공하는 것이 핵심입니다. 이를 위해, 주소 입력 정규화, 외부 지오코딩 API 연동 강화 및 상세 오류 처리를 구현할 것입니다. 🚀",
+        "targetFiles": [
+          "server/services/storeData.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "주소 입력 파라미터에 대한 선행 유효성 검사 추가 (필수값 여부, 형식). 🔍 기존 주소 처리 로직 전단에 외부 지오코딩 서비스(예: 카카오 주소 API, 도로명주소 API) 호출 로직을 삽입하여, 입력된 주소를 좌표로 변환하고 유효성을 검증합니다. 변환 실패 시, 구체적인 오류 코드와 메시지를 반환하도록 수정하고, 상세 로그를 기록합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "지오코딩 실패 시, 파이프라인을 즉시 중단하고 `INVALID_ADDRESS`와 같은 명확한 에러 코드를 포함하는 예외를 발생시키도록 로직을 변경합니다. ❌ 이를 통해 상위 호출자(컨트롤러, analyzer 등)가 오류 유형을 명확히 인지하고 사용자에게 적절한 메시지를 전달할 수 있도록 합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "주소 정규화(Normalization) 헬퍼 함수 추가: 주소 입력 전 불필요한 공백 제거, 특수 문자 처리, 일반적인 약어 통일 등 전처리 로직을 추가하여 지오코딩 성공률을 높입니다. 🧹"
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "주소 처리 실패 시, 입력된 주소와 지오코딩 서비스의 응답(오류 메시지)을 포함하는 상세 에러 로깅을 추가하여 문제 발생 시 신속한 디버깅 및 분석을 가능하게 합니다. 📋"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "8 hours"
+      },
+      {
+        "type": "FRANCHISE_RATIO_LOW",
+        "severity": "MEDIUM",
+        "autoFixable": false,
+        "issueCount": 5,
+        "title": "프랜차이즈 업소 식별 로직 개선 및 데이터 유효성 강화",
+        "description": "제시된 FRANCHISE_RATIO_LOW 이슈는 상권 분석 시스템의 핵심 지표 중 하나인 프랜차이즈 비율이 비정상적으로 낮게 산출되는 문제를 보여줍니다. 이는 프랜차이즈 업소를 정확하게 식별하지 못하고 있거나, 데이터 조회 과정에서 문제가 발생했을 가능성이 높습니다. 따라서 'server/services/storeData.js' 파일에서 프랜차이즈 업소를 식별하는 로직을 집중적으로 개선하고, 데이터 유효성 검증 및 로깅을 강화하여 문제의 근본 원인을 해결해야 합니다.",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/config/franchiseConfig.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "현재 프랜차이즈 식별 로직을 검토하고 강화합니다. 이는 업소명에 대한 보다 정교한 패턴 매칭(예: 정규표현식 활용), 프랜차이즈 브랜드명 목록 확장, 또는 사업자 등록 정보와의 교차 검증 로직 추가를 포함합니다."
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "프랜차이즈 식별 과정에서 어떤 업소는 프랜차이즈로 분류되고 어떤 업소는 일반 업소로 분류되는지에 대한 상세 로깅을 추가합니다. 이를 통해 오분류된 사례를 추적하고 로직 개선에 활용할 수 있습니다."
+          },
+          {
+            "file": "server/config/franchiseConfig.js",
+            "changeType": "add",
+            "description": "프랜차이즈 식별에 사용되는 브랜드 목록, 키워드, 또는 패턴 정의를 별도의 설정 파일로 분리하여 관리합니다. 이는 로직 변경 없이도 프랜차이즈 식별 기준을 유연하게 업데이트할 수 있도록 합니다."
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "12시간"
+      },
+      {
+        "type": "CATEGORY_MISCLASSIFIED",
+        "severity": "HIGH",
+        "autoFixable": false,
+        "issueCount": 4,
+        "title": "업종 분류 정확도 향상 및 Gemini 기반 검증 시스템 도입 🚀",
+        "description": "현재 시스템에서 발생하는 업종 분류 오류는 상권 분석의 핵심 지표 및 AI 코멘트의 정확도에 심각한 영향을 미칩니다. 📊 `server/services/storeData.js` 내 기존 분류 로직의 정교화를 통해 1차 분류 정확도를 높이고, 특히 `MEDIUM` 정확도로 분류된 오류들을 우선적으로 개선합니다. 나아가, `server/services/geminiService.js`를 활용하여 Gemini AI에 업종 분류/검증 질의 기능을 추가함으로써, 규칙 기반 분류의 한계를 보완하고 AI의 강력한 문맥 이해 능력을 통해 분류 정확도를 획기적으로 향상시킬 것을 제안합니다. 이 개선안은 데이터 품질을 직접적으로 개선하여 downstream 서비스의 신뢰도를 높일 것입니다. ✨",
+        "targetFiles": [
+          "server/services/storeData.js",
+          "server/services/geminiService.js"
+        ],
+        "codeChanges": [
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "modify",
+            "description": "기존 업종 분류 로직 (키워드 매칭, 정규식 패턴, 맵핑 테이블 등)을 상세 분석 및 개선합니다. 특히 모호하거나 복합적인 업종명에 대한 처리 로직을 강화하고, 분류 정확도가 낮은 케이스에 대한 폴백 전략을 재정비합니다. 🛠️"
+          },
+          {
+            "file": "server/services/storeData.js",
+            "changeType": "add",
+            "description": "업종 1차 분류 후, 분류 결과의 신뢰도가 낮거나 특정 조건에 해당하는 경우 `geminiService.js`의 새로운 API를 호출하여 Gemini AI로부터 업종 분류 또는 검증 결과를 받아 최종 분류에 반영하는 로직을 추가합니다. 🎯"
+          },
+          {
+            "file": "server/services/geminiService.js",
+            "changeType": "add",
+            "description": "Gemini API를 활용하여 주어진 상호명과 설명을 기반으로 최적의 업종 카테고리를 분류하거나, 기존 분류에 대한 유효성을 검증하는 전용 함수 (`classifyBusinessCategory(storeName, description)`)를 구현합니다. 프롬프트 엔지니어링을 통해 정확도를 극대화합니다. 🤖"
+          }
+        ],
+        "priority": "HIGH",
+        "estimatedEffort": "24-40시간"
+      }
+    ],
+    "summary": "은평구 지역 검증 결과, **데이터 품질 및 신뢰성**에 심각한 문제가 확인되었습니다. 📉 특히 상권 지표의 극단값 발생, 주소 유효성 미흡, 업종 분류 오류 및 상가 데이터 부족이 두드러져, `storeData.js`의 데이터 유효성 검증과 정제 로직 강화가 시급합니다.\n\n더불어, AI 코멘트가 실제 데이터와 불일치하고 전반적인 품질이 'POOR'로 평가되는 중대한 이슈가 발견되었습니다. 💬 이는 `aiConsultant.js`와 `geminiService.js`에서 프롬프트 엔지니어링을 고도화하고, `analyzer.js`의 핵심 지표를 직접 연동하여 일관성을 확보해야 함을 의미합니다.\n\n전반적인 상권 분석 시스템의 신뢰도와 사용자 경험을 향상시키기 위해, 원천 데이터 관리부터 AI 코멘트 생성까지 **파이프라인 전반에 걸친 통합적인 개선**이 필수적입니다. 🚀 특히 데이터 유효성, 일관성, 그리고 AI 코멘트 품질 향상에 집중해야 합니다."
+  },
+  "autoFixResult": {
+    "district": "은평구",
+    "timestamp": "2026-04-04T09:09:41.063Z",
+    "applied": [
+      {
+        "type": "FRANCHISE_ADD",
+        "addedCount": 6,
+        "addedBrands": [
+          "7-Eleven",
+          "CU (편의점)",
+          "메가커피 (카페)",
+          "뚜레쥬르 (베이커리)",
+          "교촌치킨/BBQ (치킨)",
+          "Starbucks"
+        ],
+        "file": "server/services/storeData.js",
+        "message": "KNOWN_FRANCHISES에 6개 브랜드 추가: 7-Eleven, CU (편의점), 메가커피 (카페), 뚜레쥬르 (베이커리), 교촌치킨/BBQ (치킨), Starbucks"
+      },
+      {
+        "type": "CATEGORY_MAP_ADD",
+        "addedCount": 12,
+        "addedMappings": {
+          "음식점·카페": "음식점·카페",
+          "소매·유통": "쇼핑·판매",
+          "교육·학원": "교육·학습",
+          "의료·건강": "병원·약국",
+          "여가·오락": "문화·여가시설",
+          "음식점": "외식·음료",
+          "도소매": "쇼핑·판매",
+          "의료": "병원·의료",
+          "교육": "교육·학원",
+          "부동산": "부동산·시설관리",
+          "전문직서비스": "일반사업·사무",
+          "정보통신": "일반사업·사무"
+        },
+        "file": "server/services/storeData.js",
+        "message": "CATEGORY_DISPLAY_MAP에 12개 매핑 추가"
+      },
+      {
+        "type": "FRANCHISE_ADD",
+        "addedCount": 59,
+        "addedBrands": [
+          "명륜진사갈비",
+          "큰맘할매순대국",
+          "선비꼬마김밥",
+          "마라공방",
+          "피자스쿨",
+          "픽미픽미아이스",
+          "장충당",
+          "커브스",
+          "1001안경콘택트",
+          "토박이부대찌개",
+          "백년백세삼계탕",
+          "꽈배기나라",
+          "메가엠지씨커피",
+          "피자나라치킨공주",
+          "미분당",
+          "설빙고24",
+          "긴자료코",
+          "GS 더 프레시",
+          "더벤티",
+          "크린프랜드",
+          "익선병아리김밥",
+          "몽소",
+          "정관장",
+          "메가MGC커피",
+          "이차돌",
+          "곱분이곱창",
+          "펀비어킹",
+          "봉구비어",
+          "노랑통닭",
+          "오늘은보글부대찌개",
+          "짝태앤노가리",
+          "씨유",
+          "페리카나치킨",
+          "비에이치씨",
+          "요거프레소",
+          "헬로엘리스마켓24",
+          "파브스커피",
+          "블루밍스윗",
+          "고빙고",
+          "차이몬스터",
+          "커피위드구루",
+          "오봉집",
+          "라사천마라탕",
+          "매머드익스프레스",
+          "족발야시장",
+          "던킨",
+          "탐앤탐스",
+          "큰집닭강정",
+          "본도시락",
+          "프랭크버거",
+          "스피드메이트",
+          "요미요미",
+          "고릴라PC방",
+          "귀한족발",
+          "명동찌개마을",
+          "가마치통닭",
+          "청담족발",
+          "하모니마트",
+          "글라스바바"
+        ],
+        "file": "server/services/storeData.js",
+        "message": "KNOWN_FRANCHISES에 59개 브랜드 추가: 명륜진사갈비, 큰맘할매순대국, 선비꼬마김밥, 마라공방, 피자스쿨, 픽미픽미아이스, 장충당, 커브스, 1001안경콘택트, 토박이부대찌개, 백년백세삼계탕, 꽈배기나라, 메가엠지씨커피, 피자나라치킨공주, 미분당, 설빙고24, 긴자료코, GS 더 프레시, 더벤티, 크린프랜드, 익선병아리김밥, 몽소, 정관장, 메가MGC커피, 이차돌, 곱분이곱창, 펀비어킹, 봉구비어, 노랑통닭, 오늘은보글부대찌개, 짝태앤노가리, 씨유, 페리카나치킨, 비에이치씨, 요거프레소, 헬로엘리스마켓24, 파브스커피, 블루밍스윗, 고빙고, 차이몬스터, 커피위드구루, 오봉집, 라사천마라탕, 매머드익스프레스, 족발야시장, 던킨, 탐앤탐스, 큰집닭강정, 본도시락, 프랭크버거, 스피드메이트, 요미요미, 고릴라PC방, 귀한족발, 명동찌개마을, 가마치통닭, 청담족발, 하모니마트, 글라스바바"
+      }
+    ],
+    "failed": [],
+    "summary": "자동 수정 완료: 3건 성공, 0건 실패"
+  },
+  "elapsedSeconds": 840.2
+}

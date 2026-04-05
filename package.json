@@ -9,7 +9,12 @@
         "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
         "build": "vite build",
         "start": "node server/index.js",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "agent:loop": "node server/agents/runLoopCli.js",
+        "agent:status": "node server/agents/runLoopCli.js --stats",
+        "agent:today": "node server/agents/runLoopCli.js --today",
+        "agent:history": "node server/agents/runLoopCli.js --history",
+        "agent:list": "node server/agents/runLoopCli.js --list"
     },
     "dependencies": {
         "chart.js": "^4.4.0",
