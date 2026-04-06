@@ -11,37 +11,46 @@
         }
         .spinner { width: 30px; height: 30px; border: 3px solid #e2e8f0; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes bounce {
-            0%, 100% { transform: translate(-50%, -100%); }
-            50% { transform: translate(-50%, -110%); }
+        @keyframes fadeOut { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); } }
+
+        /* 타겟 이동 버튼 */
+        #target-btn {
+            position: absolute; bottom: 16px; right: 16px; z-index: 999;
+            background: #ef4444; color: white; border: none; border-radius: 10px;
+            padding: 10px 18px; font-size: 13px; font-weight: 700;
+            font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(239,68,68,0.4);
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.2s; animation: pulse 2s infinite;
         }
-        /* 좌표 고정 마커 오버레이 */
-        #target-marker {
-            position: absolute;
-            z-index: 999;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            filter: drop-shadow(0px 3px 6px rgba(0,0,0,0.4));
-            transition: left 0.05s linear, top 0.05s linear;
+        #target-btn:hover { background: #dc2626; transform: scale(1.05); }
+        #target-btn:active { transform: scale(0.98); }
+
+        /* 초기 안내 배너 */
+        #init-banner {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 998; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            animation: fadeOut 5s ease forwards;
         }
-        #target-marker .marker-label {
-            background: #ef4444;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 700;
+        #init-banner .banner-text {
+            background: rgba(239, 68, 68, 0.9); color: white;
+            padding: 8px 20px; border-radius: 8px;
+            font-size: 14px; font-weight: 700;
             font-family: 'Noto Sans KR', sans-serif;
-            white-space: nowrap;
-            margin-bottom: 2px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-        #target-marker .marker-pin {
+        #init-banner .banner-arrow {
             width: 0; height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 16px solid #ef4444;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 18px solid rgba(239, 68, 68, 0.9);
+        }
+        #init-banner .banner-ring {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 4px solid rgba(239, 68, 68, 0.7);
+            animation: pulse 1.5s infinite;
         }
     </style>
 </head>
@@ -52,14 +61,20 @@
     </div>
     <div id="vmap"></div>
 
-    <!-- 좌표 고정 타겟 마커 (Vworld 엔진이 매 프레임 화면좌표로 변환) -->
-    <div id="target-marker" style="display:none;">
-        <div class="marker-label">📍 타겟 위치</div>
-        <div class="marker-pin"></div>
+    <!-- 초기 안내 배너: "여기가 타겟 건물입니다" (5초 후 자동 사라짐) -->
+    <div id="init-banner" style="display:none;">
+        <div class="banner-text">📍 여기가 타겟 건물입니다</div>
+        <div class="banner-arrow"></div>
+        <div class="banner-ring"></div>
     </div>
 
+    <!-- 타겟 위치로 이동 버튼 (항상 우하단에 표시) -->
+    <button id="target-btn" style="display:none;" onclick="flyToTarget()">
+        🎯 타겟 위치로
+    </button>
+
     <script>
-        // 0. Vworld 엔진 내부 버그 패치 (removeEventListener 파라미터 누락 해결)
+        // 0. Vworld 엔진 내부 버그 패치
         var originalRemoveEventListener = EventTarget.prototype.removeEventListener;
         EventTarget.prototype.removeEventListener = function(type, listener, options) {
             if (listener === undefined) return;
@@ -73,103 +88,36 @@
         var apiKey = urlParams.get('apikey');
         var domain = window.location.hostname;
 
-        // 현재 타겟 좌표 (초기값 = 분석 중심점)
+        // 현재 타겟 좌표
         var targetLon = lon;
         var targetLat = lat;
 
-        // Vworld 자체 3D API를 통한 좌표 고정 POI 마커 추가
-        function addTargetPOI(map, markerLon, markerLat) {
-            try {
-                // 방법1: vw.gs3d.Point (3D 포인트 그래픽)
-                if (window.vw && vw.gs3d && vw.gs3d.Point) {
-                    var gb = new vw.GraphicBoard('targetBoard');
-                    var pt = new vw.gs3d.Point(
-                        new vw.CoordZ(markerLon, markerLat, 30),
-                        { color: '#FF0000', size: 15 }
-                    );
-                    gb.add(pt);
-                    map.addGraphicBoard(gb);
-                    console.log('Vworld POI 마커 추가 성공 (gs3d.Point)');
-                    return;
+        // 타겟으로 카메라 이동
+        function flyToTarget() {
+            if (window.vmapInstance && window.vw && window.vw.CameraPosition) {
+                var movePo = new vw.CameraPosition(
+                    new vw.CoordZ(targetLon, targetLat, 100),
+                    new vw.Direction(0, -35, 0)
+                );
+                if (typeof window.vmapInstance.moveTo === 'function') {
+                    window.vmapInstance.moveTo(movePo);
+                } else if (window.vmapInstance.getViewCamera && typeof window.vmapInstance.getViewCamera().move === 'function') {
+                    window.vmapInstance.getViewCamera().move(movePo);
                 }
-            } catch(e) {
-                console.warn('gs3d.Point 방식 실패:', e.message);
+                // 이동 후 안내 배너 다시 표시 (3초)
+                showBanner();
             }
-
-            try {
-                // 방법2: vw.Marker 
-                if (window.vw && vw.Marker) {
-                    var marker = new vw.Marker(
-                        new vw.CoordZ(markerLon, markerLat, 30),
-                        { icon: 'https://map.vworld.kr/images/ol3/marker_default.png', label: '타겟' }
-                    );
-                    map.addMarker(marker);
-                    console.log('Vworld POI 마커 추가 성공 (vw.Marker)');
-                    return;
-                }
-            } catch(e) {
-                console.warn('vw.Marker 방식 실패:', e.message);
-            }
-
-            console.log('Vworld 자체 POI API 미지원 → DOM 오버레이 마커로 폴백');
         }
 
-        // 글로벌 POI 마커 업데이트 (주소 검색 이동 시)
-        function moveTargetPOI(map, newLon, newLat) {
-            targetLon = newLon;
-            targetLat = newLat;
-            // Vworld POI 재생성 시도
-            addTargetPOI(map, newLon, newLat);
-        }
-
-        // 마커 위치 업데이트 루프 (매 프레임 Cesium 좌표→화면 픽셀 변환)
-        function startMarkerTracking() {
-            var marker = document.getElementById('target-marker');
-            if (!marker) return;
-
-            function updateMarkerPosition() {
-                try {
-                    // Vworld 3D 내부의 Cesium viewer 접근
-                    var viewer = null;
-                    if (window.vmapInstance && window.vmapInstance._viewer) {
-                        viewer = window.vmapInstance._viewer;
-                    } else if (window.vmapInstance && window.vmapInstance.viewer) {
-                        viewer = window.vmapInstance.viewer;
-                    }
-                    // Cesium 글로벌 접근 시도
-                    if (!viewer && window.Cesium) {
-                        // vmap div 내부의 cesium widget canvas 탐색
-                        var cesiumWidget = document.querySelector('.cesium-widget');
-                        if (cesiumWidget && cesiumWidget._cesiumWidget) {
-                            viewer = cesiumWidget._cesiumWidget.scene;
-                        }
-                    }
-
-                    if (viewer && window.Cesium) {
-                        var cartesian = Cesium.Cartesian3.fromDegrees(targetLon, targetLat, 0);
-                        var screenPos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, cartesian);
-                        if (screenPos) {
-                            marker.style.display = 'flex';
-                            marker.style.left = screenPos.x + 'px';
-                            marker.style.top = screenPos.y + 'px';
-                            marker.style.transform = 'translate(-50%, -100%)';
-                        } else {
-                            // 화면 밖에 있으면 숨김
-                            marker.style.display = 'none';
-                        }
-                    } else {
-                        // Cesium viewer에 접근할 수 없으면 숨김 상태 유지
-                        marker.style.display = 'none';
-                    }
-                } catch(e) {
-                    // 에러 무시 (엔진 로딩 중일 수 있음)
-                }
-                requestAnimationFrame(updateMarkerPosition);
+        // 안내 배너 표시
+        function showBanner() {
+            var banner = document.getElementById('init-banner');
+            if (banner) {
+                banner.style.display = 'flex';
+                banner.style.animation = 'none';
+                banner.offsetHeight; // reflow
+                banner.style.animation = 'fadeOut 4s ease forwards';
             }
-            // 엔진 로딩 후 3초 딜레이 → 추적 시작
-            setTimeout(function() {
-                requestAnimationFrame(updateMarkerPosition);
-            }, 3000);
         }
 
         function initVworldMap() {
@@ -189,17 +137,13 @@
                             )
                         };
                         var map = new vw.Map("vmap", mapOptions);
-                        
-                        // 외부 제어를 위해 맵 인스턴스를 전역에 저장
                         window.vmapInstance = map;
                         
                         document.getElementById('loading').style.display = 'none';
 
-                        // Vworld 자체 POI API로 좌표 고정 마커 추가
-                        addTargetPOI(map, lon, lat);
-
-                        // Cesium 화면좌표 기반 마커 트래킹 시작 (POI가 안 보일 경우의 폴백)
-                        startMarkerTracking();
+                        // 버튼 & 배너 표시
+                        document.getElementById('target-btn').style.display = 'flex';
+                        showBanner();
 
                     } catch (err) {
                         console.error('Vworld Map Init Error:', err);
@@ -221,15 +165,8 @@
             if (e.data && e.data.type === 'MOVE_CAMERA') {
                 var newLon = e.data.lon;
                 var newLat = e.data.lat;
-
-                // 타겟 좌표 갱신 → 마커가 새 위치를 자동 추적
                 targetLon = newLon;
                 targetLat = newLat;
-
-                // POI 마커도 새 좌표로 이동
-                if (window.vmapInstance) {
-                    moveTargetPOI(window.vmapInstance, newLon, newLat);
-                }
 
                 if (window.vmapInstance && window.vw && window.vw.CameraPosition) {
                     var movePo = new vw.CameraPosition(
@@ -240,9 +177,9 @@
                         window.vmapInstance.moveTo(movePo);
                     } else if (window.vmapInstance.getViewCamera && typeof window.vmapInstance.getViewCamera().move === 'function') {
                         window.vmapInstance.getViewCamera().move(movePo);
-                    } else {
-                        console.warn('Vworld Map camera move function not found.');
                     }
+                    // 이동 후 안내 배너 표시
+                    showBanner();
                 }
             }
         });
@@ -253,7 +190,6 @@
             var scriptUrl = 'https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&domain=' + domain + '&apiKey=' + apiKey;
             
             var scriptsToLoad = [];
-            // document.write를 임시로 허용 (Vworld 내부에서 호출)
             var origWrite = document.write.bind(document);
             document.write = function(html) {
                 var tmp = document.createElement('div');
@@ -292,8 +228,6 @@
             var s = document.createElement('script');
             s.src = scriptUrl;
             s.onload = function() {
-                // webglMapInit.js.do 파일 자체 로드 완료 후,
-                // 내부에서 document.write로 주입하려 했던 스크립트들을 순차적으로 로드
                 loadNextScript(initVworldMap);
             };
             s.onerror = function() {
