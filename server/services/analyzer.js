@@ -87,7 +87,8 @@ export function analyzeDistrict(stores, targetCategory = null) {
  * H = -Σ(pi * ln(pi)), 정규화하여 0~100 반환
  */
 function calculateDiversityIndex(categories, total) {
-    if (total === 0 || categories.length === 0) return 0;
+    if (total === 0 || categories.length === 0) return 5;
+    if (categories.length === 1) return 10; // 단일 업종만 존재
 
     let H = 0;
     categories.forEach(cat => {
@@ -101,24 +102,29 @@ function calculateDiversityIndex(categories, total) {
     const Hmax = Math.log(categories.length);
     const evenness = Hmax > 0 ? H / Hmax : 0;
 
-    return Math.round(evenness * 100);
+    // 극단값 방지: 최소 10, 최대 95
+    return Math.max(10, Math.min(95, Math.round(evenness * 100)));
 }
 
 /**
  * 포화도 점수 - 적정 밀집도가 가장 좋음 (역 U자 곡선)
  */
 function calculateSaturationScore(categories, total) {
-    if (total === 0) return 0;
+    if (total === 0) return 10;
 
     // 상위 3개 업종의 비율
     const topCategories = categories.slice(0, 3);
     const topRatio = topCategories.reduce((sum, cat) => sum + cat.count, 0) / total;
 
-    // 상위 3개 업종이 50~65%를 차지하면 적정 (100점)
+    // 상위 3개 업종이 50~65%를 차지하면 적정 (95점)
     // 너무 집중(>80%) 또는 너무 분산(<30%)은 감점
-    if (topRatio >= 0.50 && topRatio <= 0.65) return 100;
-    if (topRatio > 0.65) return Math.max(0, Math.round(100 - (topRatio - 0.65) * 300));
-    return Math.max(0, Math.round(100 - (0.50 - topRatio) * 200));
+    let score;
+    if (topRatio >= 0.50 && topRatio <= 0.65) score = 95;
+    else if (topRatio > 0.65) score = Math.round(95 - (topRatio - 0.65) * 250);
+    else score = Math.round(95 - (0.50 - topRatio) * 180);
+
+    // 극단값 방지: 최소 10, 최대 95
+    return Math.max(10, Math.min(95, score));
 }
 
 /**
@@ -127,7 +133,8 @@ function calculateSaturationScore(categories, total) {
  * 역으로 변환하여 균형잡힐수록 높은 점수
  */
 function calculateHHI(categories, total) {
-    if (total === 0) return 0;
+    if (total === 0) return 10;
+    if (categories.length <= 1) return 10; // 단일 업종이면 독점
 
     let hhi = 0;
     categories.forEach(cat => {
@@ -141,8 +148,10 @@ function calculateHHI(categories, total) {
     const minHHI = N > 0 ? 10000 / N : 10000;
     const maxHHI = 10000;
 
-    const normalized = 1 - (hhi - minHHI) / (maxHHI - minHHI);
-    return Math.max(0, Math.min(100, Math.round(normalized * 100)));
+    const range = maxHHI - minHHI;
+    const normalized = range > 0 ? 1 - (hhi - minHHI) / range : 0.5;
+    // 극단값 방지: 최소 10, 최대 95
+    return Math.max(10, Math.min(95, Math.round(normalized * 100)));
 }
 
 /**
@@ -150,29 +159,34 @@ function calculateHHI(categories, total) {
  */
 function calculateDensityScore(totalStores) {
     // 반경 500m 기준 적정 업소 수: 300~2000개
-    if (totalStores >= 300 && totalStores <= 2000) return 100;
-    if (totalStores < 300) return Math.max(20, Math.round((totalStores / 300) * 100));
-    if (totalStores > 2000) return Math.max(40, Math.round(100 - ((totalStores - 2000) / 5000) * 60));
-    return 50;
+    let score;
+    if (totalStores >= 300 && totalStores <= 2000) score = 92;
+    else if (totalStores < 300) score = Math.round(20 + (totalStores / 300) * 72);
+    else score = Math.round(92 - ((totalStores - 2000) / 5000) * 50);
+    // 극단값 방지: 최소 15, 최대 95
+    return Math.max(15, Math.min(95, score));
 }
 
 /**
  * 업종 안정성 - 생활밀착형 업종 비율
  */
 function calculateStabilityScore(categories) {
-    const stableCategories = ['보건의료', '교육', '부동산', '시설관리·임대', '공공기관'];
+    const stableCategories = ['보건의료', '의료', '병원', '약국', '교육', '학원', '부동산', '시설관리', '공공기관', '생활서비스'];
     const total = categories.reduce((sum, cat) => sum + cat.count, 0);
-    if (total === 0) return 0;
+    if (total === 0) return 10;
 
     const stableCount = categories
         .filter(cat => stableCategories.some(sc => cat.name.includes(sc)))
         .reduce((sum, cat) => sum + cat.count, 0);
 
     const ratio = stableCount / total;
+    let score;
     // 안정 업종 10~25%가 적정
-    if (ratio >= 0.10 && ratio <= 0.25) return 100;
-    if (ratio < 0.10) return Math.round(ratio * 1000);
-    return Math.max(50, Math.round(100 - (ratio - 0.25) * 200));
+    if (ratio >= 0.10 && ratio <= 0.25) score = 92;
+    else if (ratio < 0.10) score = Math.round(20 + ratio * 720);
+    else score = Math.round(92 - (ratio - 0.25) * 180);
+    // 극단값 방지: 최소 10, 최대 95
+    return Math.max(10, Math.min(95, score));
 }
 
 /**
