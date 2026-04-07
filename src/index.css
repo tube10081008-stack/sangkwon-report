@@ -1928,5 +1928,175 @@ body {
     .cv2-title { font-size: 32px; }
     .cv2-profile-image { width: 180px; height: 180px; }
     .cv2-input-field { padding: 18px; font-size: 16px; }
-    .cv2-submit-button { padding: 18px; font-size: 18px; }
+}
+
+/* ═══════════════════════════════════════════════ */
+/* 🤖 코라 랜딩 페이지 v3 (하이엔드 B2B 대시보드 구조) */
+/* ═══════════════════════════════════════════════ */
+
+.cora-landing-v3 {
+    min-height: 100vh;
+    background: #060b14; /* Deep Dark Navy */
+    color: #f1f5f9;
+    font-family: var(--font-sans);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* CSS CSS 토폴로지 / 데이터 그리드 백그라운드 */
+.cv3-bg-topology {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0; pointer-events: none;
+    background-image: 
+        linear-gradient(rgba(110, 231, 183, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110, 231, 183, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    background-position: center center;
+}
+/* 토폴로지 그라데이션 오버레이 (가운데는 선명하고 가장자리는 어둡게) */
+.cora-landing-v3::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 0;
+    background: radial-gradient(circle at 50% 40%, transparent 10%, #060b14 80%);
+}
+
+/* 네비게이션 심플화 */
+.cv3-nav {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: flex-start;
+    padding: 30px 48px;
+}
+.cv3-nav-brand { display: flex; align-items: center; }
+.cv3-nav-name { font-size: 20px; font-weight: 800; color: #f8fafc; letter-spacing: -0.03em; }
+
+/* 메인 영역 */
+.cv3-main {
+    position: relative; z-index: 10;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    padding: 40px 20px 100px; text-align: center;
+}
+
+/* 라이브 배지 (신뢰 지표) */
+.cv3-live-badge-wrapper {
+    margin-bottom: 32px; animation: fadeUp 0.8s ease;
+}
+.cv3-live-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 30px;
+    background: rgba(110,231,183,0.05);
+    border: 1px solid rgba(110,231,183,0.15);
+}
+.cv3-live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background-color: #34d399;
+    box-shadow: 0 0 8px #34d399;
+    animation: pulseDot 2s infinite;
+}
+.cv3-live-text {
+    font-size: 13px; font-weight: 600; color: #a7f3d0;
+}
+@keyframes pulseDot {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* 헤더 카피 (Toss 스타일: 볼드, 타이트) */
+.cv3-header { margin-bottom: 48px; animation: fadeUp 0.8s ease 0.1s both; }
+.cv3-subtitle {
+    font-size: 20px; font-weight: 700; 
+    color: #6ee7b7;
+    margin-bottom: 12px; letter-spacing: -0.02em;
+}
+.cv3-title {
+    font-size: clamp(36px, 6vw, 76px); font-weight: 900;
+    color: #ffffff; line-height: 1.15;
+}
+.cv3-title-line1 {
+    display: inline-block;
+    letter-spacing: 0.18em;
+    margin-right: -0.18em;
+}
+.cv3-title-line2 {
+    display: inline-block; letter-spacing: -0.04em;
+}
+
+/* 폼 영역 */
+.cv3-search-form { 
+    width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 16px; 
+    animation: fadeUp 1s ease 0.2s both; margin-bottom: 60px;
+}
+.cv3-instruction {
+    font-size: 17px; color: #94a3b8; margin-bottom: 16px; line-height: 1.6; word-break: keep-all; font-weight: 500;
+}
+.cv3-input-wrapper { width: 100%; }
+.cv3-input-field {
+    width: 100%; padding: 26px 32px;
+    font-size: 20px; text-align: center;
+    background: #0f172a; color: #ffffff; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; outline: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    transition: all 0.2s;
+}
+.cv3-input-field::placeholder { color: #475569; font-weight: 500; }
+.cv3-input-field:focus { 
+    border-color: rgba(110,231,183,0.5);
+    box-shadow: 0 0 0 4px rgba(110,231,183,0.1), 0 20px 40px rgba(0,0,0,0.5); 
+}
+
+.cv3-submit-button {
+    width: 100%; padding: 24px; font-size: 22px; font-weight: 800; color: #022c22;
+    background: #6ee7b7; border: none; border-radius: 16px; cursor: pointer;
+    box-shadow: 0 8px 30px rgba(110,231,183,0.15); transition: all 0.2s;
+}
+.cv3-submit-button:hover {
+    background: #34d399; transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(52,211,153,0.25);
+}
+.cv3-submit-button:active { transform: translateY(0); }
+
+.cv3-secure-container {
+    margin-top: 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.cv3-secure-text { font-size: 14px; font-weight: 600; color: #64748b; }
+.cv3-secure-desc { font-size: 12px; font-weight: 500; color: #475569; line-height: 1.5; word-break: keep-all; }
+
+/* 대시보드 확장 그리드 */
+.cv3-dashboard-grid {
+    width: 100%; max-width: 1000px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    animation: fadeUp 1s ease 0.4s both; text-align: left;
+}
+.cv3-dash-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px; padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: transform 0.2s;
+}
+.cv3-dash-card:hover { transform: translateY(-4px); background: rgba(15, 23, 42, 0.8); border-color: rgba(110,231,183,0.2); }
+.cv3-card-icon { font-size: 26px; }
+.cv3-card-content { display: flex; flex-direction: column; gap: 8px; }
+.cv3-card-title { font-size: 14px; font-weight: 700; color: #94a3b8; }
+.cv3-card-value { font-size: 16px; font-weight: 800; line-height: 1.4; word-break: keep-all; }
+.cv3-card-value.negative { color: #f87171; }
+.cv3-card-value.highlight { color: #fbbf24; }
+.cv3-card-value.positive { color: #34d399; }
+.cv3-card-desc { font-size: 12px; font-weight: 500; color: #475569; margin-top: auto; }
+
+@media (max-width: 900px) {
+    .cv3-dashboard-grid { grid-template-columns: 1fr; max-width: 500px; }
+    .cv3-nav { padding: 24px 20px; }
+    .cv3-title { font-size: 42px; }
+    .cv3-title-line1 { letter-spacing: 0.15em; margin-right: -0.15em; } /* 모바일에서는 살짝 좁힘 */
+}
+@media (max-width: 640px) {
+    .cv3-title { font-size: 32px; }
+    .cv3-title-line1 { letter-spacing: 0.14em; margin-right: -0.14em; }
+    .cv3-input-field { padding: 20px; font-size: 16px; }
+    .cv3-submit-button { padding: 20px; font-size: 18px; }
 }
