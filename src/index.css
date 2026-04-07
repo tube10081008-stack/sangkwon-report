@@ -1882,6 +1882,14 @@ body {
 .cv2-instruction {
     font-size: 16px; color: #a1b8ac; margin-bottom: 12px; line-height: 1.6; word-break: keep-all;
 }
+.cv2-title-line1 {
+    display: inline-block;
+    letter-spacing: 0.18em;
+    margin-right: -0.18em; /* 마지막 글자 자간 보정 */
+}
+.cv2-title-line2 {
+    display: inline-block;
+}
 .cv2-input-wrapper { width: 100%; }
 .cv2-input-field {
     width: 100%; padding: 22px 24px;
@@ -1906,7 +1914,14 @@ body {
 }
 .cv2-submit-button:active { transform: translateY(0); }
 
-.cv2-secure-text { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 14px; }
+.cv2-secure-container {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.cv2-secure-text { font-size: 13px; color: rgba(255,255,255,0.4); }
+.cv2-secure-desc { font-size: 12px; color: rgba(255,255,255,0.25); word-break: keep-all; line-height: 1.4; }
 
 @media (max-width: 640px) {
     .cv2-nav { padding: 14px 20px; }

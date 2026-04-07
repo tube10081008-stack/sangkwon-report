@@ -74,7 +74,7 @@ export default function Landing() {
                 <div className="cora-loading-bar-track">
                     <div className="cora-loading-bar-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <p className="cora-loading-sub">잠시만 기다려 주세요, 코라가 열심히 분석 중이에요! ✨</p>
+                <p className="cora-loading-sub">잠시만 기다려 주세요, AI 에이전트 코라가 열심히 분석 중이에요! ✨</p>
             </div>
         );
     }
@@ -85,20 +85,18 @@ export default function Landing() {
             <nav className="cv2-nav">
                 <div className="cv2-nav-brand">
                     <img src="/cora-avatar.png" alt="Cora" className="cv2-nav-avatar" />
-                    <span className="cv2-nav-name">Cora AI</span>
-                </div>
-                <div className="cv2-nav-links">
-                    <Link to="/chat" className="cv2-nav-link cv2-nav-chat-link">💬 코라에게 바로 묻기</Link>
-                    <Link to="/agent-hub" className="cv2-nav-link">🤖 에이전트 허브</Link>
+                    <span className="cv2-nav-name">STANDBY LAB AI</span>
                 </div>
             </nav>
 
             <main className="cv2-main">
                 {/* 상단 텍스트 코피 */}
                 <div className="cv2-header">
-                    <div className="cv2-subtitle">성공 창업을 이끄는 AI 알고리즘</div>
+                    <div className="cv2-subtitle">고객 신뢰 No.1 AI 부동산 인텔리전스</div>
                     <h1 className="cv2-title">
-                        우리 지역 상권 <br/> 완벽 분석 리포트
+                        <span className="cv2-title-line1">데이터가 증명하는</span>
+                        <br/>
+                        <span className="cv2-title-line2">완벽한 AI 상권 분석</span>
                     </h1>
                 </div>
 
@@ -111,8 +109,8 @@ export default function Landing() {
                 {/* 입력 폼 영역 */}
                 <form className="cv2-search-form" onSubmit={handleSubmit}>
                     <p className="cv2-instruction">
-                        관심있는 주소나 지역명을 입력하시고 <strong>[분석 시작]</strong>을 눌러주세요!<br/>
-                        AI 코라가 상세한 상권 분석 정보를 제공해 드립니다.
+                        궁금한 주소나 지역명을 입력하고 <strong>[분석 시작]</strong>을 눌러보세요.<br/>
+                        흩어져 있는 수만 개의 부동산 빅데이터를 AI 에이전트가 분석해 드립니다.
                     </p>
 
                     <div className="cv2-input-wrapper">
@@ -129,8 +127,13 @@ export default function Landing() {
                         분석 시작
                     </button>
                     
-                    <div className="cv2-secure-text">
-                        🔒 안전하고 정확한 공공데이터 기반 딥러닝 분석
+                    <div className="cv2-secure-container">
+                        <div className="cv2-secure-text">
+                            🔒 국토교통부 및 공공데이터 포털 100% 실시간 연동
+                        </div>
+                        <div className="cv2-secure-desc">
+                            본 서비스는 금융권 수준의 보안 환경을 구축하여 사용자의 입력 정보를 안전하게 처리하고 폐기합니다.
+                        </div>
                     </div>
                 </form>
             </main>
