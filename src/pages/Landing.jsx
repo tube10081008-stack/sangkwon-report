@@ -2,15 +2,12 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const LOADING_MESSAGES = [
-    '📍 코라가 주소를 좌표로 변환하고 있어요...',
-    '🔍 주변 상가 데이터를 끝까지 긁어모으는 중...',
-    '📊 동네 업종 분포를 한눈에 볼 수 있게 정리 중...',
-    '🧮 복잡한 지표(Shannon 다각화 지수 등)를 계산하고 있어요...',
-    '📈 주변 상권의 실질적인 경쟁강도를 분석 중...',
-    '🏢 대형 프랜차이즈의 위협은 없는지 체크 중...',
-    '🎯 최적의 종합 등급을 산출하고 있어요...',
-    '💡 코라만의 맞춤형 인사이트를 생성 중이에요!',
-    '📋 리포트 작성이 거의 다 끝났어요!'
+    '국토부 실거래가 데이터 수집 및 정제 완료 (14,203건), 패턴 분석 가동...',
+    '동네 업종 분포를 한눈에 볼 수 있게 정리 중... (AI 상권 평가 모델 가동 중)',
+    '수집된 데이터 기반으로 Shannon 다각화 지수 연산 중...',
+    '대형 프랜차이즈 위협도 및 생존 리스크 팩터 검증 중...',
+    'AI 코라가 최종 분석 결과 연산 및 보고서 구조화 중... (90% 완료)',
+    '마지막 검증 완료. 리포트를 생성합니다!'
 ];
 
 export default function Landing() {
@@ -66,15 +63,71 @@ export default function Landing() {
     };
 
     if (loading) {
+        // 현재 처리 중인 더미 10만건 데이터 건수
+        const currentDataCount = Math.floor(100000 * (progress / 100));
+
         return (
-            <div className="cora-loading-overlay">
-                <img src="/cora-profile.png" alt="Cora Profile" className="cora-loading-avatar" />
-                <div className="cora-loading-ring"></div>
-                <div className="cora-loading-msg">{loadingMsg}</div>
-                <div className="cora-loading-bar-track">
-                    <div className="cora-loading-bar-fill" style={{ width: `${progress}%` }} />
+            <div className="cv3-loader-overlay">
+                <div className="cv3-loader-container">
+                    {/* 좌측: AI 에이전트 애니메이션 영역 */}
+                    <div className="cv3-loader-left">
+                        <div className="cv3-loader-avatar-wrapper">
+                            <div className="cv3-avatar-pulse-ring"></div>
+                            <img src="/cora-profile.png" alt="Cora Profile" className="cv3-loader-avatar" />
+                            {/* 데이터 파티클 흐름 효과 (CSS로 구현) */}
+                            <div className="cv3-particle p1"></div>
+                            <div className="cv3-particle p2"></div>
+                            <div className="cv3-particle p3"></div>
+                            <div className="cv3-particle p4"></div>
+                        </div>
+                        <div className="cv3-loader-logo-glow">STANDBY LAB AI CORE</div>
+                    </div>
+
+                    {/* 우측: 스켈레톤 리포트 & 실시간 프로그레스 대시보드 */}
+                    <div className="cv3-loader-right">
+                        
+                        <div className="cv3-skeleton-dashboard">
+                            {/* 상단 타이포 스켈레톤 */}
+                            <div className="cv3-skel-header">
+                                <div className="cv3-skel-box sh-title shimmer"></div>
+                                <div className="cv3-skel-box sh-grade shimmer"></div>
+                            </div>
+                            
+                            {/* 중단 차트 스켈레톤 */}
+                            <div className="cv3-skel-charts">
+                                <div className="cv3-skel-pie shimmer"></div>
+                                <div className="cv3-skel-bars">
+                                    <div className="cv3-skel-bar b1 shimmer"></div>
+                                    <div className="cv3-skel-bar b2 shimmer"></div>
+                                    <div className="cv3-skel-bar b3 shimmer"></div>
+                                    <div className="cv3-skel-bar b4 shimmer"></div>
+                                </div>
+                            </div>
+
+                            {/* 하단 리스트 스켈레톤 */}
+                            <div className="cv3-skel-list">
+                                <div className="cv3-skel-item shimmer"></div>
+                                <div className="cv3-skel-item shimmer"></div>
+                                <div className="cv3-skel-item shimmer" style={{ width: '60%' }}></div>
+                            </div>
+                        </div>
+
+                        {/* 프로그레스 및 동적 텍스트 영역 */}
+                        <div className="cv3-loading-status-area">
+                            <div className="cv3-progress-info">
+                                <span>전체 데이터 10만 건 중 {currentDataCount.toLocaleString()}건 분석 완료...</span>
+                                <span className="cv3-percent">{progress}%</span>
+                            </div>
+                            
+                            <div className="cv3-progress-track">
+                                <div className="cv3-progress-fill" style={{ width: `${progress}%` }}></div>
+                            </div>
+                            
+                            <div className="cv3-loading-msg">{loadingMsg}</div>
+                            <p className="cv3-loading-sub">잠시만 기다려 주세요, AI 에이전트 코라가 열심히 분석 중이에요! ✨</p>
+                        </div>
+                    </div>
                 </div>
-                <p className="cora-loading-sub">잠시만 기다려 주세요, AI 에이전트 코라가 열심히 분석 중이에요! ✨</p>
             </div>
         );
     }

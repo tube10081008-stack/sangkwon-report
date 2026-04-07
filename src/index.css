@@ -2106,3 +2106,163 @@ body {
     .cv3-input-field { padding: 20px; font-size: 16px; }
     .cv3-submit-button { padding: 20px; font-size: 18px; }
 }
+
+/* ═══════════════════════════════════════════════ */
+/* 🚀 프리미엄 V3 대시보드 로딩 & 스켈레톤 UI */
+/* ═══════════════════════════════════════════════ */
+
+.cv3-loader-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(6, 11, 20, 0.95);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: center;
+    color: #f1f5f9; padding: 20px;
+    animation: fadeIn 0.4s ease;
+}
+
+.cv3-loader-container {
+    width: 100%; max-width: 1100px; height: 600px;
+    display: flex; gap: 40px;
+}
+
+/* ================== 좌측 아바타 영역 ================== */
+.cv3-loader-left {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+}
+
+.cv3-loader-avatar-wrapper {
+    position: relative; width: 260px; height: 260px;
+}
+
+.cv3-loader-avatar {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border-radius: 50%; object-fit: cover;
+    border: 2px solid rgba(110, 231, 183, 0.4);
+    box-shadow: 0 0 40px rgba(110, 231, 183, 0.1) inset;
+    animation: pulseAvatar 3s ease-in-out infinite alternate;
+}
+
+.cv3-avatar-pulse-ring {
+    position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(110,231,183,0.15) 0%, transparent 60%);
+    animation: expandRing 2.5s infinite;
+}
+
+.cv3-loader-logo-glow {
+    margin-top: 32px; font-size: 20px; font-weight: 900;
+    letter-spacing: 0.1em; color: #a7f3d0;
+    text-shadow: 0 0 10px rgba(110,231,183,0.5);
+    animation: pulseLogo 2s infinite alternate;
+}
+
+/* 데이터 입자 흐름 (가상의 선포인트들) */
+.cv3-particle {
+    position: absolute; width: 4px; height: 4px; border-radius: 50%;
+    background: #6ee7b7; box-shadow: 0 0 10px #6ee7b7;
+    opacity: 0;
+}
+.cv3-particle.p1 { top: 20%; right: -20px; animation: flyRight 1.5s infinite; }
+.cv3-particle.p2 { top: 40%; right: -40px; animation: flyRight 1.8s infinite 0.3s; }
+.cv3-particle.p3 { top: 60%; right: -30px; animation: flyRight 1.3s infinite 0.7s; }
+.cv3-particle.p4 { top: 80%; right: -10px; animation: flyRight 2s infinite 0.1s; }
+
+@keyframes flyRight {
+    0% { transform: translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateX(150px) scale(0); opacity: 0; }
+}
+@keyframes pulseAvatar {
+    0% { filter: brightness(1) drop-shadow(0 0 10px rgba(110,231,183,0.2)); }
+    100% { filter: brightness(1.2) drop-shadow(0 0 30px rgba(110,231,183,0.5)); }
+}
+@keyframes expandRing {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.3); opacity: 0; }
+}
+@keyframes pulseLogo {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; text-shadow: 0 0 20px rgba(110,231,183,1); }
+}
+
+/* ================== 우측 스켈레톤 & 프로그레스 영역 ================== */
+.cv3-loader-right {
+    flex: 1.5; display: flex; flex-direction: column; justify-content: space-between;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 24px; padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    position: relative; overflow: hidden;
+}
+
+/* 스켈레톤 기본 요소 */
+.cv3-skel-box { background: rgba(255,255,255,0.05); border-radius: 8px; }
+.shimmer {
+    position: relative; overflow: hidden;
+    background: rgba(255, 255, 255, 0.03); 
+}
+.shimmer::after {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    animation: shimmerWave 2s infinite;
+}
+
+@keyframes shimmerWave {
+    100% { left: 200%; }
+}
+
+/* 스켈레톤 헤더 */
+.cv3-skel-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+.sh-title { width: 40%; height: 32px; }
+.sh-grade { width: 80px; height: 32px; border-radius: 16px; }
+
+/* 스켈레톤 차트 */
+.cv3-skel-charts { display: flex; gap: 40px; margin-bottom: 40px; }
+.cv3-skel-pie { width: 140px; height: 140px; border-radius: 50%; border: 16px solid rgba(255,255,255,0.03); }
+.cv3-skel-bars { flex: 1; display: flex; align-items: flex-end; gap: 16px; height: 140px; }
+.cv3-skel-bar { flex: 1; border-radius: 4px 4px 0 0; background: rgba(255,255,255,0.03); }
+.cv3-skel-bar.b1 { height: 60%; }
+.cv3-skel-bar.b2 { height: 100%; }
+.cv3-skel-bar.b3 { height: 40%; }
+.cv3-skel-bar.b4 { height: 80%; }
+
+/* 스켈레톤 리스트 */
+.cv3-skel-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.cv3-skel-item { width: 100%; height: 16px; border-radius: 4px; background: rgba(255,255,255,0.03); }
+
+/* 프로그레스 영역 (하단 고정) */
+.cv3-loading-status-area {
+    margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;
+}
+.cv3-progress-info {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 12px; font-size: 14px; color: #94a3b8; font-weight: 500;
+}
+.cv3-percent { font-size: 24px; font-weight: 800; color: #60a5fa; } /* 스페이스 블루 발광 */
+
+.cv3-progress-track {
+    width: 100%; height: 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.05); overflow: hidden; margin-bottom: 20px;
+}
+.cv3-progress-fill {
+    height: 100%; 
+    background: linear-gradient(90deg, #6e8efb, #a777e3); /* 블루-보라색 그라데이션 */
+    box-shadow: 0 0 10px rgba(167, 119, 227, 0.5);
+    border-radius: 4px; transition: width 0.3s ease;
+}
+
+.cv3-loading-msg {
+    font-size: 16px; font-weight: 700; color: #ffffff;
+    margin-bottom: 6px;
+}
+.cv3-loading-sub {
+    font-size: 13px; color: #64748b;
+}
+
+@media (max-width: 900px) {
+    .cv3-loader-container { flex-direction: column; height: auto; gap: 20px; }
+    .cv3-loader-left { display: none; } /* 모바일에선 아바타 영역 숨김 및 스켈레톤에 집중 */
+    .cv3-loader-right { padding: 24px; }
+    .cv3-skel-charts { flex-direction: column; align-items: center; }
+}
