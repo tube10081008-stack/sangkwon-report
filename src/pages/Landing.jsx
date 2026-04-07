@@ -3,34 +3,32 @@ import { useNavigate, Link } from 'react-router-dom';
 
 const LOADING_MESSAGES = [
     '📍 코라가 주소를 좌표로 변환하고 있어요...',
-    '🔍 반경 내 상가업소를 수집 중이에요...',
-    '📊 업종별 분포를 분석하고 있어요...',
-    '🧮 Shannon Diversity Index를 계산 중...',
-    '📈 HHI 경쟁강도를 분석 중...',
-    '🏢 프랜차이즈 현황을 조사 중이에요...',
-    '🎯 종합 등급을 산출하고 있어요...',
-    '💡 전문가 인사이트를 생성 중이에요...',
-    '📋 리포트를 마무리하고 있어요!'
+    '🔍 주변 상가 데이터를 끝까지 긁어모으는 중...',
+    '📊 동네 업종 분포를 한눈에 볼 수 있게 정리 중...',
+    '🧮 복잡한 지표(Shannon 다각화 지수 등)를 계산하고 있어요...',
+    '📈 주변 상권의 실질적인 경쟁강도를 분석 중...',
+    '🏢 대형 프랜차이즈의 위협은 없는지 체크 중...',
+    '🎯 최적의 종합 등급을 산출하고 있어요...',
+    '💡 코라만의 맞춤형 인사이트를 생성 중이에요!',
+    '📋 리포트 작성이 거의 다 끝났어요!'
 ];
 
 export default function Landing() {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState('single');
     const [loading, setLoading] = useState(false);
     const [loadingMsg, setLoadingMsg] = useState('');
     const [progress, setProgress] = useState(0);
 
-    const [address1, setAddress1] = useState('');
-    const [address2, setAddress2] = useState('');
-    const [targetCategory, setTargetCategory] = useState('');
-    const [radius, setRadius] = useState(500);
+    const [address, setAddress] = useState('');
+    
+    // 심플한 UI를 위해 카테고리와 반경은 고급 옵션으로 숨겨놓거나 내부적으로 기본값 사용
+    // 여기서는 가장 많이 쓰이는 기본값(반경 500m, 전체 업종)을 사용합니다.
+    const radius = 500; 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!address1.trim()) return alert('주소를 입력해주세요.');
-        if (activeTab === 'compare' && !address2.trim()) return alert('비교할 두 번째 주소를 입력해주세요.');
-        if (activeTab === 'strategy' && !targetCategory.trim()) return alert('희망 업종을 입력해주세요.');
+        if (!address.trim()) return alert('궁금한 주소나 동네 이름을 입력해주세요!');
 
         setLoading(true);
         setProgress(0);
@@ -41,213 +39,101 @@ export default function Landing() {
             msgIdx = (msgIdx + 1) % LOADING_MESSAGES.length;
             setLoadingMsg(LOADING_MESSAGES[msgIdx]);
             setProgress(prev => Math.min(prev + 12, 90));
-        }, 2500);
+        }, 2200);
 
         try {
-            let endpoint, body;
-            switch (activeTab) {
-                case 'single':
-                    endpoint = '/api/analyze/single';
-                    body = { address: address1, radius, targetCategory: targetCategory || undefined };
-                    break;
-                case 'compare':
-                    endpoint = '/api/analyze/compare';
-                    body = { address1, address2, radius, targetCategory: targetCategory || undefined };
-                    break;
-                case 'strategy':
-                    endpoint = '/api/analyze/strategy';
-                    body = { address: address1, radius, targetCategory };
-                    break;
-            }
-
-            const res = await fetch(endpoint, {
+            const res = await fetch('/api/analyze/single', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify({ address, radius })
             });
             const result = await res.json();
-            if (!result.success) throw new Error(result.error || '분석 실패');
+            if (!result.success) throw new Error(result.error || '분석에 실패했어요. 주소를 다시 확인해주세요!');
 
             setProgress(100);
             clearInterval(msgInterval);
 
             setTimeout(() => {
                 navigate('/report', {
-                    state: { type: activeTab, data: result.data, address1, address2, targetCategory, radius }
+                    state: { type: 'single', data: result.data, address1: address, radius }
                 });
-            }, 500);
+            }, 600);
         } catch (err) {
             clearInterval(msgInterval);
             setLoading(false);
-            alert('분석 오류: ' + err.message);
+            alert('앗! 에러가 발생했어요: ' + err.message);
         }
     };
 
     if (loading) {
         return (
             <div className="cora-loading-overlay">
-                <img src="/cora-avatar.png" alt="Cora" className="cora-loading-avatar" />
+                <img src="/cora-profile.png" alt="Cora Profile" className="cora-loading-avatar" />
                 <div className="cora-loading-ring"></div>
                 <div className="cora-loading-msg">{loadingMsg}</div>
                 <div className="cora-loading-bar-track">
                     <div className="cora-loading-bar-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <p className="cora-loading-sub">잠시만 기다려 주세요, 곧 분석이 완료돼요! ✨</p>
+                <p className="cora-loading-sub">잠시만 기다려 주세요, 코라가 열심히 분석 중이에요! ✨</p>
             </div>
         );
     }
 
     return (
-        <div className="cora-landing">
+        <div className="cora-landing-v2">
             {/* 네비게이션 */}
-            <nav className="cora-nav">
-                <div className="cora-nav-brand">
-                    <img src="/cora-avatar.png" alt="Cora" className="cora-nav-avatar" />
-                    <span className="cora-nav-name">Cora</span>
-                    <span className="cora-nav-badge">AI</span>
+            <nav className="cv2-nav">
+                <div className="cv2-nav-brand">
+                    <img src="/cora-avatar.png" alt="Cora" className="cv2-nav-avatar" />
+                    <span className="cv2-nav-name">Cora AI</span>
                 </div>
-                <div className="cora-nav-links">
-                    <Link to="/chat" className="cora-nav-link cora-nav-chat-link">💬 코라에게 물어보기</Link>
-                    <Link to="/agent-hub" className="cora-nav-link">🤖 에이전트 허브</Link>
+                <div className="cv2-nav-links">
+                    <Link to="/chat" className="cv2-nav-link cv2-nav-chat-link">💬 코라에게 바로 묻기</Link>
+                    <Link to="/agent-hub" className="cv2-nav-link">🤖 에이전트 허브</Link>
                 </div>
             </nav>
 
-            {/* 히어로 섹션 */}
-            <section className="cora-hero">
-                <div className="cora-hero-glow"></div>
-                <div className="cora-hero-content">
-                    <div className="cora-hero-intro">
-                        <div className="cora-hero-avatar-wrap">
-                            <img src="/cora-avatar.png" alt="Cora" className="cora-hero-avatar" />
-                            <div className="cora-hero-status"></div>
-                        </div>
-                        <div className="cora-hero-greeting">
-                            <p className="cora-hero-hello">안녕하세요, 저는 <strong>코라</strong>예요 👋</p>
-                            <h1 className="cora-hero-title">
-                                어떤 상권이<br/>
-                                <span className="cora-gradient-text">궁금하세요?</span>
-                            </h1>
-                            <p className="cora-hero-desc">
-                                주소만 알려주시면 AI가 업종 분포, 경쟁 강도, 프랜차이즈 비율까지
-                                <br/>모든 걸 분석해서 알려드릴게요.
-                            </p>
-                        </div>
+            <main className="cv2-main">
+                {/* 상단 텍스트 코피 */}
+                <div className="cv2-header">
+                    <div className="cv2-subtitle">성공 창업을 이끄는 AI 알고리즘</div>
+                    <h1 className="cv2-title">
+                        우리 지역 상권 <br/> 완벽 분석 리포트
+                    </h1>
+                </div>
+
+                {/* 중앙 코라 상반신 프로필 영역 */}
+                <div className="cv2-profile-area">
+                    <div className="cv2-profile-glow"></div>
+                    <img src="/cora-profile.png" alt="Cora AI 컨설턴트" className="cv2-profile-image" />
+                </div>
+
+                {/* 입력 폼 영역 */}
+                <form className="cv2-search-form" onSubmit={handleSubmit}>
+                    <p className="cv2-instruction">
+                        관심있는 주소나 지역명을 입력하시고 <strong>[분석 시작]</strong>을 눌러주세요!<br/>
+                        AI 코라가 상세한 상권 분석 정보를 제공해 드립니다.
+                    </p>
+
+                    <div className="cv2-input-wrapper">
+                        <input 
+                            type="text" 
+                            className="cv2-input-field" 
+                            placeholder="예: 서울 강남구 테헤란로 123"
+                            value={address}
+                            onChange={e => setAddress(e.target.value)}
+                        />
                     </div>
-
-                    {/* 분석 폼 */}
-                    <form className="cora-form" onSubmit={handleSubmit}>
-                        <div className="cora-form-card">
-                            <div className="cora-form-tabs">
-                                {[
-                                    { key: 'single', icon: '📍', label: '단일 분석' },
-                                    { key: 'compare', icon: '⚖️', label: '비교 분석' },
-                                    { key: 'strategy', icon: '🎯', label: '필승전략' }
-                                ].map(tab => (
-                                    <button key={tab.key} type="button"
-                                        className={`cora-tab ${activeTab === tab.key ? 'active' : ''}`}
-                                        onClick={() => setActiveTab(tab.key)}>
-                                        <span className="cora-tab-icon">{tab.icon}</span>
-                                        <span>{tab.label}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="cora-form-body">
-                                <div className="cora-input-group">
-                                    <label className="cora-label">{activeTab === 'compare' ? '상권 A' : '분석 주소'}</label>
-                                    <div className="cora-input-wrap">
-                                        <span className="cora-input-icon">🔍</span>
-                                        <input type="text" className="cora-field"
-                                            placeholder="예: 강남역, 서울 마포구 양화로 45"
-                                            value={address1} onChange={e => setAddress1(e.target.value)} />
-                                    </div>
-                                </div>
-
-                                {activeTab === 'compare' && (
-                                    <div className="cora-input-group">
-                                        <label className="cora-label">상권 B</label>
-                                        <div className="cora-input-wrap">
-                                            <span className="cora-input-icon">📍</span>
-                                            <input type="text" className="cora-field"
-                                                placeholder="예: 홍대입구, 서울 성동구 성수이로"
-                                                value={address2} onChange={e => setAddress2(e.target.value)} />
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="cora-form-row">
-                                    <div className="cora-input-group cora-flex1">
-                                        <label className="cora-label">관심 업종 {activeTab !== 'strategy' && <span className="cora-optional">선택</span>}</label>
-                                        <div className="cora-input-wrap">
-                                            <span className="cora-input-icon">🏪</span>
-                                            <input type="text" className="cora-field"
-                                                placeholder="예: 카페, 음식점"
-                                                value={targetCategory} onChange={e => setTargetCategory(e.target.value)} />
-                                        </div>
-                                    </div>
-                                    <div className="cora-input-group">
-                                        <label className="cora-label">반경</label>
-                                        <div className="cora-radius-pills">
-                                            {[500, 1000, 1500, 3000].map(r => (
-                                                <button key={r} type="button"
-                                                    className={`cora-pill ${radius === r ? 'active' : ''}`}
-                                                    onClick={() => setRadius(r)}>
-                                                    {r >= 1000 ? `${r / 1000}km` : `${r}m`}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button type="submit" className="cora-submit">
-                                    <img src="/cora-avatar.png" alt="" className="cora-submit-avatar" />
-                                    <span>
-                                        {activeTab === 'single' && '코라에게 분석 요청하기'}
-                                        {activeTab === 'compare' && '코라에게 비교 요청하기'}
-                                        {activeTab === 'strategy' && '코라에게 전략 요청하기'}
-                                    </span>
-                                    <span className="cora-submit-arrow">→</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            {/* 코라의 능력 */}
-            <section className="cora-features">
-                <div className="cora-features-header">
-                    <span className="cora-features-badge">✨ Powered by AI</span>
-                    <h2 className="cora-features-title">코라가 할 수 있는 것들</h2>
-                    <p className="cora-features-desc">공공데이터 + 학술 분석 기법 + AI 인사이트를 결합한 프리미엄 분석</p>
-                </div>
-                <div className="cora-features-grid">
-                    {[
-                        { icon: '📊', title: '6대 핵심 지표', desc: 'Shannon 다양성, HHI 경쟁강도 등 학술적 분석으로 상권을 정밀 진단' },
-                        { icon: '🗺️', title: '3D 스카이뷰 맵', desc: 'Vworld 3D 엔진으로 타겟 건물과 주변 상권을 입체적으로 시각화' },
-                        { icon: '🎯', title: '맞춤 필승전략', desc: 'SWOT 분석, 타겟 고객 프로파일링, 차별화 포지셔닝 가이드 제공' },
-                        { icon: '⚖️', title: '상권 비교 분석', desc: '두 후보지를 레이더 차트로 비교하여 최적 입지를 추천' },
-                        { icon: '🏢', title: '프랜차이즈 분석', desc: '200개+ 프랜차이즈 DB로 브랜드 밀집도와 독립 상점 생존율 분석' },
-                        { icon: '💬', title: 'AI 실시간 대화', desc: '코라에게 자유롭게 질문하고 실시간 상권 인사이트를 받아보세요' },
-                    ].map((f, i) => (
-                        <div key={i} className="cora-feature-card" style={{ animationDelay: `${i * 0.08}s` }}>
-                            <div className="cora-feature-icon">{f.icon}</div>
-                            <h3>{f.title}</h3>
-                            <p>{f.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* 푸터 */}
-            <footer className="cora-footer">
-                <img src="/cora-avatar.png" alt="Cora" className="cora-footer-avatar" />
-                <p>© 2026 Cora AI — 공공데이터 기반 상권분석 에이전트</p>
-                <div className="cora-footer-links">
-                    <Link to="/chat">💬 코라와 대화하기</Link>
-                    <Link to="/agent-hub">🤖 에이전트 허브</Link>
-                </div>
-            </footer>
+                    
+                    <button type="submit" className="cv2-submit-button">
+                        분석 시작
+                    </button>
+                    
+                    <div className="cv2-secure-text">
+                        🔒 안전하고 정확한 공공데이터 기반 딥러닝 분석
+                    </div>
+                </form>
+            </main>
         </div>
     );
 }

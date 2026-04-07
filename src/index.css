@@ -1811,205 +1811,107 @@ body {
 }
 
 /* ═══════════════════════════════════════════════ */
-/* 🤖 코라 랜딩 페이지 (에이전틱 리디자인)         */
+/* 🤖 코라 랜딩 페이지 v2 (단일 창 돋보기 스타일) */
 /* ═══════════════════════════════════════════════ */
 
-.cora-landing { min-height: 100vh; background: #060612; color: #e2e8f0; font-family: var(--font-sans); }
+.cora-landing-v2 {
+    min-height: 100vh;
+    background: #0d1210; /* 아주 어두운 그린-블랙계열 */
+    background: radial-gradient(circle at 50% 30%, #172621 0%, #040907 100%);
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+    display: flex;
+    flex-direction: column;
+}
 
-/* 네비게이션 */
-.cora-nav {
+/* 네비게이션 심플화 */
+.cv2-nav {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 32px; position: sticky; top: 0; z-index: 50;
-    background: rgba(6,6,18,0.85); backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(99,102,241,0.08);
+    padding: 20px 32px; 
 }
-.cora-nav-brand { display: flex; align-items: center; gap: 10px; }
-.cora-nav-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(99,102,241,0.4); }
-.cora-nav-name { font-size: 17px; font-weight: 800; color: white; letter-spacing: -0.02em; }
-.cora-nav-badge {
-    padding: 2px 7px; border-radius: 6px; font-size: 9px; font-weight: 800;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; letter-spacing: 0.05em;
-}
-.cora-nav-links { display: flex; gap: 8px; }
-.cora-nav-link {
-    padding: 7px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
-    color: rgba(255,255,255,0.5); text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.06); transition: all 0.2s;
-}
-.cora-nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
-.cora-nav-chat-link { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.2); color: rgba(165,180,252,0.9); }
-.cora-nav-chat-link:hover { background: rgba(99,102,241,0.25); color: white; }
+.cv2-nav-brand { display: flex; align-items: center; gap: 10px; }
+.cv2-nav-avatar { width: 32px; height: 32px; border-radius: 50%; opacity: 0.9; }
+.cv2-nav-name { font-size: 18px; font-weight: 800; color: #bbf7d0; letter-spacing: -0.02em; }
+.cv2-nav-links { display: flex; gap: 16px; }
+.cv2-nav-link { font-size: 14px; font-weight: 600; color: #8fa398; text-decoration: none; transition: 0.2s; }
+.cv2-nav-link:hover { color: #fff; }
+.cv2-nav-chat-link { color: #6ee7b7; border: 1px solid rgba(110,231,183,0.3); padding: 6px 14px; border-radius: 20px; }
+.cv2-nav-chat-link:hover { background: rgba(110,231,183,0.1); }
 
-/* 히어로 */
-.cora-hero {
-    position: relative; padding: 60px 32px 80px; overflow: hidden;
-    display: flex; justify-content: center;
+/* 메인 영역 */
+.cv2-main {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px 20px 80px; text-align: center;
 }
-.cora-hero-glow {
-    position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
-    width: 900px; height: 900px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.06) 40%, transparent 70%);
-    pointer-events: none; animation: heroGlow 15s ease-in-out infinite;
-}
-.cora-hero-content { position: relative; max-width: 800px; width: 100%; }
-.cora-hero-intro { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 40px; }
-.cora-hero-avatar-wrap { position: relative; flex-shrink: 0; }
-.cora-hero-avatar {
-    width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
-    border: 2.5px solid rgba(99,102,241,0.4); box-shadow: 0 0 30px rgba(99,102,241,0.2);
-}
-.cora-hero-status {
-    position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px;
-    border-radius: 50%; background: #22c55e; border: 2.5px solid #060612;
-}
-.cora-hero-hello { font-size: 15px; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
-.cora-hero-hello strong { color: var(--primary-300); }
-.cora-hero-title {
-    font-size: clamp(30px, 5vw, 48px); font-weight: 900; color: white;
-    line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 14px;
-}
-.cora-gradient-text {
-    background: linear-gradient(135deg, #818cf8, #c084fc, #06b6d4);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.cora-hero-desc { font-size: 15px; color: rgba(255,255,255,0.45); line-height: 1.7; }
 
-/* 분석 폼 */
-.cora-form { width: 100%; }
-.cora-form-card {
-    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 20px; overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 80px rgba(99,102,241,0.06);
+/* 헤더 카피 */
+.cv2-header { margin-bottom: 24px; animation: fadeUp 0.8s ease; }
+.cv2-subtitle {
+    font-size: 20px; font-weight: 600; 
+    color: #6ee7b7; /* 민트 그린 */
+    margin-bottom: 16px; letter-spacing: -0.01em;
 }
-.cora-form-tabs { display: flex; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06); }
-.cora-tab {
-    flex: 1; padding: 14px; border: none; background: none; cursor: pointer;
-    color: rgba(255,255,255,0.35); font-family: var(--font-sans); font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.25s; border-bottom: 2px solid transparent;
+.cv2-title {
+    font-size: clamp(32px, 5vw, 60px); font-weight: 900;
+    color: #fff; line-height: 1.25; letter-spacing: -0.03em;
+    text-shadow: 0 4px 24px rgba(110,231,183,0.15);
 }
-.cora-tab:hover { color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.02); }
-.cora-tab.active {
-    color: white; background: rgba(99,102,241,0.08);
-    border-bottom-color: var(--primary-400);
-}
-.cora-tab-icon { font-size: 16px; }
-.cora-form-body { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
-.cora-input-group { display: flex; flex-direction: column; gap: 6px; }
-.cora-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.06em; }
-.cora-optional { font-weight: 500; color: rgba(255,255,255,0.2); text-transform: none; font-size: 10px; }
-.cora-input-wrap {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px; padding: 0 14px; transition: all 0.2s;
-}
-.cora-input-wrap:focus-within { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.06); box-shadow: 0 0 0 3px rgba(99,102,241,0.08); }
-.cora-input-icon { font-size: 16px; flex-shrink: 0; }
-.cora-field {
-    flex: 1; padding: 13px 0; background: none; border: none; outline: none;
-    color: white; font-family: var(--font-sans); font-size: 15px;
-}
-.cora-field::placeholder { color: rgba(255,255,255,0.2); }
-.cora-form-row { display: flex; gap: 14px; }
-.cora-flex1 { flex: 1; }
-.cora-radius-pills { display: flex; gap: 6px; margin-top: 2px; }
-.cora-pill {
-    padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
-    font-family: var(--font-sans); cursor: pointer;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.35); transition: all 0.2s;
-}
-.cora-pill.active { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.4); color: white; }
-.cora-pill:hover:not(.active) { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
-.cora-submit {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 15px; border: none; border-radius: 14px; cursor: pointer;
-    font-family: var(--font-sans); font-size: 15px; font-weight: 700; color: white;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    transition: all 0.3s; position: relative; overflow: hidden;
-}
-.cora-submit::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-    opacity: 0; transition: opacity 0.3s;
-}
-.cora-submit:hover::before { opacity: 1; }
-.cora-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
-.cora-submit-avatar { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
-.cora-submit-arrow { font-size: 18px; margin-left: auto; opacity: 0.7; }
 
-/* 피처 섹션 */
-.cora-features { padding: 80px 32px; background: rgba(255,255,255,0.01); }
-.cora-features-header { text-align: center; margin-bottom: 48px; }
-.cora-features-badge {
-    display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
-    background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2);
-    color: var(--primary-300); margin-bottom: 16px;
+/* 중앙 그래픽 (코라 상반신) */
+.cv2-profile-area { position: relative; margin: 30px 0 40px; animation: fadeUp 0.8s ease 0.1s both; }
+.cv2-profile-glow {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 280px; height: 280px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(110,231,183,0.15) 0%, transparent 70%);
+    animation: pulseGlow 4s infinite alternate; pointer-events: none;
 }
-.cora-features-title { font-size: clamp(22px, 3vw, 32px); font-weight: 800; color: white; margin-bottom: 10px; }
-.cora-features-desc { font-size: 14px; color: rgba(255,255,255,0.4); }
-.cora-features-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px; max-width: 900px; margin: 0 auto;
+.cv2-profile-image {
+    position: relative; z-index: 2;
+    width: 220px; height: 220px; object-fit: cover;
+    border-radius: 50%; border: 3px solid rgba(110,231,183,0.3);
+    box-shadow: 0 10px 50px rgba(0,0,0,0.6), 0 0 30px rgba(110,231,183,0.2) inset;
 }
-.cora-feature-card {
-    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px; padding: 24px; transition: all 0.3s;
-    animation: fadeUp 0.5s ease both;
+@keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
 }
-.cora-feature-card:hover { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.15); transform: translateY(-3px); }
-.cora-feature-icon { font-size: 28px; margin-bottom: 12px; }
-.cora-feature-card h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
-.cora-feature-card p { font-size: 13px; color: rgba(255,255,255,0.4); line-height: 1.6; }
 
-/* 로딩 화면 */
-.cora-loading-overlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(135deg, #060612 0%, #0f0a2a 50%, #1a1040 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+/* 폼 영역 */
+.cv2-search-form { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; animation: fadeUp 1s ease 0.2s both; }
+.cv2-instruction {
+    font-size: 16px; color: #a1b8ac; margin-bottom: 12px; line-height: 1.6; word-break: keep-all;
 }
-.cora-loading-avatar {
-    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-    border: 3px solid rgba(99,102,241,0.4);
-    box-shadow: 0 0 40px rgba(99,102,241,0.3);
-    animation: loadingFloat 2s ease-in-out infinite;
+.cv2-input-wrapper { width: 100%; }
+.cv2-input-field {
+    width: 100%; padding: 22px 24px;
+    font-size: 18px; text-align: center;
+    background: #ffffff; color: #111827; font-weight: 500;
+    border: none; border-radius: 14px; outline: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: all 0.2s;
 }
-@keyframes loadingFloat {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-.cora-loading-ring {
-    width: 100px; height: 100px; border: 3px solid rgba(99,102,241,0.1);
-    border-top-color: var(--primary-400); border-radius: 50%;
-    animation: spin 1.2s linear infinite; position: absolute;
-}
-.cora-loading-msg { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); text-align: center; animation: fadeInOut 3s ease-in-out infinite; }
-.cora-loading-bar-track { width: 240px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
-.cora-loading-bar-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #a5b4fc); border-radius: 2px; transition: width 0.5s ease; }
-.cora-loading-sub { font-size: 13px; color: rgba(255,255,255,0.3); }
+.cv2-input-field::placeholder { color: #9ca3af; font-weight: 400; }
+.cv2-input-field:focus { box-shadow: 0 0 0 4px rgba(110,231,183,0.4), 0 10px 30px rgba(0,0,0,0.4); }
 
-/* 푸터 */
-.cora-footer {
-    display: flex; flex-direction: column; align-items: center; gap: 12px;
-    padding: 40px 32px; border-top: 1px solid rgba(255,255,255,0.04);
+.cv2-submit-button {
+    width: 100%; padding: 22px; font-size: 20px; font-weight: 800; color: #064e3b;
+    background: #6ee7b7; /* 버튼 민트그린 */
+    border: none; border-radius: 14px; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(110,231,183,0.2); transition: all 0.2s;
 }
-.cora-footer-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; opacity: 0.5; }
-.cora-footer p { font-size: 12px; color: rgba(255,255,255,0.2); }
-.cora-footer-links { display: flex; gap: 16px; }
-.cora-footer-links a { font-size: 12px; color: rgba(255,255,255,0.25); text-decoration: none; transition: color 0.2s; }
-.cora-footer-links a:hover { color: var(--primary-300); }
+.cv2-submit-button:hover {
+    background: #34d399; transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(52,211,153,0.3);
+}
+.cv2-submit-button:active { transform: translateY(0); }
 
-/* 모바일 */
+.cv2-secure-text { font-size: 13px; color: rgba(255,255,255,0.35); margin-top: 14px; }
+
 @media (max-width: 640px) {
-    .cora-nav { padding: 10px 16px; }
-    .cora-nav-links { gap: 4px; }
-    .cora-nav-link { font-size: 11px; padding: 6px 10px; }
-    .cora-hero { padding: 40px 16px 60px; }
-    .cora-hero-intro { flex-direction: column; align-items: center; text-align: center; }
-    .cora-hero-avatar { width: 56px; height: 56px; }
-    .cora-hero-title { font-size: 28px; }
-    .cora-form-body { padding: 20px; }
-    .cora-form-row { flex-direction: column; }
-    .cora-features { padding: 48px 16px; }
-    .cora-features-grid { grid-template-columns: 1fr; }
+    .cv2-nav { padding: 14px 20px; }
+    .cv2-title { font-size: 32px; }
+    .cv2-profile-image { width: 180px; height: 180px; }
+    .cv2-input-field { padding: 18px; font-size: 16px; }
+    .cv2-submit-button { padding: 18px; font-size: 18px; }
 }
