@@ -11,9 +11,8 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<CoraChat />} />
+                <Route path="/" element={<Landing />} />
                 <Route path="/chat" element={<CoraChat />} />
-                <Route path="/start-analysis" element={<Landing />} />
                 <Route path="/report" element={<ReportPage />} />
                 <Route path="/shared/:id" element={<SharedReportPage />} />
                 <Route path="/agent-hub" element={<AgentDashboard />} />
