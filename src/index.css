@@ -2125,7 +2125,7 @@ body {
     display: flex; gap: 40px;
 }
 
-/* ================== 좌측 아바타 영역 ================== */
+/* ================== 좌측 아바타 영역 (B2B 스피너 뷰) ================== */
 .cv3-loader-left {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -2133,29 +2133,56 @@ body {
 }
 
 .cv3-loader-avatar-wrapper {
-    position: relative; width: 260px; height: 260px;
+    position: relative; width: 220px; height: 220px;
+    display: flex; align-items: center; justify-content: center;
 }
 
-.cv3-loader-avatar {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    border-radius: 50%; object-fit: cover;
-    border: 2px solid rgba(110, 231, 183, 0.4);
-    box-shadow: 0 0 40px rgba(110, 231, 183, 0.1) inset;
-    animation: pulseAvatar 3s ease-in-out infinite alternate;
+/* 3D 노드 스피너 (아바타 대체) */
+.cv3-data-core-spinner {
+    position: relative; width: 100%; height: 100%;
 }
-
-.cv3-avatar-pulse-ring {
-    position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+.cv3-core-ring {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(110,231,183,0.15) 0%, transparent 60%);
-    animation: expandRing 2.5s infinite;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5) inset;
+}
+.cv3-core-ring.r1 {
+    border-top-color: #60a5fa; border-left-color: #60a5fa;
+    animation: rotateRing 3s linear infinite;
+}
+.cv3-core-ring.r2 {
+    border-right-color: #a777e3; border-bottom-color: #a777e3;
+    inset: 15px;
+    animation: rotateRing 4s linear infinite reverse;
+}
+.cv3-core-ring.r3 {
+    border-top-color: #f1f5f9; border-right-color: #f1f5f9;
+    border-width: 2px; border-style: dashed;
+    inset: 35px;
+    animation: rotateRing 8s linear infinite;
+}
+.cv3-core-center {
+    position: absolute; inset: 50px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #3b82f6, #1e1b4b);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    animation: pulseCore 2s ease-in-out infinite alternate;
+}
+
+@keyframes rotateRing {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+@keyframes pulseCore {
+    0% { transform: scale(1); filter: brightness(1); }
+    100% { transform: scale(1.05); filter: brightness(1.3); }
 }
 
 .cv3-loader-logo-glow {
-    margin-top: 32px; font-size: 20px; font-weight: 900;
-    letter-spacing: 0.1em; color: #a7f3d0;
-    text-shadow: 0 0 10px rgba(110,231,183,0.5);
-    animation: pulseLogo 2s infinite alternate;
+    margin-top: 32px; font-size: 16px; font-weight: 800;
+    letter-spacing: 0.2em; color: #cbd5e1;
+    /* 네온 발광 효과 제거, 그림자만 남김 */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
 }
 
 /* 데이터 입자 흐름 (가상의 선포인트들) */
@@ -2173,18 +2200,7 @@ body {
     0% { transform: translateX(0) scale(1); opacity: 1; }
     100% { transform: translateX(150px) scale(0); opacity: 0; }
 }
-@keyframes pulseAvatar {
-    0% { filter: brightness(1) drop-shadow(0 0 10px rgba(110,231,183,0.2)); }
-    100% { filter: brightness(1.2) drop-shadow(0 0 30px rgba(110,231,183,0.5)); }
-}
-@keyframes expandRing {
-    0% { transform: scale(0.8); opacity: 0.8; }
-    100% { transform: scale(1.3); opacity: 0; }
-}
-@keyframes pulseLogo {
-    0% { opacity: 0.7; }
-    100% { opacity: 1; text-shadow: 0 0 20px rgba(110,231,183,1); }
-}
+/* 불필요한 아바타 네온 애니메이션 삭제 */
 
 /* ================== 우측 스켈레톤 & 프로그레스 영역 ================== */
 .cv3-loader-right {
@@ -2196,16 +2212,17 @@ body {
     position: relative; overflow: hidden;
 }
 
-/* 스켈레톤 기본 요소 */
-.cv3-skel-box { background: rgba(255,255,255,0.05); border-radius: 8px; }
+/* 스켈레톤 기본 요소 (명도 살짝 상승) */
+.cv3-skel-box { background: rgba(255,255,255,0.08); border-radius: 8px; }
 .shimmer {
     position: relative; overflow: hidden;
-    background: rgba(255, 255, 255, 0.03); 
+    background: rgba(255, 255, 255, 0.08); 
 }
 .shimmer::after {
     content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-    animation: shimmerWave 2s infinite;
+    /* 쉬머 애니메이션 밝기 대폭 상향 */
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    animation: shimmerWave 1.5s infinite;
 }
 
 @keyframes shimmerWave {
@@ -2219,9 +2236,9 @@ body {
 
 /* 스켈레톤 차트 */
 .cv3-skel-charts { display: flex; gap: 40px; margin-bottom: 40px; }
-.cv3-skel-pie { width: 140px; height: 140px; border-radius: 50%; border: 16px solid rgba(255,255,255,0.03); }
+.cv3-skel-pie { width: 140px; height: 140px; border-radius: 50%; border: 16px solid rgba(255,255,255,0.08); }
 .cv3-skel-bars { flex: 1; display: flex; align-items: flex-end; gap: 16px; height: 140px; }
-.cv3-skel-bar { flex: 1; border-radius: 4px 4px 0 0; background: rgba(255,255,255,0.03); }
+.cv3-skel-bar { flex: 1; border-radius: 4px 4px 0 0; background: rgba(255,255,255,0.08); }
 .cv3-skel-bar.b1 { height: 60%; }
 .cv3-skel-bar.b2 { height: 100%; }
 .cv3-skel-bar.b3 { height: 40%; }
@@ -2229,17 +2246,17 @@ body {
 
 /* 스켈레톤 리스트 */
 .cv3-skel-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
-.cv3-skel-item { width: 100%; height: 16px; border-radius: 4px; background: rgba(255,255,255,0.03); }
+.cv3-skel-item { width: 100%; height: 16px; border-radius: 4px; background: rgba(255,255,255,0.08); }
 
 /* 프로그레스 영역 (하단 고정) */
 .cv3-loading-status-area {
     margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;
 }
 .cv3-progress-info {
-    display: flex; justify-content: space-between; align-items: flex-end;
+    display: flex; justify-content: space-between; align-items: baseline; /* 텍스트 정렬 이슈 수정 */
     margin-bottom: 12px; font-size: 14px; color: #94a3b8; font-weight: 500;
 }
-.cv3-percent { font-size: 24px; font-weight: 800; color: #60a5fa; } /* 스페이스 블루 발광 */
+.cv3-percent { font-size: 24px; font-weight: 800; color: #60a5fa; line-height: 1; }
 
 .cv3-progress-track {
     width: 100%; height: 8px; border-radius: 4px;

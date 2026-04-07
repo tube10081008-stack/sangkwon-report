@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const LOADING_MESSAGES = [
-    '국토부 실거래가 데이터 수집 및 정제 완료 (14,203건), 패턴 분석 가동...',
-    '동네 업종 분포를 한눈에 볼 수 있게 정리 중... (AI 상권 평가 모델 가동 중)',
+    '국토부 실거래가 데이터 수집 및 정제 가동...',
+    '동네 상권 업종 분포 및 밀집도 분석 중...',
     '수집된 데이터 기반으로 Shannon 다각화 지수 연산 중...',
     '대형 프랜차이즈 위협도 및 생존 리스크 팩터 검증 중...',
-    'AI 코라가 최종 분석 결과 연산 및 보고서 구조화 중... (90% 완료)',
-    '마지막 검증 완료. 리포트를 생성합니다!'
+    'AI 엔진이 상권 가치 종합 지표를 모델링 중...'
 ];
 
 export default function Landing() {
@@ -47,8 +46,9 @@ export default function Landing() {
             const result = await res.json();
             if (!result.success) throw new Error(result.error || '분석에 실패했어요. 주소를 다시 확인해주세요!');
 
-            setProgress(100);
             clearInterval(msgInterval);
+            setProgress(100);
+            setLoadingMsg('데이터 처리 및 최종 검증 완료. 리포트를 생성합니다.');
 
             setTimeout(() => {
                 navigate('/report', {
@@ -72,8 +72,13 @@ export default function Landing() {
                     {/* 좌측: AI 에이전트 애니메이션 영역 */}
                     <div className="cv3-loader-left">
                         <div className="cv3-loader-avatar-wrapper">
-                            <div className="cv3-avatar-pulse-ring"></div>
-                            <img src="/cora-profile.png" alt="Cora Profile" className="cv3-loader-avatar" />
+                            <div className="cv3-data-core-spinner">
+                                <div className="cv3-core-ring r1"></div>
+                                <div className="cv3-core-ring r2"></div>
+                                <div className="cv3-core-ring r3"></div>
+                                <div className="cv3-core-center"></div>
+                            </div>
+                            
                             {/* 데이터 파티클 흐름 효과 (CSS로 구현) */}
                             <div className="cv3-particle p1"></div>
                             <div className="cv3-particle p2"></div>
@@ -124,7 +129,7 @@ export default function Landing() {
                             </div>
                             
                             <div className="cv3-loading-msg">{loadingMsg}</div>
-                            <p className="cv3-loading-sub">잠시만 기다려 주세요, AI 에이전트 코라가 열심히 분석 중이에요! ✨</p>
+                            <p className="cv3-loading-sub">잠시만 기다려 주세요, AI 엔진이 열심히 분석 중입니다.</p>
                         </div>
                     </div>
                 </div>
