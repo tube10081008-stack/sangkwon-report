@@ -257,21 +257,21 @@ export default function HeatMap({ center, points, radius = 500, multiHeatmaps })
 
         const initialZoom = RADIUS_OPTIONS.find(r => r.value === radius)?.zoom || 15;
         const map = L.map(mapRef.current, { center: [centerLat, centerLng], zoom: initialZoom, zoomControl: true, scrollWheelZoom: true });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', maxZoom: 19
         }).addTo(map);
 
         const circle = L.circle([centerLat, centerLng], {
-            radius: radius, color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.04, weight: 2, dashArray: '8, 8'
+            radius: radius, color: '#6ee7b7', fillColor: '#6ee7b7', fillOpacity: 0.06, weight: 2, dashArray: '6, 6'
         }).addTo(map);
         circleRef.current = circle;
 
         const centerIcon = L.divIcon({
-            html: '<div style="width:14px;height:14px;border-radius:50%;background:#6366f1;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+            html: '<div style="width:14px;height:14px;border-radius:50%;background:#6ee7b7;border:2px solid #0B0F19;box-shadow:0 0 10px rgba(110,231,183,1);"></div>',
             iconSize: [14, 14], iconAnchor: [7, 7], className: ''
         });
         L.marker([centerLat, centerLng], { icon: centerIcon }).addTo(map)
-            .bindTooltip('분석 중심점', { direction: 'top', offset: [0, -10] });
+            .bindTooltip('핵심 코어 반경', { direction: 'top', offset: [0, -10] });
 
         mapInstanceRef.current = map;
 

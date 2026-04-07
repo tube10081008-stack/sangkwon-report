@@ -14,12 +14,50 @@ import RealEstatePanel from './RealEstatePanel';
 
 ChartJS.register(ArcElement, Tooltip, Legend, RadialLinearScale, PointElement, LineElement, Filler, CategoryScale, LinearScale, BarElement);
 
-const CHART_COLORS = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316'];
-const SUB_COLORS = ['#818cf8', '#60a5fa', '#22d3ee', '#34d399', '#fbbf24', '#f87171', '#f472b6', '#a78bfa', '#2dd4bf', '#fb923c', '#a3e635', '#e879f9'];
+// B2B Dark Theme Chart Colors
+const CHART_COLORS = ['#3E8ED0', '#48C774', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#264653', '#8AB4F8', '#6EE7B7', '#9CA3AF'];
+const SUB_COLORS = ['#3E8ED0', '#48C774', '#F4A261', '#E76F51', '#2A9D8F', '#E9C46A', '#264653', '#8AB4F8', '#6EE7B7', '#9CA3AF'];
+
+// 차트 전역 다크 테마 설정
+ChartJS.defaults.color = '#A0AAB5';
+ChartJS.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+
+// Custom CountUp Hook
+const useCountUp = (end, duration = 2000) => {
+    const [count, setCount] = useState(0);
+    
+    useEffect(() => {
+        let startTime = null;
+        let animationFrame;
+        
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp;
+            const progress = timestamp - startTime;
+            const percentage = Math.min(progress / duration, 1);
+            
+            const easeOut = percentage === 1 ? 1 : 1 - Math.pow(2, -10 * percentage);
+            setCount(Math.floor(end * easeOut));
+            
+            if (progress < duration) {
+                animationFrame = requestAnimationFrame(animate);
+            } else {
+                setCount(end);
+            }
+        };
+        
+        animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [end, duration]);
+    
+    return count;
+};
 
 export default function SingleReport({ data }) {
     const { location, analysis, aiComments, radius, transitInfo, demographics, seoulData, realEstateData } = data;
     const { totalStores, categorySummary, franchiseAnalysis, heatmapData, multiHeatmaps, targetAnalysis } = analysis;
+
+    // 카운트업 적용
+    const animatedTotalStores = useCountUp(totalStores);
 
     // ===== 도넛 드릴다운 상태 =====
     const [drillCategory, setDrillCategory] = useState(null);
@@ -42,7 +80,7 @@ export default function SingleReport({ data }) {
             data: currentCategories.map(c => c.count),
             backgroundColor: drillCategory ? SUB_COLORS.slice(0, currentCategories.length) : CHART_COLORS.slice(0, 8),
             borderWidth: 2,
-            borderColor: '#fff',
+            borderColor: '#0B0F19', // Dark theme background
             hoverOffset: 12,
             hoverBorderWidth: 3
         }]
@@ -51,7 +89,7 @@ export default function SingleReport({ data }) {
     const donutOptions = {
         responsive: true, maintainAspectRatio: false,
         plugins: {
-            legend: { position: 'right', labels: { padding: 12, font: { family: "'Noto Sans KR'", size: 12 }, usePointStyle: true, pointStyleWidth: 10 } },
+            legend: { position: 'right', labels: { padding: 12, font: { family: "'Noto Sans KR'", size: 12 }, usePointStyle: true, pointStyleWidth: 10, color: '#A0AAB5' } },
             tooltip: {
                 callbacks: {
                     label: (ctx) => `${ctx.label}: ${ctx.raw}개 (${((ctx.raw / currentTotal) * 100).toFixed(1)}%)`,
@@ -59,7 +97,7 @@ export default function SingleReport({ data }) {
                 }
             }
         },
-        cutout: '65%',
+        cutout: '68%',
         onClick: (event, elements) => {
             if (!drillCategory && elements.length > 0) {
                 const idx = elements[0].index;
@@ -69,23 +107,18 @@ export default function SingleReport({ data }) {
                 }
             }
         },
-        animation: { animateRotate: true, duration: 600 }
+        animation: { animateRotate: true, duration: 800 }
     };
 
     // ===== 인구·매출 통합 탭 상태 =====
     const [dataTab, setDataTab] = useState('population');
-
-    // 섹션 번호 자동 계산
-    let sectionNum = 0;
-    const nextSection = () => ++sectionNum;
 
     return (
         <>
             {/* 1. 위치 정보 및 분석 개요 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>📍 위치 정보 및 분석 개요</h2>
+                    <h2>📍 핵심 분석 대상 영역</h2>
                 </div>
                 <div className="stat-grid">
                     <div className="stat-card">
@@ -98,43 +131,42 @@ export default function SingleReport({ data }) {
                     </div>
                     <div className="stat-card">
                         <div className="stat-label">총 업소 수</div>
-                        <div className="stat-value">{totalStores.toLocaleString()}<span className="stat-unit">개</span></div>
+                        <div className="stat-value">{animatedTotalStores.toLocaleString()}<span className="stat-unit">개</span></div>
                     </div>
                     <div className="stat-card">
                         <div className="stat-label">분석 반경</div>
                         <div className="stat-value">{radius}<span className="stat-unit">m</span></div>
                     </div>
                 </div>
-                <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.7' }}>
-                    본 리포트는 <strong>{location.address}</strong>를 중심으로 반경 <strong>{radius}m</strong> 이내의 상권 정보를 종합적으로 분석한 결과입니다.
+                <p style={{ fontSize: '14px', color: '#A0AAB5', lineHeight: '1.7' }}>
+                    본 리포트는 <strong>{location.address}</strong>를 중심으로 반경 <strong>{radius}m</strong> 이내의 상권 데이터를 다각도로 인텔리전스화 한 결과입니다.
                 </p>
             </div>
 
             {/* 2. 업종별 분포 분석 (드릴다운 도넛) */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>🏪 업종별 분포 분석</h2>
+                    <h2>🏪 상권 포트폴리오 분포도</h2>
                 </div>
 
                 {/* 드릴다운 네비게이션 */}
                 {drillCategory && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 16px', background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', borderRadius: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 16px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '6px', border: '1px solid var(--report-border)' }}>
                         <button
                             onClick={() => setDrillCategory(null)}
                             style={{
-                                padding: '6px 14px', background: '#6366f1', color: 'white', border: 'none',
-                                borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+                                padding: '6px 14px', background: 'var(--report-accent-dim)', color: 'var(--report-accent-mint)', border: '1px solid rgba(110, 231, 183, 0.3)',
+                                borderRadius: '4px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
                                 display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s'
                             }}
                         >
-                            ← 전체 업종
+                            ← 전체 포트폴리오
                         </button>
-                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1e40af' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--report-text-primary)' }}>
                             📂 {drillCategory.name}
                         </span>
-                        <span style={{ fontSize: '13px', color: '#3b82f6', fontWeight: 500 }}>
-                            ({drillCategory.count.toLocaleString()}개 업소의 세부 분류)
+                        <span style={{ fontSize: '13px', color: 'var(--report-text-secondary)', fontWeight: 500 }}>
+                            ({drillCategory.count.toLocaleString()}개소 세분화)
                         </span>
                     </div>
                 )}
@@ -147,11 +179,11 @@ export default function SingleReport({ data }) {
                             position: 'absolute', top: '50%', left: drillCategory ? '38%' : '35%',
                             transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none'
                         }}>
-                            <div style={{ fontSize: '24px', fontWeight: 800, color: '#1e293b' }}>
+                            <div style={{ fontSize: '24px', fontWeight: 800, color: '#FFFFFF' }}>
                                 {currentTotal.toLocaleString()}
                             </div>
-                            <div style={{ fontSize: '11px', color: '#94a3b8', fontWeight: 500 }}>
-                                {drillCategory ? drillCategory.name : '전체 업소'}
+                            <div style={{ fontSize: '11px', color: '#A0AAB5', fontWeight: 500 }}>
+                                {drillCategory ? drillCategory.name : '전체 포트폴리오'}
                             </div>
                         </div>
                     </div>
@@ -167,7 +199,7 @@ export default function SingleReport({ data }) {
                                     }
                                 }}
                                 style={{ cursor: !drillCategory ? 'pointer' : 'default', transition: 'background 0.2s' }}
-                                onMouseEnter={(e) => { if (!drillCategory) e.currentTarget.style.background = '#f1f5f9'; }}
+                                onMouseEnter={(e) => { if (!drillCategory) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
                             >
                                 <div className={`category-rank ${i < 3 ? 'top3' : ''}`}>{i + 1}</div>
@@ -193,11 +225,10 @@ export default function SingleReport({ data }) {
             {/* 3. GIS 다중 히트맵 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>🗺️ GIS 다중 히트맵 분석</h2>
+                    <h2>🗺️ 상권 데이터 히트맵 및 토폴로지 분석</h2>
                 </div>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>
-                    탭을 전환하여 전체 밀집도, 업종별 분포, 추정 유동인구, 소비 활성화 지수 등 다양한 관점의 히트맵을 확인하세요.
+                <p style={{ fontSize: '14px', color: 'var(--report-text-secondary)', marginBottom: '12px' }}>
+                    공간 빅데이터(GIS)를 활용하여 상권의 밀집도와 소비 심도를 직관적인 맵 스캐닝으로 분석합니다.
                 </p>
                 <HeatMap center={[location.latitude, location.longitude]} points={heatmapData} radius={radius} multiHeatmaps={multiHeatmaps} />
             </div>
@@ -205,14 +236,13 @@ export default function SingleReport({ data }) {
             {/* 4. 프리미엄 부동산/입지 분석 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number" style={{ background: '#ec4899', color: 'white' }}>{nextSection()}</div>
                     <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        🏢 프리미엄 부동산 / 입지 분석
-                        <span style={{ fontSize: '10px', background: '#fef08a', color: '#854d0e', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>PRO</span>
+                        🏢 상권 스카이라인 및 인프라 구조
+                        <span style={{ fontSize: '10px', background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', border: '1px solid rgba(236, 72, 153, 0.3)' }}>PRO</span>
                     </h2>
                 </div>
-                <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '16px' }}>
-                    브이월드(Vworld) 국가공간정보를 활용하여 타겟 상권의 입체적 스카이라인과 토지 용도(상업/주거 등)를 심층 분석합니다.
+                <p style={{ fontSize: '14px', color: 'var(--report-text-secondary)', marginBottom: '16px' }}>
+                    브이월드(Vworld) 3D 공간정보를 기반으로 타겟 구역의 입체적 스카이라인과 용도 지구를 정밀 진단합니다.
                 </p>
 
                 <div className="vworld-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -289,8 +319,7 @@ export default function SingleReport({ data }) {
             {/* 5. 프랜차이즈 분석 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>🏢 프랜차이즈 현황 분석</h2>
+                    <h2>🏢 브랜드 / 독립 시장 침투율 분석</h2>
                 </div>
                 <div className="stat-grid" style={{ marginBottom: '20px' }}>
                     <div className="stat-card">
@@ -334,8 +363,7 @@ export default function SingleReport({ data }) {
             {targetAnalysis && (
                 <div className="report-section">
                     <div className="section-header">
-                        <div className="section-number">{nextSection()}</div>
-                        <h2>🎯 {targetAnalysis.targetCategory} 업종 분석</h2>
+                        <h2>🎯 {targetAnalysis.targetCategory} 경쟁 강도 지표</h2>
                     </div>
                     <div className={`verdict ${targetAnalysis.saturationLevel.level === '미진입' || targetAnalysis.saturationLevel.level === '적정' ? 'recommend' : targetAnalysis.saturationLevel.level === '경쟁' ? 'conditional' : 'caution'}`}>
                         <div className="verdict-icon">{targetAnalysis.saturationLevel.level === '미진입' ? '🟢' : targetAnalysis.saturationLevel.level === '적정' ? '🟢' : targetAnalysis.saturationLevel.level === '경쟁' ? '🟡' : '🔴'}</div>
@@ -366,8 +394,7 @@ export default function SingleReport({ data }) {
             {/* 7. SWOT 분석 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>💡 상권 특성 및 인사이트</h2>
+                    <h2>💡 상권 다면 SWOT 지표</h2>
                 </div>
                 <div className="insight-grid">
                     <div className="insight-card strength">
@@ -393,11 +420,10 @@ export default function SingleReport({ data }) {
             {aiComments.realEstateTrend && (
                 <div className="report-section">
                     <div className="section-header">
-                        <div className="section-number" style={{ background: '#3b82f6', color: 'white' }}>{sectionNum}-1</div>
-                        <h2>🏢 최신 부동산 실거래 6개월 동향</h2>
+                        <h2>🏢 최신 실거래가 동향 인프라</h2>
                     </div>
-                    <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '16px', fontSize: '14px', lineHeight: '1.8', whiteSpace: 'pre-line', color: '#1e3a8a' }}
-                         dangerouslySetInnerHTML={{ __html: aiComments.realEstateTrend.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #1d4ed8;">$1</strong>') }} />
+                    <div style={{ background: 'var(--report-panel)', border: '1px solid var(--report-border)', borderRadius: '8px', padding: '16px', fontSize: '14px', lineHeight: '1.8', whiteSpace: 'pre-line', color: 'var(--report-text-primary)' }}
+                         dangerouslySetInnerHTML={{ __html: aiComments.realEstateTrend.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--report-accent-mint);">$1</strong>') }} />
 
                     <RealEstatePanel data={realEstateData} />
 
@@ -412,8 +438,7 @@ export default function SingleReport({ data }) {
             {/* 8. 종합 결론 및 제언 */}
             <div className="report-section">
                 <div className="section-header">
-                    <div className="section-number">{nextSection()}</div>
-                    <h2>📋 종합 결론 및 전문가 제언</h2>
+                    <h2>📋 종합 결론 및 전략적 제언</h2>
                 </div>
                 <div className="recommendation-box">
                     <h4>📌 전문가 추천 사항</h4>
@@ -423,8 +448,8 @@ export default function SingleReport({ data }) {
                         ))}
                     </ul>
                 </div>
-                <p style={{ marginTop: '20px', fontSize: '14px', color: '#64748b', lineHeight: '1.8', padding: '16px', background: '#f8fafc', borderRadius: '8px' }}
-                    dangerouslySetInnerHTML={{ __html: aiComments.overview.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                <p style={{ marginTop: '20px', fontSize: '14px', color: 'var(--report-text-primary)', lineHeight: '1.8', padding: '16px', background: 'var(--report-panel)', borderRadius: '8px', border: '1px solid var(--report-border)' }}
+                    dangerouslySetInnerHTML={{ __html: aiComments.overview.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--report-accent-mint);">$1</strong>') }} />
             </div>
         </>
     );
