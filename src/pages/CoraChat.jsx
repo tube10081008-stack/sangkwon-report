@@ -4,10 +4,17 @@ import ChatInput from '../components/chat/ChatInput';
 
 const API_BASE = import.meta.env.PROD ? '' : 'http://localhost:3001';
 
+const FALLBACK_SUGGESTIONS = [
+    { text: "강남역 근처 상권 분석해줘", icon: "📊" },
+    { text: "홍대랑 이태원 비교해줘", icon: "⚖️" },
+    { text: "성수동에서 카페 창업 전략 알려줘", icon: "🎯" },
+    { text: "요즘 뜨는 상권 어디야?", icon: "🔥" }
+];
+
 export default function CoraChat() {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [suggestions, setSuggestions] = useState([]);
+    const [suggestions, setSuggestions] = useState(FALLBACK_SUGGESTIONS);
     const [sessionId] = useState(() => 'cora_' + Date.now());
     const [showWelcome, setShowWelcome] = useState(true);
     const messagesEndRef = useRef(null);
@@ -15,8 +22,8 @@ export default function CoraChat() {
     useEffect(() => {
         fetch(`${API_BASE}/api/cora/suggestions`)
             .then(r => r.json())
-            .then(d => { if (d.success) setSuggestions(d.suggestions); })
-            .catch(() => {});
+            .then(d => { if (d.success && d.suggestions?.length) setSuggestions(d.suggestions); })
+            .catch(() => { /* 폴백 유지 */ });
     }, []);
 
     useEffect(() => {
