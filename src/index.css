@@ -1576,3 +1576,236 @@ body {
     font-weight: 600;
     cursor: pointer;
 }
+
+/* ═══════════════════════════════════════════════ */
+/* 🤖 코라 채팅 UI                                */
+/* ═══════════════════════════════════════════════ */
+
+.cora-chat-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #0a0a1a;
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+}
+
+/* 헤더 */
+.cora-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+    z-index: 10;
+}
+.cora-header-left { display: flex; align-items: center; gap: 12px; }
+.cora-header-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(99,102,241,0.5); object-fit: cover; }
+.cora-header-title { font-size: 16px; font-weight: 700; color: white; margin: 0; line-height: 1.2; }
+.cora-header-subtitle { font-size: 11px; color: var(--primary-300); font-weight: 500; }
+.cora-header-actions { display: flex; align-items: center; gap: 10px; }
+.cora-header-link {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; text-decoration: none;
+    color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+}
+.cora-header-link:hover { color: white; background: rgba(255,255,255,0.12); }
+.cora-reset-btn {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    font-family: var(--font-sans); transition: all 0.2s;
+}
+.cora-reset-btn:hover { color: white; background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.3); }
+
+/* 메시지 영역 */
+.cora-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99,102,241,0.3) transparent;
+}
+.cora-messages::-webkit-scrollbar { width: 6px; }
+.cora-messages::-webkit-scrollbar-track { background: transparent; }
+.cora-messages::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+
+/* 웰컴 화면 */
+.cora-welcome {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex: 1; padding: 40px 20px; text-align: center; animation: fadeUp 0.8s ease;
+}
+.cora-welcome-avatar-wrap { position: relative; margin-bottom: 24px; }
+.cora-welcome-avatar {
+    width: 100px; height: 100px; border-radius: 50%; object-fit: cover;
+    border: 3px solid rgba(99,102,241,0.4);
+    box-shadow: 0 0 40px rgba(99,102,241,0.3);
+}
+.cora-welcome-pulse {
+    position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(99,102,241,0.3);
+    animation: welcomePulse 2s ease-in-out infinite;
+}
+@keyframes welcomePulse {
+    0%,100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0; }
+}
+.cora-welcome-title {
+    font-size: clamp(22px, 4vw, 30px); font-weight: 800; color: white; margin-bottom: 12px;
+}
+.cora-name-highlight {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.cora-welcome-desc { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 36px; }
+
+/* 추천 질문 칩 */
+.cora-suggestions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 520px; }
+.cora-suggestion-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px; border-radius: 16px; font-size: 14px; font-weight: 600;
+    font-family: var(--font-sans); cursor: pointer;
+    background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25);
+    color: rgba(255,255,255,0.85); transition: all 0.3s;
+    animation: chipIn 0.5s ease both;
+}
+@keyframes chipIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.cora-suggestion-chip:hover {
+    background: rgba(99,102,241,0.25); border-color: rgba(99,102,241,0.5);
+    transform: translateY(-2px); box-shadow: 0 4px 16px rgba(99,102,241,0.2);
+}
+.cora-chip-icon { font-size: 18px; }
+
+/* 채팅 버블 공통 */
+.chat-bubble-row { display: flex; gap: 10px; max-width: 85%; animation: fadeUp 0.4s ease; }
+.chat-bubble-row.user-row { align-self: flex-end; }
+.chat-bubble-row.cora-row { align-self: flex-start; }
+.chat-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-top: 4px; }
+.chat-bubble-wrap { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.chat-bubble {
+    padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.7; word-break: break-word;
+}
+.cora-bubble {
+    background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.15);
+    border-bottom-left-radius: 4px; color: #e2e8f0;
+}
+.user-bubble {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    border-bottom-right-radius: 4px; color: white;
+}
+.cora-bold { color: #a5b4fc; font-weight: 700; }
+.typing-cursor { animation: blink 0.8s infinite; color: var(--primary-400); font-weight: 300; }
+@keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+
+/* 생각 중 애니메이션 */
+.thinking-bubble { display: flex; align-items: center; gap: 10px; padding: 12px 18px; }
+.thinking-dots { display: flex; gap: 4px; }
+.thinking-dots span {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--primary-400);
+    animation: dotBounce 1.4s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+    0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+.thinking-text { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+/* 인라인 차트 카드 */
+.inline-chart-card {
+    background: rgba(15,15,40,0.7); border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 14px; padding: 18px; animation: fadeUp 0.5s ease;
+}
+.inline-chart-header { font-size: 13px; font-weight: 700; color: var(--primary-300); margin-bottom: 14px; }
+.radar-grid { display: flex; flex-direction: column; gap: 8px; }
+.radar-bar-item { display: flex; align-items: center; gap: 10px; }
+.radar-bar-label { width: 75px; font-size: 11px; color: rgba(255,255,255,0.6); text-align: right; flex-shrink: 0; }
+.radar-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.radar-bar-fill {
+    height: 100%; border-radius: 4px;
+    background: linear-gradient(90deg, #6366f1, #a5b4fc);
+    animation: barGrow 0.8s ease both;
+}
+@keyframes barGrow { from { width: 0 !important; } }
+.radar-bar-value { width: 28px; font-size: 12px; font-weight: 700; color: var(--primary-300); }
+
+/* 비교 차트 */
+.compare-legend { display: flex; gap: 16px; margin-bottom: 10px; }
+.compare-label-1, .compare-label-2 { font-size: 11px; color: rgba(255,255,255,0.6); }
+.compare-bar-item { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.compare-bar-pair { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.bar-fill-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa) !important; }
+.bar-fill-2 { background: linear-gradient(90deg, #8b5cf6, #a78bfa) !important; }
+
+/* 입력 영역 */
+.cora-input-area {
+    padding: 12px 20px 16px; background: rgba(15,15,35,0.95);
+    backdrop-filter: blur(20px); border-top: 1px solid rgba(99,102,241,0.1);
+}
+.cora-input-suggestions { display: flex; gap: 6px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px; }
+.cora-mini-chip {
+    white-space: nowrap; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;
+    font-family: var(--font-sans); cursor: pointer;
+    background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
+    color: rgba(255,255,255,0.5); transition: all 0.2s;
+}
+.cora-mini-chip:hover { background: rgba(99,102,241,0.2); color: white; }
+.cora-input-row { display: flex; gap: 10px; align-items: flex-end; }
+.cora-textarea {
+    flex: 1; padding: 12px 16px; border-radius: 16px; font-size: 14px;
+    font-family: var(--font-sans); resize: none; outline: none;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: white; line-height: 1.5; max-height: 120px;
+    transition: border-color 0.2s;
+}
+.cora-textarea::placeholder { color: rgba(255,255,255,0.25); }
+.cora-textarea:focus { border-color: rgba(99,102,241,0.4); }
+.cora-textarea:disabled { opacity: 0.5; }
+.cora-send-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(99,102,241,0.2); color: rgba(255,255,255,0.3);
+    transition: all 0.3s; flex-shrink: 0;
+}
+.cora-send-btn.active { background: var(--primary-600); color: white; box-shadow: 0 0 20px rgba(99,102,241,0.4); }
+.cora-send-btn:disabled { cursor: not-allowed; }
+.cora-send-spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.15);
+    border-top-color: var(--primary-400); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+.cora-disclaimer {
+    text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 8px;
+}
+
+/* 랜딩 페이지: 코라 CTA */
+.cora-landing-cta {
+    display: flex; align-items: center; gap: 14px; justify-content: center;
+    margin-top: 20px; padding: 14px 28px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25));
+    border: 1px solid rgba(99,102,241,0.3); cursor: pointer;
+    transition: all 0.3s; text-decoration: none; max-width: 420px; margin-left: auto; margin-right: auto;
+}
+.cora-landing-cta:hover {
+    background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.4));
+    transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.3);
+}
+.cora-landing-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(99,102,241,0.5); }
+.cora-landing-text { text-align: left; }
+.cora-landing-name { font-size: 15px; font-weight: 700; color: white; }
+.cora-landing-desc { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+/* 모바일 반응형 */
+@media (max-width: 640px) {
+    .cora-messages { padding: 16px 12px; }
+    .chat-bubble-row { max-width: 92%; }
+    .cora-welcome-avatar { width: 80px; height: 80px; }
+    .cora-suggestions { flex-direction: column; align-items: stretch; }
+    .cora-suggestion-chip { justify-content: center; }
+    .cora-header-link { display: none; }
+    .radar-bar-label { width: 55px; font-size: 10px; }
+}

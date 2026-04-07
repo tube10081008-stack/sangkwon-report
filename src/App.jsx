@@ -5,12 +5,14 @@ import Landing from './pages/Landing';
 import ReportPage from './pages/ReportPage';
 import SharedReportPage from './pages/SharedReportPage';
 import AgentDashboard from './pages/AgentDashboard';
+import CoraChat from './pages/CoraChat';
 
 function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<AccessDenied />} />
+                <Route path="/" element={<CoraChat />} />
+                <Route path="/chat" element={<CoraChat />} />
                 <Route path="/start-analysis" element={<Landing />} />
                 <Route path="/report" element={<ReportPage />} />
                 <Route path="/shared/:id" element={<SharedReportPage />} />

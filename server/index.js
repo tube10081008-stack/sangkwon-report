@@ -12,6 +12,7 @@ dotenv.config({ path: join(__dirname, '..', '.env') });
 
 import apiRoutes from './routes/api.js';
 import agentRoutes from './routes/agentApi.js';
+import coraRoutes from './routes/coraRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +22,7 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use('/api', apiRoutes);
 app.use('/api/agent', agentRoutes);
+app.use('/api/cora', coraRoutes);
 
 // 프로덕션: Vite 빌드 결과물 서빙 + SPA 라우팅 폴백
 const distPath = join(__dirname, '..', 'dist');
