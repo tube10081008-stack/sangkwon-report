@@ -163,14 +163,14 @@ function identifyThreats(indicators, categories, total) {
 function generateRecommendations(grade, indicators, categories, targetAnalysis) {
     const recs = [];
 
-    recs.push('📌 상권의 활성도와 경쟁 환경을 종합적으로 고려하여 신중하게 접근하시기 바랍니다.');
+    recs.push('■ 상권의 활성도와 경쟁 환경을 종합적으로 고려하여 신중하게 접근하시기 바랍니다.');
 
     if (targetAnalysis) {
         const sat = targetAnalysis.saturationLevel;
-        recs.push(`📌 ${targetAnalysis.targetCategory} 업종: ${sat.level} 상태 - ${sat.advice}`);
+        recs.push(`■ ${targetAnalysis.targetCategory} 업종: ${sat.level} 상태 - ${sat.advice}`);
     }
 
-    recs.push('💡 최종 결정 전 반드시 해당 상권의 임대료, 권리금, 유동인구(주중/주말)를 현장 확인하시기 바랍니다.');
+    recs.push('■ 최종 결정 전 반드시 해당 상권의 임대료, 권리금, 유동인구(주중/주말)를 현장 확인하시기 바랍니다.');
 
     return recs;
 }
@@ -360,7 +360,7 @@ function generateOpeningChecklist(targetCategory, location) {
 function generateFinalAdvice(grade, score, targetCategory, location) {
     return `${location.address} 상권에서 ${targetCategory} 창업을 고려 중이시라면, ` +
         `반드시 현장 답사와 주변 상인 인터뷰를 진행하시기 바랍니다. ` +
-        `임대료, 권리금, 유동인구(주중/주말) 등을 직접 확인하신 후 최종 결정하시는 것을 권장합니다. 화이팅! 💪`;
+        `임대료, 권리금, 유동인구(주중/주말) 등을 직접 확인하신 후 최종 결정하시는 것을 권장합니다.`;
 }
 
 function generateRealEstateTrend(data) {
@@ -368,13 +368,13 @@ function generateRealEstateTrend(data) {
     
     const { summary, topTransactions } = data;
 
-    let text = '📈 [최근 6개월간 주변 상권 및 거주지 단기 실거래 요약]\n';
+    let text = '[최근 6개월간 주변 상권 및 거주지 단기 실거래 요약]\n';
     text += '- 상업/업무용 빌딩/상가 매매: **' + summary.commTotal6Months + '건** 거래\n';
     text += '- 오피스텔 매매: **' + summary.offiTotal6Months + '건** 거래\n';
     text += '- 아파트 매매: **' + summary.aptTotal6Months + '건** 거래\n';
     text += '- 아파트 전월세: **' + summary.aptRentTotal6Months + '건** 거래\n\n';
     
-    text += '\n💡 각 부동산 분야별 구체적인 실거래가(최고가/단가 등) 및 입지 분석은 하단의 AI 채팅 봇에게 자유롭게 질문해 보세요!';
+    text += '\n각 부동산 분야별 구체적인 실거래가(최고가/단가 등) 및 입지 분석은 하단의 AI 채팅 기능을 통해 질문하실 수 있습니다.';
 
     return text;
 }
