@@ -1950,9 +1950,11 @@ body {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     z-index: 0; pointer-events: none;
     background-image: 
-        linear-gradient(rgba(110, 231, 183, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(110, 231, 183, 0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
+        radial-gradient(circle at 15% 20%, rgba(110, 231, 183, 0.08) 0%, transparent 20%),
+        radial-gradient(circle at 85% 70%, rgba(110, 231, 183, 0.05) 0%, transparent 30%),
+        linear-gradient(rgba(110, 231, 183, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(110, 231, 183, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-position: center center;
 }
 /* 토폴로지 그라데이션 오버레이 (가운데는 선명하고 가장자리는 어둡게) */
@@ -2006,23 +2008,25 @@ body {
 }
 
 /* 헤더 카피 (Toss 스타일: 볼드, 타이트) */
-.cv3-header { margin-bottom: 48px; animation: fadeUp 0.8s ease 0.1s both; }
+.cv3-header { margin-bottom: 56px; animation: fadeUp 0.8s ease 0.1s both; }
 .cv3-subtitle {
     font-size: 20px; font-weight: 700; 
     color: #6ee7b7;
-    margin-bottom: 12px; letter-spacing: -0.02em;
+    margin-bottom: 20px; letter-spacing: -0.01em;
 }
 .cv3-title {
-    font-size: clamp(36px, 6vw, 76px); font-weight: 900;
-    color: #ffffff; line-height: 1.15;
+    font-size: clamp(36px, 6vw, 76px); 
+    color: #ffffff; line-height: 1.1; /* 완전 타이트한 행간 */
 }
 .cv3-title-line1 {
     display: inline-block;
-    letter-spacing: 0.18em;
-    margin-right: -0.18em;
+    font-weight: 500;
+    letter-spacing: -0.04em; /* 타이트한 자간 */
 }
 .cv3-title-line2 {
-    display: inline-block; letter-spacing: -0.04em;
+    display: inline-block; 
+    font-weight: 900;
+    letter-spacing: -0.05em; /* 굵을수록 더 좁게 */
 }
 
 /* 폼 영역 */
@@ -2037,9 +2041,11 @@ body {
 .cv3-input-field {
     width: 100%; padding: 26px 32px;
     font-size: 20px; text-align: center;
-    background: #0f172a; color: #ffffff; font-weight: 600;
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; outline: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    background: #111827; /* 명도를 살짝 높여 시인성 확보 */
+    color: #ffffff; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.15); /* 명확한 경계 (1px 화이트 투명선) */
+    border-radius: 16px; outline: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
     transition: all 0.2s;
 }
 .cv3-input-field::placeholder { color: #475569; font-weight: 500; }
@@ -2079,7 +2085,7 @@ body {
     transition: transform 0.2s;
 }
 .cv3-dash-card:hover { transform: translateY(-4px); background: rgba(15, 23, 42, 0.8); border-color: rgba(110,231,183,0.2); }
-.cv3-card-icon { font-size: 26px; }
+.cv3-card-icon { font-size: 24px; color: #6ee7b7; display: flex; align-items: center; justify-content: flex-start; }
 .cv3-card-content { display: flex; flex-direction: column; gap: 8px; }
 .cv3-card-title { font-size: 14px; font-weight: 700; color: #94a3b8; }
 .cv3-card-value { font-size: 16px; font-weight: 800; line-height: 1.4; word-break: keep-all; }

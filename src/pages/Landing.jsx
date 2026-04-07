@@ -144,7 +144,11 @@ export default function Landing() {
                 {/* 하단 대시보드 확장 영역 */}
                 <section className="cv3-dashboard-grid">
                     <div className="cv3-dash-card">
-                        <div className="cv3-card-icon">⚡</div>
+                        <div className="cv3-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                            </svg>
+                        </div>
                         <div className="cv3-card-content">
                             <h3 className="cv3-card-title">AI 리스크 & 트렌드 분석</h3>
                             <p className="cv3-card-value negative">🔴 F&B 폐업 리스크 상승 지역 감지</p>
@@ -153,7 +157,12 @@ export default function Landing() {
                     </div>
                     
                     <div className="cv3-dash-card">
-                        <div className="cv3-card-icon">🏆</div>
+                        <div className="cv3-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="8" r="7" />
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+                            </svg>
+                        </div>
                         <div className="cv3-card-content">
                             <h3 className="cv3-card-title">투자가치 우수 지표</h3>
                             <p className="cv3-card-value highlight">⭐ 1평당 추정 매출액 TOP 5</p>
@@ -162,7 +171,12 @@ export default function Landing() {
                     </div>
 
                     <div className="cv3-dash-card">
-                        <div className="cv3-card-icon">📈</div>
+                        <div className="cv3-card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                <polyline points="17 6 23 6 23 12" />
+                            </svg>
+                        </div>
                         <div className="cv3-card-content">
                             <h3 className="cv3-card-title">자본 유입 트렌드</h3>
                             <p className="cv3-card-value positive">🟢 기관 투자자 / 법인 매입 비율 증가</p>
