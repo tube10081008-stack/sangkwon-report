@@ -4,14 +4,59 @@
  * (Gemini API 키가 있으면 AI 분석 활성화 가능)
  */
 
+import { askGemini } from './geminiService.js';
+
 /**
- * 단일 상권 분석 AI 코멘트 생성
+ * 단일 상권 분석 AI 코멘트 생성 (Gemini 기반 동적 생성, 실패 시 규칙 기반 폴백)
  */
-export function generateSingleAnalysisComment(analysis, location, realEstateData) {
+export async function generateSingleAnalysisComment(analysis, location, realEstateData) {
     const { grade, overallScore, totalStores, categorySummary, franchiseAnalysis, indicators, targetAnalysis } = analysis;
 
     const topCategories = categorySummary.slice(0, 3);
     const topCatNames = topCategories.map(c => c.name).join(', ');
+
+    // 1. Gemini 기반 동적 코멘트 생성 시도
+    try {
+        const prompt = `당신은 대한민국 최고의 부동산 상권 분석 전문가입니다. 주어진 데이터를 바탕으로 신뢰성 있고 통찰력 있는 상권 분석 코멘트를 작성해주세요.
+
+[분석 대상 지역]: ${location.address}
+[종합 점수 및 등급]: ${overallScore}점 (${grade.grade}등급)
+[총 업소 수]: ${totalStores}개
+[프랜차이즈 비율]: ${franchiseAnalysis.franchiseRatio}%
+[주요 업종 탑 3]: ${topCatNames}
+[상권 활성도 점수]: ${indicators.densityScore?.value || 0}점
+[경쟁 강도 점수]: ${indicators.competitionIntensity?.value || 0}점
+
+위 데이터를 바탕으로 객관적이고 전문적인 시각에서 다음 항목을 분석하여 반드시 JSON 형식으로만 응답하세요:
+{
+    "overview": "상권 전체에 대한 2~3문장 브리핑",
+    "strengths": ["상시 유지되는 핵심 강점 1", "핵심 강점 2"],
+    "weaknesses": ["우려되는 취약점 1", "취약점 2"],
+    "opportunities": ["시장 진입 시 노려볼 만한 기회 요인 1", "기회 요인 2"],
+    "threats": ["주의해야 할 거시적 위험 요인 1"],
+    "recommendations": ["구체적이고 실전적인 추천 전략 1", "추천 전략 2"],
+    "conclusion": "최종 투자 판단 및 결론 한 문장 요약"
+}`;
+
+        const response = await askGemini(prompt, null, '상권 데이터 분석 전문가. 어조는 전문적이고 객관적. 마크다운 코드블록 제거 후 순수 JSON 객체(오브젝트)만 반환.');
+        
+        // JSON 파싱 (코드블록 포매팅 등 제거 후 파싱)
+        let cleaned = response.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+
+        if (parsed && parsed.overview && parsed.strengths && parsed.recommendations) {
+            parsed.realEstateTrend = realEstateData ? generateRealEstateTrend(realEstateData) : '부동산 실거래가 데이터를 수집할 수 없습니다.';
+            if (targetAnalysis) {
+                parsed.targetInsight = generateTargetInsight(targetAnalysis, location);
+            }
+            console.log(`[AI Consultant] Gemini 코멘트 생성 성공: ${location.address}`);
+            return parsed;
+        }
+    } catch (e) {
+        console.warn('[AI Consultant] Gemini 코멘트 생성 실패, 기존 규칙 기반 폴백 적용:', e.message);
+    }
+
+    // 2. Gemini 실패 시 기존 규칙 기반(폴백) 코멘트 반환
 
     const comments = {
         overview: generateOverview(location, grade, overallScore, totalStores, topCatNames),

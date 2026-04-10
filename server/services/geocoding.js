@@ -109,7 +109,34 @@ async function keywordSearch(query) {
     const data = await response.json();
 
     if (!data.documents || data.documents.length === 0) {
-        throw new Error('해당 주소를 찾을 수 없습니다. 정확한 도로명 또는 지번 주소를 입력해주세요.');
+        // 주소 검색 및 키워드 검색 실패 시 "구 + 동" 축약어로 재시도
+        const tokens = query.split(/\s+/);
+        const guDongPattern = tokens.filter(t => t.endsWith('구') || t.endsWith('동') || t.endsWith('시') || t.endsWith('읍') || t.endsWith('면'));
+        
+        if (guDongPattern.length >= 1 && query !== guDongPattern.join(' ')) {
+            const fallbackQuery = guDongPattern.join(' ');
+            console.warn(`[Geocoding] 키워드 검색 실패, 구/동/읍/면 축약어 재시도: "${fallbackQuery}"`);
+            
+            const fallbackUrl = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(fallbackQuery)}`;
+            const fallbackRes = await fetch(fallbackUrl, {
+                headers: { 'Authorization': `KakaoAK ${KAKAO_API_KEY}` }
+            });
+            const fallbackData = await fallbackRes.json();
+            
+            if (fallbackData.documents && fallbackData.documents.length > 0) {
+                const doc = fallbackData.documents[0];
+                return {
+                    address: doc.address_name || fallbackQuery,
+                    roadAddress: doc.road_address_name || null,
+                    latitude: parseFloat(doc.y),
+                    longitude: parseFloat(doc.x),
+                    region1: '', region2: '', region3: '',
+                    placeName: doc.place_name || ''
+                };
+            }
+        }
+        
+        throw new Error(`해당 주소(${query})를 찾을 수 없습니다. 정확한 행정구역명, 도로명 또는 지번 주소를 입력해주세요.`);
     }
 
     const doc = data.documents[0];

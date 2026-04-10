@@ -110,7 +110,7 @@ router.post('/analyze/single', async (req, res) => {
         }
 
         // AI 컨설팅 코멘트에 실거래가 데이터 적용
-        const aiComments = generateSingleAnalysisComment(analysis, location, realEstateData);
+        const aiComments = await generateSingleAnalysisComment(analysis, location, realEstateData);
 
         res.json({
             success: true,
@@ -211,7 +211,7 @@ router.post('/analyze/strategy', async (req, res) => {
         const analysis = analyzeDistrict(stores, targetCategory);
 
         // 4. AI 컨설팅 코멘트
-        const aiComments = generateSingleAnalysisComment(analysis, location);
+        const aiComments = await generateSingleAnalysisComment(analysis, location);
 
         // 5. 필승전략 가이드
         const strategy = generateStrategyGuide(analysis, location, targetCategory);

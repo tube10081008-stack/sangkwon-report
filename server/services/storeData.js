@@ -498,9 +498,17 @@ export function analyzeFranchises(stores) {
 
     stores.forEach(store => {
         const normalizedStoreName = normalizeName(store.name);
-        const matched = normalizedFranchises.find(f =>
-            normalizedStoreName.includes(f.normalized)
-        );
+        const matched = normalizedFranchises.find(f => {
+            if (f.original.length <= 3) {
+                // 3글자 이하는 오탐 방지를 위해 
+                // 1) 정규화 이름 완전 일치 
+                // 2) 원본 이름이 띄어쓰기 경계에 있거나 뒤에 '점'이 붙는 경우만 허용
+                if (normalizedStoreName === f.normalized) return true;
+                const regex = new RegExp(`(^|\\s)${f.original}(점|\\s|$)`, 'i');
+                return regex.test(store.name);
+            }
+            return normalizedStoreName.includes(f.normalized);
+        });
 
         if (matched) {
             franchiseStores.push({ ...store, matchedBrand: matched.original });
