@@ -89,7 +89,7 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
             console.error(`페이지 ${pageNo} 조회 오류:`, error.message);
             break;
         }
-    } while (pageNo <= 4); // 최대 4,000건(4페이지)까지 강제 루프
+    } while (pageNo <= 10); // 최대 10,000건(10페이지)까지 확장 루프
 
     // 데이터 품질 경고 로그
     if (allStores.length === 0) {
