@@ -1,154 +1,82 @@
 /**
- * 🔥 실증 데이터 기반 매물 비교 분석 서비스
- * 서울시 12종 실측 API + 교통 + 부동산 + AI를 활용한 A vs B 비교
+ * 🔥 실증 데이터 기반 매물 비교 분석 서비스 v2
+ * 20개 이상의 실질 지표로 수억 원 입지 결정에 필요한 모든 정보를 비교합니다.
  */
 
 import { askGemini } from './geminiService.js';
 
 /**
- * 실증 비교 지표 산출
+ * 실증 비교 지표 산출 — 카테고리별 분류
  */
 export function buildEmpiricalComparison(a, b) {
-    const metrics = [];
+    const categories = [];
 
-    // 1. 유동인구 (KT 통신 실측)
-    const aPop = a.seoul?.floatingPop?.total || 0;
-    const bPop = b.seoul?.floatingPop?.total || 0;
-    if (aPop || bPop) {
-        metrics.push({
-            id: 'floating_pop', label: '분기 유동인구',
-            source: 'KT 통신 기지국 실측', icon: '👥',
-            a: aPop, b: bPop, unit: '명',
-            winner: aPop >= bPop ? 'A' : 'B',
-            diff: aPop && bPop ? Math.round(Math.abs(aPop - bPop) / Math.min(aPop, bPop) * 100) : null,
-            detail: {
-                aByTime: a.seoul?.floatingPop?.byTime || null,
-                bByTime: b.seoul?.floatingPop?.byTime || null,
-                aByAge: a.seoul?.floatingPop?.age || null,
-                bByAge: b.seoul?.floatingPop?.age || null,
-            }
-        });
-    }
+    // ═══════ 1. 상권 규모 & 활력 ═══════
+    const scaleMetrics = [];
 
-    // 2. 추정매출 (신한카드 실측)
-    const aSales = a.seoul?.sales?.totalSales || 0;
-    const bSales = b.seoul?.sales?.totalSales || 0;
-    if (aSales || bSales) {
-        metrics.push({
-            id: 'estimated_sales', label: '분기 추정매출',
-            source: '신한카드 결제 데이터', icon: '💳',
-            a: aSales, b: bSales, unit: '원', format: 'currency',
-            winner: aSales >= bSales ? 'A' : 'B',
-            diff: aSales && bSales ? Math.round(Math.abs(aSales - bSales) / Math.min(aSales, bSales) * 100) : null,
-            detail: {
-                aSalesByTime: a.seoul?.sales?.byTime || null,
-                bSalesByTime: b.seoul?.sales?.byTime || null,
-                aSalesByAge: a.seoul?.sales?.byAge || null,
-                bSalesByAge: b.seoul?.sales?.byAge || null,
-            }
-        });
-    }
-
-    // 3. 폐업률 (서울시 + 카드사)
-    const aClose = a.seoul?.store?.closeRate || 0;
-    const bClose = b.seoul?.store?.closeRate || 0;
-    if (aClose || bClose) {
-        metrics.push({
-            id: 'close_rate', label: '폐업률',
-            source: '서울시 + 카드사', icon: '📉',
-            a: aClose, b: bClose, unit: '%',
-            winner: aClose <= bClose ? 'A' : 'B',
-            lowerIsBetter: true,
-            diff: aClose && bClose ? Math.round(Math.abs(aClose - bClose) / Math.max(aClose, bClose) * 100) : null,
-        });
-    }
-
-    // 4. 개업률
-    const aOpen = a.seoul?.store?.openRate || 0;
-    const bOpen = b.seoul?.store?.openRate || 0;
-    if (aOpen || bOpen) {
-        metrics.push({
-            id: 'open_rate', label: '개업률',
-            source: '서울시 + 카드사', icon: '📈',
-            a: aOpen, b: bOpen, unit: '%',
-            winner: aOpen >= bOpen ? 'A' : 'B',
-            diff: aOpen && bOpen ? Math.round(Math.abs(aOpen - bOpen) / Math.max(aOpen, bOpen) * 100) : null,
-        });
-    }
-
-    // 5. 배후세대 월평균소득 (KB카드 + 건보공단)
-    const aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
-    const bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
-    if (aIncome || bIncome) {
-        metrics.push({
-            id: 'avg_income', label: '배후세대 월평균소득',
-            source: 'KB카드 + 국민건강보험공단', icon: '💰',
-            a: aIncome, b: bIncome, unit: '원', format: 'currency',
-            winner: aIncome >= bIncome ? 'A' : 'B',
-            diff: aIncome && bIncome ? Math.round(Math.abs(aIncome - bIncome) / Math.min(aIncome, bIncome) * 100) : null,
-        });
-    }
-
-    // 6. 상주인구 (주민등록 실측)
-    const aResident = a.seoul?.residentPop?.totalPop || 0;
-    const bResident = b.seoul?.residentPop?.totalPop || 0;
-    if (aResident || bResident) {
-        metrics.push({
-            id: 'resident_pop', label: '상주인구',
-            source: '서울시 주민등록', icon: '🏠',
-            a: aResident, b: bResident, unit: '명',
-            winner: aResident >= bResident ? 'A' : 'B',
-            diff: aResident && bResident ? Math.round(Math.abs(aResident - bResident) / Math.min(aResident, bResident) * 100) : null,
-            detail: {
-                aHousehold1: a.seoul?.residentPop?.household?.['1인'] || 0,
-                bHousehold1: b.seoul?.residentPop?.household?.['1인'] || 0,
-            }
-        });
-    }
-
-    // 7. 직장인구 (SKT 통신 실측)
-    const aWork = a.seoul?.workingPop?.total || 0;
-    const bWork = b.seoul?.workingPop?.total || 0;
-    if (aWork || bWork) {
-        metrics.push({
-            id: 'working_pop', label: '직장인구',
-            source: 'SKT 통신 데이터', icon: '🏢',
-            a: aWork, b: bWork, unit: '명',
-            winner: aWork >= bWork ? 'A' : 'B',
-            diff: aWork && bWork ? Math.round(Math.abs(aWork - bWork) / Math.min(aWork, bWork) * 100) : null,
-        });
-    }
-
-    // 8. 교통 접근성 점수
-    const aTransit = a.transit?.score || 0;
-    const bTransit = b.transit?.score || 0;
-    metrics.push({
-        id: 'transit_score', label: '교통 접근성',
-        source: '카카오맵 + OpenStreetMap', icon: '🚇',
-        a: aTransit, b: bTransit, unit: '점',
-        winner: aTransit >= bTransit ? 'A' : 'B',
-        diff: aTransit && bTransit ? Math.round(Math.abs(aTransit - bTransit)) : null,
-        detail: {
-            aNearestSubway: a.transit?.nearestSubway?.name || '-',
-            aNearestDist: a.transit?.nearestSubway?.distance || 0,
-            bNearestSubway: b.transit?.nearestSubway?.name || '-',
-            bNearestDist: b.transit?.nearestSubway?.distance || 0,
-        }
+    scaleMetrics.push({
+        id: 'overall_score', label: '상권 종합 점수',
+        source: '자체 분석 엔진 (6대 지표 종합)', icon: '🏆',
+        a: a.analysis.overallScore || 0, b: b.analysis.overallScore || 0, unit: '점',
+        winner: (a.analysis.overallScore || 0) >= (b.analysis.overallScore || 0) ? 'A' : 'B',
+        extraA: a.analysis.grade?.grade || '-', extraB: b.analysis.grade?.grade || '-',
+        extraLabel: '등급',
     });
 
-    // 9. 반경 내 총 업소 수
-    metrics.push({
+    scaleMetrics.push({
         id: 'store_count', label: '반경 내 총 업소 수',
-        source: '소상공인시장진흥공단', icon: '🏪',
+        source: '소상공인시장진흥공단 API', icon: '🏪',
         a: a.analysis.totalStores, b: b.analysis.totalStores, unit: '개',
         winner: a.analysis.totalStores >= b.analysis.totalStores ? 'A' : 'B',
-        diff: Math.round(Math.abs(a.analysis.totalStores - b.analysis.totalStores) / Math.max(a.analysis.totalStores || 1, b.analysis.totalStores || 1) * 100),
     });
 
-    // 10. 프랜차이즈 점유율
+    const aDiv = a.analysis.indicators?.diversityIndex?.value || 0;
+    const bDiv = b.analysis.indicators?.diversityIndex?.value || 0;
+    scaleMetrics.push({
+        id: 'diversity', label: '업종 다양성 지수',
+        source: 'Shannon Diversity Index 기반', icon: '🌈',
+        a: aDiv, b: bDiv, unit: '점',
+        winner: aDiv >= bDiv ? 'A' : 'B',
+        note: '높을수록 다양한 업종이 공존 — 상권 안정성 ↑',
+    });
+
+    const aDensity = a.analysis.indicators?.densityScore?.value || 0;
+    const bDensity = b.analysis.indicators?.densityScore?.value || 0;
+    scaleMetrics.push({
+        id: 'density', label: '상권 활성도',
+        source: '업소 밀도 기반 산출', icon: '⚡',
+        a: aDensity, b: bDensity, unit: '점',
+        winner: aDensity >= bDensity ? 'A' : 'B',
+    });
+
+    const aStab = a.analysis.indicators?.stabilityScore?.value || 0;
+    const bStab = b.analysis.indicators?.stabilityScore?.value || 0;
+    scaleMetrics.push({
+        id: 'stability', label: '업종 안정성',
+        source: '의료·교육 등 필수 업종 비율', icon: '🛡️',
+        a: aStab, b: bStab, unit: '점',
+        winner: aStab >= bStab ? 'A' : 'B',
+        note: '높을수록 경기 변동에 강한 상권',
+    });
+
+    categories.push({ title: '📐 상권 규모 & 활력', metrics: scaleMetrics });
+
+    // ═══════ 2. 경쟁 환경 ═══════
+    const compMetrics = [];
+
+    const aComp = a.analysis.indicators?.competitionIntensity?.value || 0;
+    const bComp = b.analysis.indicators?.competitionIntensity?.value || 0;
+    compMetrics.push({
+        id: 'competition', label: '경쟁 균형도',
+        source: 'HHI(허핀달-허쉬만) 지수 기반', icon: '⚖️',
+        a: aComp, b: bComp, unit: '점',
+        winner: aComp >= bComp ? 'A' : 'B',
+        note: '높을수록 특정 업종 쏠림 없이 균형적',
+    });
+
     const aFran = parseFloat(a.analysis.franchiseAnalysis?.franchiseRatio) || 0;
     const bFran = parseFloat(b.analysis.franchiseAnalysis?.franchiseRatio) || 0;
-    metrics.push({
+    compMetrics.push({
         id: 'franchise_ratio', label: '프랜차이즈 점유율',
         source: '소상공인시장진흥공단 + 자체 DB', icon: '🏷️',
         a: aFran, b: bFran, unit: '%',
@@ -156,13 +84,269 @@ export function buildEmpiricalComparison(a, b) {
         note: '높으면 검증된 상권, 낮으면 독립 창업 기회',
     });
 
-    // 종합 승자 카운트
-    const aWins = metrics.filter(m => m.winner === 'A').length;
-    const bWins = metrics.filter(m => m.winner === 'B').length;
+    const aIndep = a.analysis.indicators?.franchiseScore?.value || 0;
+    const bIndep = b.analysis.indicators?.franchiseScore?.value || 0;
+    compMetrics.push({
+        id: 'independent_ratio', label: '독립 상점 진입 여건',
+        source: '프랜차이즈 제외 비율 산출', icon: '🚪',
+        a: aIndep, b: bIndep, unit: '점',
+        winner: aIndep >= bIndep ? 'A' : 'B',
+        note: '높을수록 신규 독립 브랜드 진입에 유리',
+    });
+
+    // 상위 3대 업종 비교
+    const aTop3 = (a.analysis.categorySummary || []).slice(0, 3);
+    const bTop3 = (b.analysis.categorySummary || []).slice(0, 3);
+    compMetrics.push({
+        id: 'top_categories', label: '주요 업종 TOP 3',
+        source: '소상공인시장진흥공단 업종 분류', icon: '📋',
+        a: 0, b: 0, unit: '',
+        winner: null, type: 'text',
+        textA: aTop3.map(c => `${c.name} ${c.percentage}%`).join(' / ') || '-',
+        textB: bTop3.map(c => `${c.name} ${c.percentage}%`).join(' / ') || '-',
+    });
+
+    categories.push({ title: '🥊 경쟁 환경', metrics: compMetrics });
+
+    // ═══════ 3. 배후 수요 (유동/직장/상주인구) ═══════
+    const demandMetrics = [];
+
+    // 실측 유동인구 (서울시 KT)
+    const aFloat = a.seoul?.floatingPop?.total || 0;
+    const bFloat = b.seoul?.floatingPop?.total || 0;
+    demandMetrics.push({
+        id: 'floating_pop', label: '분기 유동인구',
+        source: aFloat || bFloat ? 'KT 통신 기지국 실측' : '업종 데이터 기반 추정',
+        icon: '👥',
+        a: aFloat || a.demo?.floatingPop || 0,
+        b: bFloat || b.demo?.floatingPop || 0,
+        unit: '명',
+        winner: (aFloat || a.demo?.floatingPop || 0) >= (bFloat || b.demo?.floatingPop || 0) ? 'A' : 'B',
+        estimated: !(aFloat || bFloat),
+    });
+
+    // 직장인구
+    const aWork = a.seoul?.workingPop?.total || 0;
+    const bWork = b.seoul?.workingPop?.total || 0;
+    demandMetrics.push({
+        id: 'working_pop', label: '직장인구',
+        source: aWork || bWork ? 'SKT 통신 데이터 실측' : '업종 데이터 기반 추정',
+        icon: '🏢',
+        a: aWork || a.demo?.workingPop || 0,
+        b: bWork || b.demo?.workingPop || 0,
+        unit: '명',
+        winner: (aWork || a.demo?.workingPop || 0) >= (bWork || b.demo?.workingPop || 0) ? 'A' : 'B',
+        estimated: !(aWork || bWork),
+    });
+
+    // 상주인구
+    const aRes = a.seoul?.residentPop?.totalPop || 0;
+    const bRes = b.seoul?.residentPop?.totalPop || 0;
+    demandMetrics.push({
+        id: 'resident_pop', label: '상주인구',
+        source: aRes || bRes ? '서울시 주민등록 실측' : '업종 데이터 기반 추정',
+        icon: '🏠',
+        a: aRes || a.demo?.residentPop || 0,
+        b: bRes || b.demo?.residentPop || 0,
+        unit: '명',
+        winner: (aRes || a.demo?.residentPop || 0) >= (bRes || b.demo?.residentPop || 0) ? 'A' : 'B',
+        estimated: !(aRes || bRes),
+    });
+
+    // 1인가구
+    const a1p = a.seoul?.residentPop?.household?.['1인'] || a.demo?.singleHouseholdRatio || 0;
+    const b1p = b.seoul?.residentPop?.household?.['1인'] || b.demo?.singleHouseholdRatio || 0;
+    if (a1p || b1p) {
+        demandMetrics.push({
+            id: 'single_household', label: '1인가구 비율/수',
+            source: aRes ? '서울시 주민등록' : '업종 기반 추정',
+            icon: '🧑',
+            a: a1p, b: b1p,
+            unit: aRes ? '세대' : '%',
+            winner: a1p >= b1p ? 'A' : 'B',
+            note: '1인가구 多 → 배달/편의점/소포장 수요↑',
+        });
+    }
+
+    categories.push({ title: '👥 배후 수요 (고객 풀)', metrics: demandMetrics });
+
+    // ═══════ 4. 매출 & 소비력 ═══════
+    const salesMetrics = [];
+
+    const aSales = a.seoul?.sales?.totalSales || 0;
+    const bSales = b.seoul?.sales?.totalSales || 0;
+    salesMetrics.push({
+        id: 'estimated_sales', label: '분기 추정매출',
+        source: '신한카드 결제 데이터',
+        icon: '💳', a: aSales, b: bSales,
+        unit: '원', format: 'currency',
+        winner: aSales > bSales ? 'A' : bSales > aSales ? 'B' : null,
+        noData: !aSales && !bSales,
+    });
+
+    const aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
+    const bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
+    salesMetrics.push({
+        id: 'avg_income', label: '배후세대 월평균소득',
+        source: 'KB카드 + 국민건강보험공단',
+        icon: '💰', a: aIncome, b: bIncome,
+        unit: '원', format: 'currency',
+        winner: aIncome > bIncome ? 'A' : bIncome > aIncome ? 'B' : null,
+        noData: !aIncome && !bIncome,
+    });
+
+    const aClose = a.seoul?.store?.closeRate || 0;
+    const bClose = b.seoul?.store?.closeRate || 0;
+    salesMetrics.push({
+        id: 'close_rate', label: '폐업률',
+        source: '서울시 + 카드사',
+        icon: '📉', a: aClose, b: bClose,
+        unit: '%',
+        winner: aClose && bClose ? (aClose <= bClose ? 'A' : 'B') : null,
+        lowerIsBetter: true,
+        noData: !aClose && !bClose,
+        note: '낮을수록 상권 생존력이 높음',
+    });
+
+    const aOpen = a.seoul?.store?.openRate || 0;
+    const bOpen = b.seoul?.store?.openRate || 0;
+    salesMetrics.push({
+        id: 'open_rate', label: '개업률',
+        source: '서울시 + 카드사',
+        icon: '📈', a: aOpen, b: bOpen,
+        unit: '%',
+        winner: aOpen && bOpen ? (aOpen >= bOpen ? 'A' : 'B') : null,
+        noData: !aOpen && !bOpen,
+        note: '높을수록 신규 진입이 활발한 상권',
+    });
+
+    categories.push({ title: '💳 매출 & 소비력', metrics: salesMetrics });
+
+    // ═══════ 5. 교통 접근성 ═══════
+    const transitMetrics = [];
+
+    const aTransit = a.transit?.score || 0;
+    const bTransit = b.transit?.score || 0;
+    transitMetrics.push({
+        id: 'transit_score', label: '교통 접근성 종합',
+        source: '카카오맵 + OpenStreetMap', icon: '🚇',
+        a: aTransit, b: bTransit, unit: '점',
+        winner: aTransit >= bTransit ? 'A' : 'B',
+    });
+
+    const aSubDist = a.transit?.nearestSubway?.distance || 9999;
+    const bSubDist = b.transit?.nearestSubway?.distance || 9999;
+    transitMetrics.push({
+        id: 'subway_distance', label: '최근접 지하철역 거리',
+        source: '카카오맵 검색', icon: '🚉',
+        a: aSubDist === 9999 ? 0 : aSubDist,
+        b: bSubDist === 9999 ? 0 : bSubDist,
+        unit: 'm', lowerIsBetter: true,
+        winner: aSubDist <= bSubDist ? 'A' : 'B',
+        textA: `${a.transit?.nearestSubway?.name || '-'} (${aSubDist === 9999 ? '-' : aSubDist + 'm'})`,
+        textB: `${b.transit?.nearestSubway?.name || '-'} (${bSubDist === 9999 ? '-' : bSubDist + 'm'})`,
+        type: 'textWithBar',
+    });
+
+    // 버스정류장: Overpass → 서울시 집객시설 폴백
+    const aBusOverpass = a.transit?.totalBusStops || 0;
+    const bBusOverpass = b.transit?.totalBusStops || 0;
+    const aBusFacility = a.seoul?.facility?.busStop || 0;
+    const bBusFacility = b.seoul?.facility?.busStop || 0;
+    const aBusCount = aBusOverpass || aBusFacility;
+    const bBusCount = bBusOverpass || bBusFacility;
+    transitMetrics.push({
+        id: 'bus_stops', label: '반경 내 버스정류장 수',
+        source: (aBusOverpass || bBusOverpass) ? 'OpenStreetMap + 서울시 집객시설' : '서울시 집객시설 API',
+        icon: '🚌',
+        a: aBusCount, b: bBusCount, unit: '개',
+        winner: aBusCount >= bBusCount ? 'A' : 'B',
+    });
+
+    const aSubCount = a.transit?.totalSubways || 0;
+    const bSubCount = b.transit?.totalSubways || 0;
+    // 지하철역: Overpass + 서울시 집객시설 폴백
+    const aSubFacility = a.seoul?.facility?.subwayStation || 0;
+    const bSubFacility = b.seoul?.facility?.subwayStation || 0;
+    transitMetrics.push({
+        id: 'subway_count', label: '반경 내 지하철역 수',
+        source: '카카오맵 + 서울시 집객시설', icon: '🚂',
+        a: aSubCount || aSubFacility, b: bSubCount || bSubFacility, unit: '개',
+        winner: (aSubCount || aSubFacility) >= (bSubCount || bSubFacility) ? 'A' : 'B',
+    });
+
+    // 서울시 집객시설 추가 지표 (은행, 병원, 학교 등)
+    const aBank = a.seoul?.facility?.bank || 0;
+    const bBank = b.seoul?.facility?.bank || 0;
+    if (aBank || bBank) {
+        transitMetrics.push({
+            id: 'bank_count', label: '주변 은행 수',
+            source: '서울시 집객시설 API', icon: '🏦',
+            a: aBank, b: bBank, unit: '개',
+            winner: aBank >= bBank ? 'A' : 'B',
+        });
+    }
+    const aHospital = a.seoul?.facility?.hospital || 0;
+    const bHospital = b.seoul?.facility?.hospital || 0;
+    if (aHospital || bHospital) {
+        transitMetrics.push({
+            id: 'hospital_count', label: '주변 종합병원 수',
+            source: '서울시 집객시설 API', icon: '🏥',
+            a: aHospital, b: bHospital, unit: '개',
+            winner: aHospital >= bHospital ? 'A' : 'B',
+        });
+    }
+
+    categories.push({ title: '🚇 교통 & 인프라', metrics: transitMetrics });
+
+    // ═══════ 6. 부동산 시세 ═══════
+    const reMetrics = [];
+
+    const aApt = a.realEstate?.summary?.aptTotal6Months || 0;
+    const bApt = b.realEstate?.summary?.aptTotal6Months || 0;
+    reMetrics.push({
+        id: 'apt_transactions', label: '아파트 매매 거래(6개월)',
+        source: '국토교통부 실거래가', icon: '🏠',
+        a: aApt, b: bApt, unit: '건',
+        winner: aApt > bApt ? 'A' : bApt > aApt ? 'B' : null,
+        noData: !aApt && !bApt,
+    });
+
+    const aComm = a.realEstate?.summary?.commTotal6Months || 0;
+    const bComm = b.realEstate?.summary?.commTotal6Months || 0;
+    reMetrics.push({
+        id: 'comm_transactions', label: '상가/업무용 거래(6개월)',
+        source: '국토교통부 실거래가', icon: '🏬',
+        a: aComm, b: bComm, unit: '건',
+        winner: aComm > bComm ? 'A' : bComm > aComm ? 'B' : null,
+        noData: !aComm && !bComm,
+        note: '거래 활발 = 상권에 대한 투자자 관심↑',
+    });
+
+    const aOffi = a.realEstate?.summary?.offiTotal6Months || 0;
+    const bOffi = b.realEstate?.summary?.offiTotal6Months || 0;
+    reMetrics.push({
+        id: 'offi_transactions', label: '오피스텔 거래(6개월)',
+        source: '국토교통부 실거래가', icon: '🏢',
+        a: aOffi, b: bOffi, unit: '건',
+        winner: aOffi > bOffi ? 'A' : bOffi > aOffi ? 'B' : null,
+        noData: !aOffi && !bOffi,
+    });
+
+    categories.push({ title: '🏠 부동산 시세', metrics: reMetrics });
+
+    // ═══════ 종합 승자 ═══════
+    const allMetrics = categories.flatMap(c => c.metrics);
+    const aWins = allMetrics.filter(m => m.winner === 'A').length;
+    const bWins = allMetrics.filter(m => m.winner === 'B').length;
 
     return {
-        metrics,
-        summary: { aWins, bWins, totalMetrics: metrics.length, overallWinner: aWins > bWins ? 'A' : aWins < bWins ? 'B' : 'DRAW' }
+        categories,
+        summary: {
+            aWins, bWins,
+            totalMetrics: allMetrics.length,
+            overallWinner: aWins > bWins ? 'A' : aWins < bWins ? 'B' : 'DRAW',
+        }
     };
 }
 
@@ -171,25 +355,40 @@ export function buildEmpiricalComparison(a, b) {
  */
 export async function generateAICompareComment(address1, address2, empiricalComparison) {
     try {
-        const prompt = `당신은 대한민국 최고의 상가 부동산 분석가입니다. 아래 두 매물의 실증 비교 데이터를 바탕으로, 부동산 중개인이 고객에게 설명할 수 있는 전문적이고 설득력 있는 비교 분석 코멘트를 작성하세요.
+        const allMetrics = empiricalComparison.categories.flatMap(c => c.metrics);
+        const metricsText = allMetrics.map(m => {
+            if (m.type === 'text') return `${m.icon} ${m.label}: A="${m.textA}" vs B="${m.textB}" (${m.source})`;
+            const aVal = m.format === 'currency' ? `${m.a}원` : `${m.a}${m.unit}`;
+            const bVal = m.format === 'currency' ? `${m.b}원` : `${m.b}${m.unit}`;
+            return `${m.icon} ${m.label}: A=${aVal} vs B=${bVal} (${m.source})${m.winner ? ` → ${m.winner} 우세` : ''}`;
+        }).join('\n');
+
+        const prompt = `당신은 대한민국 최고의 상가 부동산 입지 분석 전문가입니다. 아래 두 매물의 실증 비교 데이터를 바탕으로, 수억 원의 투자를 결정하는 고객에게 신뢰를 줄 수 있는 전문 분석을 제공하세요.
 
 [A 매물]: ${address1}
 [B 매물]: ${address2}
 
-[실증 비교 데이터]
-${empiricalComparison.metrics.map(m => `${m.icon} ${m.label}: A=${m.a}${m.unit} vs B=${m.b}${m.unit} (출처: ${m.source})${m.winner ? ` → ${m.winner} 우세` : ''}`).join('\n')}
+[실증 비교 데이터 - ${allMetrics.length}개 지표]
+${metricsText}
 
-[종합 스코어보드]
-A 승: ${empiricalComparison.summary.aWins}개 지표 / B 승: ${empiricalComparison.summary.bWins}개 지표
+[종합] A 승: ${empiricalComparison.summary.aWins}개 / B 승: ${empiricalComparison.summary.bWins}개
+
+⚠️ 핵심 작성 원칙 — "수치 근거 병행 규칙":
+- 정성적 표현(예: "확연한 우위", "압도적 차이")은 사용 가능하지만, 반드시 해당 수치와 % 차이를 함께 명시해야 합니다.
+- ✅ 좋은 예: "A의 유동인구 221,696명은 B(98,234명) 대비 126% 높아 확연한 우위를 보입니다"
+- ❌ 나쁜 예: "A가 현저히 높은 유동인구를 보입니다" (수치 없이 정성 표현만 단독 사용 = 금지)
+- 모든 강점, 리스크, 가이드에서 반드시 실제 데이터 수치를 인용하세요.
+- "높다/낮다/많다/적다"는 반드시 "몇 %, 몇 배, 구체적 수치"와 함께 쓰세요.
 
 반드시 아래 JSON 형식 하나만 출력하세요:
 {
-  "verdict": "A 또는 B 중 종합적으로 유리한 쪽과 핵심 근거 1~2문장 (데이터 수치 인용 필수)",
-  "aStrengths": ["A의 데이터 기반 핵심 강점 1", "A의 강점 2"],
-  "bStrengths": ["B의 데이터 기반 핵심 강점 1", "B의 강점 2"],
-  "targetGuide": "업종/타겟에 따른 선택 가이드 2~3문장 (예: 직장인 대상 점심이라면 A, 1인가구 배달이라면 B 등)"
+  "verdict": "종합 판정 2~3문장 (모든 비교에 수치와 %차를 포함하고, 근거 있는 정성 표현 병행)",
+  "aStrengths": ["A의 수치+근거 강점 1", "A의 수치+근거 강점 2", "A의 수치+근거 강점 3"],
+  "bStrengths": ["B의 수치+근거 강점 1", "B의 수치+근거 강점 2", "B의 수치+근거 강점 3"],
+  "targetGuide": "업종/타겟 고객별 선택 가이드 (수치 포함). 최소 3가지 시나리오",
+  "riskFactors": "각 매물의 구체적 리스크 (수치 근거 포함) 1~2문장"
 }`;
-        const raw = await askGemini(prompt, null, '부동산 상권 비교 분석 전문가. 순수 JSON만 반환.');
+        const raw = await askGemini(prompt, null, '부동산 상권 입지 비교 전문가. 순수 JSON만 반환.');
         const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
         return JSON.parse(cleaned);
     } catch (e) {

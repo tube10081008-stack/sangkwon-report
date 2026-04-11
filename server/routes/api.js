@@ -184,8 +184,8 @@ router.post('/analyze/compare', async (req, res) => {
 
         // 5. 실증 비교 지표
         const empiricalComparison = buildEmpiricalComparison(
-            { analysis: analysis1, seoul: seoul1, transit: transit1 },
-            { analysis: analysis2, seoul: seoul2, transit: transit2 }
+            { analysis: analysis1, seoul: seoul1, transit: transit1, demo: demo1, realEstate: realEstate1 },
+            { analysis: analysis2, seoul: seoul2, transit: transit2, demo: demo2, realEstate: realEstate2 }
         );
 
         // 6. AI 비교 코멘트

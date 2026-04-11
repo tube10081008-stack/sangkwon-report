@@ -27,13 +27,13 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     // 1. 지하철역 검색 (카카오 category_group_code: SW8)
     const subwayUrl = `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=SW8&x=${lng}&y=${lat}&radius=${searchRadius}&sort=distance&size=15`;
     
-    // 2. 버스정류장 검색 (OpenStreetMap Overpass API - 카카오에 버스정류장 카테고리 없음)
-    const overpassQuery = `[out:json];node[highway=bus_stop](around:${searchRadius},${lat},${lng});out body;`;
+    // 2. 버스정류장 검색 (OpenStreetMap Overpass API - 복수 태그 검색)
+    const overpassQuery = `[out:json][timeout:10];(node[highway=bus_stop](around:${searchRadius},${lat},${lng});node["public_transport"="platform"]["bus"="yes"](around:${searchRadius},${lat},${lng});node["public_transport"="stop_position"]["bus"="yes"](around:${searchRadius},${lat},${lng});node["amenity"="bus_station"](around:${searchRadius},${lat},${lng}););out body;`;
     const busUrl = `https://overpass-api.de/api/interpreter`;
 
     const [subwayRes, busRaw] = await Promise.all([
         fetch(subwayUrl, { headers }).then(r => r.json()).catch(() => ({ documents: [] })),
-        fetch(busUrl, { method: 'POST', body: 'data=' + encodeURIComponent(overpassQuery), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(r => r.json()).catch(() => ({ elements: [] }))
+        fetch(busUrl, { method: 'POST', body: 'data=' + encodeURIComponent(overpassQuery), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }).then(r => r.json()).catch((e) => { console.warn('Overpass API 실패:', e.message); return { elements: [] }; })
     ]);
 
     const subways = (subwayRes.documents || []).map(doc => ({
