@@ -14,6 +14,7 @@ import { getSeoulDistrictData } from '../services/seoulData.js';
 import { getRealEstateData } from '../services/realEstateData.js';
 import { reverseGeocode } from '../services/geocoding.js';
 import { askGemini } from '../services/geminiService.js';
+import { buildEmpiricalComparison, generateAICompareComment } from '../services/compareService.js';
 
 const router = Router();
 
@@ -135,52 +136,73 @@ router.post('/analyze/single', async (req, res) => {
 
 /**
  * POST /api/analyze/compare
- * 두 상권 비교 분석
+ * 🔥 실증 데이터 기반 매물 비교 분석기 (서울시 12종 API + 교통 + 부동산 + AI)
  */
 router.post('/analyze/compare', async (req, res) => {
     try {
         const { address1, address2, radius = 500, targetCategory } = req.body;
-
         if (!address1 || !address2) {
             return res.status(400).json({ error: '두 주소를 모두 입력해주세요.' });
         }
 
-        console.log(`📊 비교 분석 시작: ${address1} vs ${address2}`);
+        console.log(`📊 실증 비교 분석 시작: ${address1} vs ${address2}`);
 
-        // 1. 두 주소 좌표 변환 (병렬)
+        // 1. 좌표 변환 (병렬)
         const [location1, location2] = await Promise.all([
-            geocodeAddress(address1),
-            geocodeAddress(address2)
+            geocodeAddress(address1), geocodeAddress(address2)
         ]);
 
-        // 2. 반경 내 상가업소 조회 (병렬)
+        // 2. 상가업소 수집 (병렬)
         const [stores1, stores2] = await Promise.all([
             getStoresInRadius(location1.latitude, location1.longitude, radius),
             getStoresInRadius(location2.latitude, location2.longitude, radius)
         ]);
 
-        // 3. 개별 분석
+        // 3. 기본 분석
         const analysis1 = analyzeDistrict(stores1, targetCategory);
         const analysis2 = analyzeDistrict(stores2, targetCategory);
 
-        // 4. 비교 분석
-        const comparison = compareDistricts(analysis1, analysis2);
+        // 4. 실증 데이터 풀 병렬 수집
+        let seoul1 = null, seoul2 = null, transit1 = null, transit2 = null;
+        let realEstate1 = null, realEstate2 = null, demo1 = null, demo2 = null;
+        try {
+            const [ri1, ri2] = await Promise.all([
+                reverseGeocode(location1.latitude, location1.longitude).catch(() => null),
+                reverseGeocode(location2.latitude, location2.longitude).catch(() => null)
+            ]);
+            [seoul1, seoul2, transit1, transit2, realEstate1, realEstate2, demo1, demo2] = await Promise.all([
+                getSeoulDistrictData(location1.latitude, location1.longitude).catch(() => null),
+                getSeoulDistrictData(location2.latitude, location2.longitude).catch(() => null),
+                getTransitInfo(location1.latitude, location1.longitude, radius).catch(() => null),
+                getTransitInfo(location2.latitude, location2.longitude, radius).catch(() => null),
+                (ri1?.code ? getRealEstateData(ri1.code, location1, radius) : Promise.resolve(null)).catch(() => null),
+                (ri2?.code ? getRealEstateData(ri2.code, location2, radius) : Promise.resolve(null)).catch(() => null),
+                getDemographics(location1.latitude, location1.longitude, location1, stores1).catch(() => null),
+                getDemographics(location2.latitude, location2.longitude, location2, stores2).catch(() => null),
+            ]);
+        } catch (e) { console.warn('실증 데이터 수집 부분 실패:', e.message); }
 
-        // 5. AI 비교 코멘트
-        const aiComments = generateCompareComment(comparison, location1, location2);
+        // 5. 실증 비교 지표
+        const empiricalComparison = buildEmpiricalComparison(
+            { analysis: analysis1, seoul: seoul1, transit: transit1 },
+            { analysis: analysis2, seoul: seoul2, transit: transit2 }
+        );
+
+        // 6. AI 비교 코멘트
+        const aiCompareComment = await generateAICompareComment(address1, address2, empiricalComparison);
+
+        // 7. 기본 비교
+        const comparison = compareDistricts(analysis1, analysis2);
 
         res.json({
             success: true,
             data: {
-                area1: { location: location1, analysis: analysis1 },
-                area2: { location: location2, analysis: analysis2 },
-                comparison,
-                aiComments,
-                radius,
-                generatedAt: new Date().toISOString()
+                area1: { location: location1, analysis: analysis1, seoul: seoul1, transit: transit1, realEstate: realEstate1, demographics: demo1 },
+                area2: { location: location2, analysis: analysis2, seoul: seoul2, transit: transit2, realEstate: realEstate2, demographics: demo2 },
+                comparison, empiricalComparison, aiCompareComment,
+                radius, generatedAt: new Date().toISOString()
             }
         });
-
     } catch (error) {
         console.error('비교 분석 오류:', error);
         res.status(500).json({ error: error.message || '비교 분석 중 오류가 발생했습니다.' });
