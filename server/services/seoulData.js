@@ -48,15 +48,21 @@ async function callSeoulAPI(apiKey, serviceName, start = 1, end = 5) {
 }
 
 /**
- * 상권코드로 특정 API 필터링 조회 (최근 분기 데이터 추출)
+ * 상권코드로 특정 API 필터링 조회 (최근 분기 데이터 선별)
  */
 async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
-    // 최근 데이터를 찾기 위해 넉넉히 조회
-    const rows = await callSeoulAPI(apiKey, serviceName, 1, 1000);
-    if (!rows) return null;
+    // 서울시 API는 1회 1000건 제한이 있으므로, 최신 1개 분기 전체(약 1,671개)를 커버하기 위해 두 번 병렬 호출
+    const [page1, page2] = await Promise.all([
+        callSeoulAPI(apiKey, serviceName, 1, 1000),
+        callSeoulAPI(apiKey, serviceName, 1001, 2000)
+    ]);
+    const rows = [...(page1 || []), ...(page2 || [])];
+    if (rows.length === 0) return null;
+    
     // 해당 상권코드 필터링
     const filtered = rows.filter(r => r.TRDAR_CD === trdarCd);
     if (filtered.length === 0) return null;
+    
     // 최신 분기 데이터 반환
     filtered.sort((a, b) => {
         const qa = `${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
@@ -70,9 +76,13 @@ async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
  * 좌표로 가장 가까운 상권 코드 찾기
  */
 async function findNearestTrdarCd(apiKey, lat, lng) {
-    // 영역-상권 API에서 전체 조회 (캐시 고려)
-    const rows = await callSeoulAPI(apiKey, SERVICES.region, 1, 1000);
-    if (!rows || rows.length === 0) return null;
+    // 영역-상권 API 전체 조회 (1~2000: 서울시 전체 1,671개 커버)
+    const [page1, page2] = await Promise.all([
+        callSeoulAPI(apiKey, SERVICES.region, 1, 1000),
+        callSeoulAPI(apiKey, SERVICES.region, 1001, 2000)
+    ]);
+    const rows = [...(page1 || []), ...(page2 || [])];
+    if (rows.length === 0) return null;
 
     // TM → WGS84 근사 변환 후 최근접 상권 찾기
     let nearest = null;
