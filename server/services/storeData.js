@@ -3,6 +3,8 @@
  * 반경 내 상가업소 전체 조회 (페이지네이션 처리)
  */
 
+import { augmentStoreCategories } from './categoryClassifier.js';
+
 const BASE_URL = 'http://apis.data.go.kr/B553077/api/open/sdsc2/storeListInRadius';
 
 /**
@@ -98,7 +100,8 @@ export async function getStoresInRadius(lat, lng, radius = 500) {
         console.warn(`⚠️ [데이터 품질] 위치(${lat}, ${lng}) 반경 ${radius}m: 업소 ${allStores.length}건. 데이터 부족.`);
     }
 
-    return processStoreData(allStores);
+    const rawProcessed = processStoreData(allStores);
+    return await augmentStoreCategories(rawProcessed);
 }
 
 /**
@@ -500,12 +503,15 @@ export function analyzeFranchises(stores) {
         const normalizedStoreName = normalizeName(store.name);
         const matched = normalizedFranchises.find(f => {
             if (f.original.length <= 3) {
-                // 3글자 이하는 오탐 방지를 위해 
-                // 1) 정규화 이름 완전 일치 
-                // 2) 원본 이름이 띄어쓰기 경계에 있거나 뒤에 '점'이 붙는 경우만 허용
+                // 완전 일치
                 if (normalizedStoreName === f.normalized) return true;
-                const regex = new RegExp(`(^|\\s)${f.original}(점|\\s|$)`, 'i');
-                return regex.test(store.name);
+                // 원본 이름이 독립된 단어로 존재하거나, 뒤에 '점/본점/직영/가' 등으로 끝나는 지점명 패턴 인정
+                const regex = new RegExp(`(^|\\s)${f.original}(점|지점|본점|직영|\\s|$)`, 'i');
+                if (regex.test(store.name)) return true;
+                // 정규화된 이름에서 "브랜드+지점명" 형태 (예: CU신논현점, BHC강남점)
+                // 브랜드명으로 시작하고 끝이 '점'으로 끝나는 경우 허용
+                if (normalizedStoreName.startsWith(f.normalized) && normalizedStoreName.endsWith('점')) return true;
+                return false;
             }
             return normalizedStoreName.includes(f.normalized);
         });

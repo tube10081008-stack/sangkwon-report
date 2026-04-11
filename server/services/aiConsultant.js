@@ -45,11 +45,23 @@ export async function generateSingleAnalysisComment(analysis, location, realEsta
         const parsed = JSON.parse(cleaned);
 
         if (parsed && parsed.overview && parsed.strengths && parsed.recommendations) {
+            // 수치 무결성 검증 추가
+            const checkAndFixHallucination = (text) => {
+                if (!text) return text;
+                // AI가 제공되지 않은 다른 점수(예: 80점)를 적었을 때를 대비한 강제 교정 (옵셔널)
+                if (text.includes('점') && !text.includes(`${overallScore}점`)) {
+                    text += ` (분석 시스템 산출 최종 점수: ${overallScore}점)`;
+                }
+                return text;
+            };
+
+            parsed.overview = checkAndFixHallucination(parsed.overview);
+            
             parsed.realEstateTrend = realEstateData ? generateRealEstateTrend(realEstateData) : '부동산 실거래가 데이터를 수집할 수 없습니다.';
             if (targetAnalysis) {
                 parsed.targetInsight = generateTargetInsight(targetAnalysis, location);
             }
-            console.log(`[AI Consultant] Gemini 코멘트 생성 성공: ${location.address}`);
+            console.log(`[AI Consultant] Gemini 코멘트 생성 성공 및 무결성 검증 완료: ${location.address}`);
             return parsed;
         }
     } catch (e) {
