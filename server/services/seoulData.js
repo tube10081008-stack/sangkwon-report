@@ -48,28 +48,68 @@ async function callSeoulAPI(apiKey, serviceName, start = 1, end = 5) {
 }
 
 /**
- * 상권코드로 특정 API 필터링 조회 (최근 분기 데이터 선별)
+ * 상권코드로 특정 API 필터링 조회 (최신분기 리버스 딥스캔 알고리즘)
  */
 async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
-    // 서울시 API는 1회 1000건 제한이 있으므로, 최신 1개 분기 전체(약 1,671개)를 커버하기 위해 두 번 병렬 호출
-    const [page1, page2] = await Promise.all([
-        callSeoulAPI(apiKey, serviceName, 1, 1000),
-        callSeoulAPI(apiKey, serviceName, 1001, 2000)
-    ]);
-    const rows = [...(page1 || []), ...(page2 || [])];
-    if (rows.length === 0) return null;
-    
-    // 해당 상권코드 필터링
-    const filtered = rows.filter(r => r.TRDAR_CD === trdarCd);
-    if (filtered.length === 0) return null;
-    
-    // 최신 분기 데이터 반환
-    filtered.sort((a, b) => {
-        const qa = `${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
-        const qb = `${b.STDR_YY_CD || ''}${b.STDR_QU_CD || ''}`;
-        return qb.localeCompare(qa);
-    });
-    return filtered[0];
+    try {
+        // 1. 데이터 베이스 총계 확인 (1건만 호출)
+        const initUrl = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1/`;
+        const initRes = await fetch(initUrl, { timeout: 8000 }).catch(() => null);
+        if (!initRes || !initRes.ok) return null;
+        
+        const initData = await (initRes.json().catch(() => ({})));
+        const totalCount = initData[serviceName]?.list_total_count;
+        if (!totalCount) return null;
+
+        // 2. 리버스 딥스캔 (최신 데이터는 맨 끝단에 위치함)
+        // 매출(Selng): 분기당 약 2.2만 건. 점포(Stor): 약 7.7만 건.
+        let lookback = 2000;
+        if (serviceName === 'VwsmTrdarSelngQq') lookback = 28000; // 넉넉히 28페이지
+        if (serviceName === 'VwsmTrdarStorQq') lookback = 80000; // 넉넉히 80페이지
+
+        const startIdx = Math.max(1, totalCount - lookback);
+        const promises = [];
+        for (let current = startIdx; current <= totalCount; current += 1000) {
+            const endIdx = Math.min(current + 999, totalCount);
+            promises.push(
+                fetch(`${SEOUL_BASE}/${apiKey}/json/${serviceName}/${current}/${endIdx}/`, { timeout: 15000 })
+                    .then(r => r.json())
+                    .catch(() => null)
+            );
+        }
+
+        const results = await Promise.all(promises);
+        let allRows = [];
+        results.forEach(res => {
+            if (res && res[serviceName] && res[serviceName].row) {
+                allRows = allRows.concat(res[serviceName].row);
+            }
+        });
+
+        if (allRows.length === 0) return null;
+
+        // 3. 해당 상권코드(TRDAR_CD) 완전 필터링
+        const filtered = allRows.filter(r => r.TRDAR_CD === String(trdarCd));
+        if (filtered.length === 0) return null;
+
+        // 4. 최신 분기로만 컷오프 (가장 신선한 데이터)
+        filtered.sort((a, b) => {
+            const qa = `${a.STDR_YYQU_CD || ''}${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
+            const qb = `${b.STDR_YYQU_CD || ''}${b.STDR_YY_CD || ''}${b.STDR_QU_CD || ''}`;
+            return qb.localeCompare(qa);
+        });
+        
+        const latestQuarterKey = `${filtered[0].STDR_YYQU_CD || ''}${filtered[0].STDR_YY_CD || ''}${filtered[0].STDR_QU_CD || ''}`;
+        const latestRows = filtered.filter(a => {
+            const qa = `${a.STDR_YYQU_CD || ''}${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
+            return qa === latestQuarterKey;
+        });
+
+        // 다중 로우(매출/점포 등 업종별 분할 리스트) 그대로 반환 => parse 에서 Reduce
+        return latestRows; 
+    } catch (e) {
+        return null;
+    }
 }
 
 /**
@@ -123,8 +163,9 @@ async function findNearestTrdarCd(apiKey, lat, lng) {
  * ===== 데이터 파서들 =====
  */
 
-function parseFloatingPop(row) {
-    if (!row) return null;
+function parseFloatingPop(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         total: parseInt(row.TOT_FLPOP_CO) || 0,
         male: parseInt(row.ML_FLPOP_CO) || 0,
@@ -137,13 +178,10 @@ function parseFloatingPop(row) {
             '50대': parseInt(row.AGRDE_50_FLPOP_CO) || 0,
             '60대+': parseInt(row.AGRDE_60_ABOVE_FLPOP_CO) || 0,
         },
-        byTime: {
-            '00~06시': parseInt(row.TMZON_00_06_FLPOP_CO) || 0,
-            '06~11시': parseInt(row.TMZON_06_11_FLPOP_CO) || 0,
-            '11~14시': parseInt(row.TMZON_11_14_FLPOP_CO) || 0,
-            '14~17시': parseInt(row.TMZON_14_17_FLPOP_CO) || 0,
-            '17~21시': parseInt(row.TMZON_17_21_FLPOP_CO) || 0,
-            '21~24시': parseInt(row.TMZON_21_24_FLPOP_CO) || 0,
+        time: {
+            '오전': (parseInt(row.TMZON_06_11_FLPOP_CO) || 0) + (parseInt(row.TMZON_11_14_FLPOP_CO) || 0),
+            '오후': (parseInt(row.TMZON_14_17_FLPOP_CO) || 0) + (parseInt(row.TMZON_17_21_FLPOP_CO) || 0),
+            '야간': (parseInt(row.TMZON_21_24_FLPOP_CO) || 0) + (parseInt(row.TMZON_00_06_FLPOP_CO) || 0),
         },
         byDay: {
             '월': parseInt(row.MON_FLPOP_CO) || 0,
@@ -159,8 +197,9 @@ function parseFloatingPop(row) {
     };
 }
 
-function parseWorkingPop(row) {
-    if (!row) return null;
+function parseWorkingPop(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         total: parseInt(row.TOT_WRC_POPLTN_CO) || 0,
         male: parseInt(row.ML_WRC_POPLTN_CO) || 0,
@@ -178,8 +217,9 @@ function parseWorkingPop(row) {
     };
 }
 
-function parseResidentPop(row) {
-    if (!row) return null;
+function parseResidentPop(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         totalPop: parseInt(row.TOT_POPLTN_CO) || 0,
         totalHousehold: parseInt(row.TOT_HSHLD_CO) || 0,

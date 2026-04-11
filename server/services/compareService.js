@@ -173,65 +173,52 @@ export function buildEmpiricalComparison(a, b) {
     // ═══════ 4. 매출 & 소비력 ═══════
     const salesMetrics = [];
 
-    // 스마트 폴백 (강화): 실제 상권 규모는 기본 수백억 단위. 직장/상주인구 1인당 분기 소비액을 과감하게 수십만 원 이상으로 환산.
-    const scaleFactor = (data) => (data.seoul?.workingPop?.total || 10000) + (data.seoul?.residentPop?.totalPop || 5000);
-
-    let aSales = a.seoul?.sales?.totalSales || 0;
-    let bSales = b.seoul?.sales?.totalSales || 0;
-    let aSalesEstimated = false;
-    let bSalesEstimated = false;
-    
-    // 인구당 분기 150만원 소비 가정 + 기본 베이스 50억
-    if (aSales === 0) { aSales = Math.floor(scaleFactor(a) * 1500000 + 5000000000); aSalesEstimated = true; }
-    if (bSales === 0) { bSales = Math.floor(scaleFactor(b) * 1500000 + 5000000000); bSalesEstimated = true; }
+    const aSales = a.seoul?.sales?.totalSales || 0;
+    const bSales = b.seoul?.sales?.totalSales || 0;
 
     salesMetrics.push({
         id: 'estimated_sales', label: '분기 추정매출',
-        source: (!aSalesEstimated && !bSalesEstimated) ? '신한카드 결제 데이터' : '결제 데이터 + 인구비례 추정',
+        source: '신한카드 결제 원본 데이터',
         icon: '💳', a: aSales, b: bSales,
         unit: '원', format: 'currency',
         winner: aSales > bSales ? 'A' : bSales > aSales ? 'B' : null,
-        noData: false,
+        noData: !aSales && !bSales,
     });
 
-    let aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
-    let bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
-    let aIncEst = false, bIncEst = false;
-    // 월평균 소득 폴백: 서울 핵심 상권은 기본 350~450 사이로 추정
-    if (aIncome === 0) { aIncome = Math.floor((scaleFactor(a) / 10000) * 100000) + 3800000; aIncEst = true; }
-    if (bIncome === 0) { bIncome = Math.floor((scaleFactor(b) / 10000) * 100000) + 3800000; bIncEst = true; }
+    const aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
+    const bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
 
     salesMetrics.push({
         id: 'avg_income', label: '배후세대 월평균소득',
-        source: (!aIncEst && !bIncEst) ? 'KB카드 + 국민건강보험공단' : '국민건강보험공단 + 자산스케일 추정치',
+        source: 'KB카드 + 국민건강보험공단',
         icon: '💰', a: aIncome, b: bIncome,
         unit: '원', format: 'currency',
         winner: aIncome > bIncome ? 'A' : bIncome > aIncome ? 'B' : null,
-        noData: false,
+        noData: !aIncome && !bIncome,
     });
 
-    const aClose = a.seoul?.store?.closeRate || parseFloat((9.5 + Math.random() * 3).toFixed(1));
-    const bClose = b.seoul?.store?.closeRate || parseFloat((9.5 + Math.random() * 3).toFixed(1));
+    const aClose = a.seoul?.store?.closeRate || 0;
+    const bClose = b.seoul?.store?.closeRate || 0;
     salesMetrics.push({
         id: 'close_rate', label: '폐업률',
         source: '서울시 상권 분석',
         icon: '📉', a: aClose, b: bClose,
         unit: '%',
-        winner: aClose <= bClose ? 'A' : 'B',
+        winner: aClose && bClose ? (aClose <= bClose ? 'A' : 'B') : null,
         lowerIsBetter: true,
-        noData: false,
+        noData: !aClose && !bClose,
         note: '낮을수록 상권 생존력이 높음',
     });
 
-    const aOpen = a.seoul?.store?.openRate || parseFloat((12.0 + Math.random() * 4).toFixed(1));
-    const bOpen = b.seoul?.store?.openRate || parseFloat((12.0 + Math.random() * 4).toFixed(1));
+    const aOpen = a.seoul?.store?.openRate || 0;
+    const bOpen = b.seoul?.store?.openRate || 0;
     salesMetrics.push({
         id: 'open_rate', label: '개업률',
         source: '서울시 상권 분석',
         icon: '📈', a: aOpen, b: bOpen,
         unit: '%',
-        winner: aOpen >= bOpen ? 'A' : 'B',
-        noData: false,
+        winner: aOpen && bOpen ? (aOpen >= bOpen ? 'A' : 'B') : null,
+        noData: !aOpen && !bOpen,
         note: '높을수록 신규 진입이 활발한 상권',
     });
 
