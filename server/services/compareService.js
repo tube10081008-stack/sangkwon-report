@@ -173,20 +173,21 @@ export function buildEmpiricalComparison(a, b) {
     // ═══════ 4. 매출 & 소비력 ═══════
     const salesMetrics = [];
 
-    // 스마트 폴백: 매출/소득 데이터 누락 시 인근 스케일 및 모집단(상주+직장) 크기로 비례 환산
-    const scaleFactor = (data) => Math.max(1, ((data.seoul?.workingPop?.total || 100) + (data.seoul?.residentPop?.totalPop || 100)) / 100);
+    // 스마트 폴백 (강화): 실제 상권 규모는 기본 수백억 단위. 직장/상주인구 1인당 분기 소비액을 과감하게 수십만 원 이상으로 환산.
+    const scaleFactor = (data) => (data.seoul?.workingPop?.total || 10000) + (data.seoul?.residentPop?.totalPop || 5000);
 
     let aSales = a.seoul?.sales?.totalSales || 0;
     let bSales = b.seoul?.sales?.totalSales || 0;
     let aSalesEstimated = false;
     let bSalesEstimated = false;
     
-    if (aSales === 0) { aSales = Math.floor(scaleFactor(a) * 1200000 + 400000000); aSalesEstimated = true; }
-    if (bSales === 0) { bSales = Math.floor(scaleFactor(b) * 1200000 + 400000000); bSalesEstimated = true; }
+    // 인구당 분기 150만원 소비 가정 + 기본 베이스 50억
+    if (aSales === 0) { aSales = Math.floor(scaleFactor(a) * 1500000 + 5000000000); aSalesEstimated = true; }
+    if (bSales === 0) { bSales = Math.floor(scaleFactor(b) * 1500000 + 5000000000); bSalesEstimated = true; }
 
     salesMetrics.push({
         id: 'estimated_sales', label: '분기 추정매출',
-        source: (!aSalesEstimated && !bSalesEstimated) ? '신한카드 결제 데이터' : '결제 데이터 + 인근 규모 추정치',
+        source: (!aSalesEstimated && !bSalesEstimated) ? '신한카드 결제 데이터' : '결제 데이터 + 인구비례 추정',
         icon: '💳', a: aSales, b: bSales,
         unit: '원', format: 'currency',
         winner: aSales > bSales ? 'A' : bSales > aSales ? 'B' : null,
@@ -196,8 +197,9 @@ export function buildEmpiricalComparison(a, b) {
     let aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
     let bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
     let aIncEst = false, bIncEst = false;
-    if (aIncome === 0) { aIncome = Math.floor(scaleFactor(a) * 80) + 3100000; aIncEst = true; }
-    if (bIncome === 0) { bIncome = Math.floor(scaleFactor(b) * 80) + 3100000; bIncEst = true; }
+    // 월평균 소득 폴백: 서울 핵심 상권은 기본 350~450 사이로 추정
+    if (aIncome === 0) { aIncome = Math.floor((scaleFactor(a) / 10000) * 100000) + 3800000; aIncEst = true; }
+    if (bIncome === 0) { bIncome = Math.floor((scaleFactor(b) / 10000) * 100000) + 3800000; bIncEst = true; }
 
     salesMetrics.push({
         id: 'avg_income', label: '배후세대 월평균소득',
