@@ -121,24 +121,72 @@ export default function ReportPage() {
     };
 
     return (
-        <div className="report-page">
-            <div className="report-header">
-                <h1>🎯 {getTitle()}</h1>
-                <p>{getSubtitle()}</p>
-            </div>
+        <div className="b2b-hub-container report-page">
+            <header className="b2b-hub-header" style={{ marginBottom: '24px' }}>
+                <div className="b2b-header-brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+                    <span className="b2b-brand-logo">STANBY LAB</span>
+                    <span className="b2b-brand-vertical-line"></span>
+                    <span className="b2b-brand-subtitle">EXECUTIVE COMMAND CENTER</span>
+                </div>
+                <div className="b2b-header-status">
+                    <div style={{ color: '#06b6d4', fontWeight: 700, fontSize: '14px', border: '1px solid #06b6d4', padding: '6px 12px', borderRadius: '8px', background: 'rgba(6, 182, 212, 0.05)' }}>
+                        CHIEF ANALYST : EDDIE
+                    </div>
+                </div>
+            </header>
 
-            <div className="report-container">
-                <button className="report-back-btn" onClick={() => navigate('/')}>
-                    ← 새 분석 시작
-                </button>
+            <section className="b2b-hero-section" style={{ padding: '0 48px', marginBottom: '24px', textAlign: 'center' }}>
+                <h1 className="b2b-hero-title" style={{ fontSize: '32px', marginBottom: '12px' }}>
+                    <span style={{ color: '#06b6d4', fontWeight: 700 }}>입지 및 상권 분석 브리핑</span>
+                </h1>
+                <p className="compare-subtitle b2b-hero-desc" style={{ margin: '0 auto' }}>
+                    {getTitle()} · {getSubtitle()}
+                </p>
+                <div style={{ marginTop: '20px' }}>
+                    <button className="report-back-btn" onClick={() => navigate('/')} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}>
+                        ← 메인 허브로 복귀
+                    </button>
+                </div>
+            </section>
 
-                {type === 'single' && <SingleReport data={data} />}
+            <div className="report-container" style={{ margin: '0 48px', padding: '20px 0' }}>
+
+                {type === 'single' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <SingleReport data={data} />
+                        <div className="b2b-interop-section" style={{
+                            marginTop: '24px', padding: '24px', background: 'rgba(212, 175, 55, 0.05)',
+                            border: '1px solid rgba(212, 175, 55, 0.2)', borderRadius: '16px', textAlign: 'center'
+                        }}>
+                            <h3 style={{ fontSize: '15px', color: '#D4AF37', marginBottom: '8px', fontWeight: 700 }}>
+                                ⚖️ 추가적인 매물 비교 분석이 필요하십니까?
+                            </h3>
+                            <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '16px' }}>
+                                현재 조회가 완료된 <strong>{data.location?.address || address1}</strong> 데이터를 유지한 채,<br/>
+                                수익성 비교를 위해 <strong>수석 비평관 마리(Mari)</strong>에게 분석을 인계합니다.
+                            </p>
+                            <button 
+                                onClick={() => navigate('/compare', { state: { presetAddressA: address1, radius } })}
+                                style={{
+                                    padding: '12px 24px', background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+                                    border: '1px solid #D4AF37', color: '#FBECC7', borderRadius: '8px',
+                                    fontSize: '14px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s',
+                                    boxShadow: '0 4px 12px rgba(212,175,55,0.1)'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.background = '#D4AF37'}
+                                onMouseOut={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, #1e293b, #0f172a)'}
+                            >
+                                🚀 수석 비평관 (Mari) 호출하기 →
+                            </button>
+                        </div>
+                    </div>
+                )}
                 {type === 'compare' && <CompareReport data={data} address1={address1} address2={address2} />}
                 {type === 'strategy' && <StrategyReport data={data} targetCategory={targetCategory} />}
 
-                <div className="report-footer">
-                    <p>본 리포트는 <strong>공공데이터 API</strong>를 기반으로 자동 생성되었습니다.</p>
-                    <p>© {new Date().getFullYear()} 상권분석 리포트 | 데이터 기반 소상공인 컨설팅</p>
+                <div className="report-footer" style={{ marginTop: '40px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '20px' }}>
+                    <p>본 프리미엄 브리핑은 <strong>국토부 및 공공데이터 100% 연동망</strong>을 기반으로 작동합니다.</p>
+                    <p>© {new Date().getFullYear()} STANDBY LAB EXECUTIVE | B2B 리서치 허브</p>
                 </div>
             </div>
 

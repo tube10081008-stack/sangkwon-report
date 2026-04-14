@@ -38,7 +38,12 @@ export default function VworldBuildingAgeMap({ center, radius = 500 }) {
     useEffect(() => {
         if (!mapRef.current || centerLat === undefined || centerLng === undefined) return;
         if (mapInstanceRef.current) {
-            mapInstanceRef.current.setView([centerLat, centerLng]);
+            setTimeout(() => {
+                if (mapInstanceRef.current) {
+                    mapInstanceRef.current.invalidateSize();
+                    mapInstanceRef.current.setView([centerLat, centerLng]);
+                }
+            }, 100);
             return;
         }
 

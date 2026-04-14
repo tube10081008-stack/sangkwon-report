@@ -22,7 +22,7 @@ const SERVICES = {
     workingPop:      'VwsmTrdarWrkPopltnQq',    // 직장인구-상권
     residentPop:     'VwsmTrdarPopltnQq',       // 상주인구-상권
     sales:           'VwsmTrdarSelngQq',         // 추정매출-상권
-    incomeSpending:  'VwsmTrdarIxQq',           // 소득소비-상권
+    incomeSpending:  'VwsmTrdhlNcmCnsmpQq',    // 소득소비-상권배후지 (실제 월평균소득 데이터)
     apartment:       'VwsmTrdarAptQq',          // 아파트-상권
     store:           'VwsmTrdarStorQq',          // 점포-상권
     changeIndex:     'VwsmTrdarChgIndQq',       // 상권변화지표-상권
@@ -48,93 +48,117 @@ async function callSeoulAPI(apiKey, serviceName, start = 1, end = 5) {
 }
 
 /**
- * 상권코드로 특정 API 필터링 조회 (최신분기 리버스 딥스캔 알고리즘)
+ * 단일 페이지 fetch + 재시도 (최대 2회)
+ */
+async function fetchPageWithRetry(url, serviceName, maxRetries = 2) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+            const res = await fetch(url, { timeout: 20000 });
+            if (!res.ok) { await new Promise(r => setTimeout(r, 300)); continue; }
+            const data = await res.json();
+            if (data[serviceName]?.row) return data[serviceName].row;
+            return [];
+        } catch (e) {
+            if (attempt < maxRetries) await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        }
+    }
+    return [];
+}
+
+// URL 필터링이 작동하는 서비스 목록 (서울시 API 테스트 검증 완료)
+const URL_FILTERABLE_SERVICES = new Set(['VwsmTrdarStorQq']);
+
+/**
+ * 상권코드로 특정 API 조회 (하이브리드: URL필터 or 배치순차스캔)
  */
 async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
     try {
-        // 1. 데이터 베이스 총계 확인 (1건만 호출)
-        const initUrl = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1/`;
-        const initRes = await fetch(initUrl, { timeout: 8000 }).catch(() => null);
-        if (!initRes || !initRes.ok) return null;
+        // 1. 최신 분기 자동 탐색
+        let targetQuarter = null;
+        let totalCount = 0;
         
-        const initData = await (initRes.json().catch(() => ({})));
-        const totalCount = initData[serviceName]?.list_total_count;
-        if (!totalCount) return null;
-
-        // 2. 리버스 딥스캔 (최신 데이터는 맨 끝단에 위치함)
-        // 매출(Selng): 분기당 약 2.2만 건. 점포(Stor): 약 7.7만 건.
-        let lookback = 2000;
-        if (serviceName === 'VwsmTrdarSelngQq') lookback = 28000; // 넉넉히 28페이지
-        if (serviceName === 'VwsmTrdarStorQq') lookback = 80000; // 넉넉히 80페이지
-
-        const startIdx = Math.max(1, totalCount - lookback);
-        const promises = [];
-        for (let current = startIdx; current <= totalCount; current += 1000) {
-            const endIdx = Math.min(current + 999, totalCount);
-            promises.push(
-                fetch(`${SEOUL_BASE}/${apiKey}/json/${serviceName}/${current}/${endIdx}/`, { timeout: 15000 })
-                    .then(r => r.json())
-                    .catch(() => null)
-            );
+        const quartersToTry = ['20244', '20243', '20242', '20241', '20234', '20233', '20232', '20231'];
+        for (const q of quartersToTry) {
+            const initRes = await fetch(`${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1/${q}`, { timeout: 5000 }).catch(() => null);
+            if (initRes && initRes.ok) {
+                try {
+                    const initData = await initRes.json();
+                    if (initData[serviceName] && initData[serviceName].list_total_count > 0) {
+                        totalCount = initData[serviceName].list_total_count;
+                        targetQuarter = q;
+                        break;
+                    }
+                } catch (e) {}
+            }
         }
 
-        const results = await Promise.all(promises);
-        let allRows = [];
-        results.forEach(res => {
-            if (res && res[serviceName] && res[serviceName].row) {
-                allRows = allRows.concat(res[serviceName].row);
-            }
-        });
+        console.log(`[SeoulAPI] ${serviceName} Quarter: ${targetQuarter}, Total: ${totalCount}`);
+        if (!targetQuarter || totalCount === 0) return null;
 
+        // 2-A. URL 필터링 지원 서비스: 상권코드로 직접 필터링 (1회 호출)
+        if (URL_FILTERABLE_SERVICES.has(serviceName)) {
+            const url = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1000/${targetQuarter}/${trdarCd}`;
+            const rows = await fetchPageWithRetry(url, serviceName);
+            console.log(`[SeoulAPI] ${serviceName} (URL필터) -> ${rows.length} rows`);
+            return rows.length > 0 ? rows : null;
+        }
+
+        // 2-B. 전수 스캔 필요 서비스: 배치 순차 처리 (동시 3페이지씩)
+        const BATCH_SIZE = 3;
+        const pages = Math.ceil(totalCount / 1000);
+        let allRows = [];
+
+        for (let batchStart = 0; batchStart < pages; batchStart += BATCH_SIZE) {
+            const batch = [];
+            for (let i = batchStart; i < Math.min(batchStart + BATCH_SIZE, pages); i++) {
+                const url = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/${i * 1000 + 1}/${(i + 1) * 1000}/${targetQuarter}`;
+                batch.push(fetchPageWithRetry(url, serviceName));
+            }
+            const batchResults = await Promise.all(batch);
+            batchResults.forEach(rows => { allRows = allRows.concat(rows); });
+
+            // 이미 타겟 상권이 발견되었고, 이 서비스가 단일행 반환이면 조기 종료
+            const found = allRows.filter(r => r.TRDAR_CD === String(trdarCd));
+            if (found.length > 0 && totalCount <= 2000) break;
+        }
+
+        console.log(`[SeoulAPI] ${serviceName} Scanned ${allRows.length}/${totalCount} rows`);
         if (allRows.length === 0) return null;
 
-        // 3. 해당 상권코드(TRDAR_CD) 완전 필터링
-        const filtered = allRows.filter(r => r.TRDAR_CD === String(trdarCd));
-        if (filtered.length === 0) return null;
-
-        // 4. 최신 분기로만 컷오프 (가장 신선한 데이터)
-        filtered.sort((a, b) => {
-            const qa = `${a.STDR_YYQU_CD || ''}${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
-            const qb = `${b.STDR_YYQU_CD || ''}${b.STDR_YY_CD || ''}${b.STDR_QU_CD || ''}`;
-            return qb.localeCompare(qa);
-        });
+        const filteredRows = allRows.filter(r => r.TRDAR_CD === String(trdarCd));
+        console.log(`[SeoulAPI] ${serviceName} TRDAR_CD ${trdarCd} -> ${filteredRows.length} matched`);
         
-        const latestQuarterKey = `${filtered[0].STDR_YYQU_CD || ''}${filtered[0].STDR_YY_CD || ''}${filtered[0].STDR_QU_CD || ''}`;
-        const latestRows = filtered.filter(a => {
-            const qa = `${a.STDR_YYQU_CD || ''}${a.STDR_YY_CD || ''}${a.STDR_QU_CD || ''}`;
-            return qa === latestQuarterKey;
-        });
-
-        // 다중 로우(매출/점포 등 업종별 분할 리스트) 그대로 반환 => parse 에서 Reduce
-        return latestRows; 
+        return filteredRows.length > 0 ? filteredRows : null;
     } catch (e) {
+        console.error(`[SeoulAPI] ERROR ${serviceName}:`, e.message);
         return null;
     }
 }
 
 /**
- * 좌표로 가장 가까운 상권 코드 찾기
+ * 좌표로 대표 상권 코드 찾기
+ * 매칭 우선순위: 발달상권(D) > 전통시장(R) > 골목상권(A) (500m 이내)
+ * → 입지 분석에는 해당 지역의 대표 상권 규모가 반영되어야 정확한 비교 가능
  */
 async function findNearestTrdarCd(apiKey, lat, lng) {
-    // 영역-상권 API 전체 조회 (1~2000: 서울시 전체 1,671개 커버)
     const [page1, page2] = await Promise.all([
         callSeoulAPI(apiKey, SERVICES.region, 1, 1000),
-        callSeoulAPI(apiKey, SERVICES.region, 1001, 2000)
+        callSeoulAPI(apiKey, SERVICES.region, 1001, 1671)
     ]);
     const rows = [...(page1 || []), ...(page2 || [])];
     if (rows.length === 0) return null;
 
-    // TM → WGS84 근사 변환 후 최근접 상권 찾기
-    let nearest = null;
-    let minDist = Infinity;
+    // 상권 유형별 우선순위 (발달상권이 가장 대표성 높음)
+    const TYPE_PRIORITY = { 'D': 1, 'R': 2, 'A': 3 };
+    const MAX_RANGE = 500; // 500m 이내만 후보
+
+    const candidates = [];
 
     rows.forEach(r => {
-        // XCNTS_VALUE, YDNTS_VALUE는 TM좌표 → 위경도 근사 변환
         const tx = parseFloat(r.XCNTS_VALUE);
         const ty = parseFloat(r.YDNTS_VALUE);
         if (!tx || !ty) return;
         
-        // TM(EPSG:5181) → WGS84 근사변환
         const rLng = (tx - 200000) / 100000 + 127;
         const rLat = (ty - 500000) / 110000 + 38;
         
@@ -142,26 +166,69 @@ async function findNearestTrdarCd(apiKey, lat, lng) {
         const dlng = (rLng - lng) * 111320 * Math.cos(lat * Math.PI / 180);
         const dist = Math.sqrt(dlat * dlat + dlng * dlng);
 
-        if (dist < minDist) {
-            minDist = dist;
-            nearest = {
+        if (dist <= MAX_RANGE) {
+            candidates.push({
                 trdarCd: r.TRDAR_CD,
                 trdarNm: r.TRDAR_CD_NM,
                 trdarSe: r.TRDAR_SE_CD_NM,
+                trdarSeCode: r.TRDAR_SE_CD,
                 admDong: r.ADSTRD_CD_NM,
                 signgu: r.SIGNGU_CD_NM,
                 distance: Math.round(dist),
-                area: parseFloat(r.RELM_AR) || 0
-            };
+                area: parseFloat(r.RELM_AR) || 0,
+                priority: TYPE_PRIORITY[r.TRDAR_SE_CD] || 99,
+            });
         }
     });
 
-    return nearest;
+    if (candidates.length === 0) {
+        // 500m 내 없으면 전체에서 최단거리
+        let nearest = null;
+        let minDist = Infinity;
+        rows.forEach(r => {
+            const tx = parseFloat(r.XCNTS_VALUE);
+            const ty = parseFloat(r.YDNTS_VALUE);
+            if (!tx || !ty) return;
+            const rLng = (tx - 200000) / 100000 + 127;
+            const rLat = (ty - 500000) / 110000 + 38;
+            const dlat = (rLat - lat) * 111320;
+            const dlng = (rLng - lng) * 111320 * Math.cos(lat * Math.PI / 180);
+            const dist = Math.sqrt(dlat * dlat + dlng * dlng);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = { trdarCd: r.TRDAR_CD, trdarNm: r.TRDAR_CD_NM, trdarSe: r.TRDAR_SE_CD_NM, admDong: r.ADSTRD_CD_NM, signgu: r.SIGNGU_CD_NM, distance: Math.round(dist), area: parseFloat(r.RELM_AR) || 0 };
+            }
+        });
+        return nearest;
+    }
+
+    // 우선순위 정렬: 1) 상권유형(발달>전통>골목) 2) 거리
+    candidates.sort((a, b) => a.priority - b.priority || a.distance - b.distance);
+    const best = candidates[0];
+    
+    console.log(`   후보 상권 ${candidates.length}개 중 선택: ${best.trdarNm} (${best.trdarSe}, ${best.distance}m)`);
+    if (candidates.length > 1) {
+        console.log(`   기각된 후보: ${candidates.slice(1, 4).map(c => `${c.trdarNm}(${c.trdarSe},${c.distance}m)`).join(', ')}`);
+    }
+
+    return best;
 }
 
 /**
  * ===== 데이터 파서들 =====
  */
+
+// 분기 코드 헬퍼: STDR_YYQU_CD("20243") 또는 STDR_YY_CD+STDR_QU_CD 양쪽 모두 대응
+function extractQuarter(row) {
+    if (row.STDR_YY_CD && row.STDR_QU_CD) {
+        return `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`;
+    }
+    if (row.STDR_YYQU_CD) {
+        const code = String(row.STDR_YYQU_CD);
+        return `${code.substring(0, 4)}년 ${code.substring(4)}분기`;
+    }
+    return '분기정보없음';
+}
 
 function parseFloatingPop(rows) {
     if (!rows || rows.length === 0) return null;
@@ -192,7 +259,7 @@ function parseFloatingPop(rows) {
             '토': parseInt(row.SAT_FLPOP_CO) || 0,
             '일': parseInt(row.SUN_FLPOP_CO) || 0,
         },
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: 'KT 통신데이터'
     };
 }
@@ -212,7 +279,7 @@ function parseWorkingPop(rows) {
             '50대': parseInt(row.AGRDE_50_WRC_POPLTN_CO) || 0,
             '60대+': parseInt(row.AGRDE_60_ABOVE_WRC_POPLTN_CO) || 0,
         },
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: 'SKT 통신데이터'
     };
 }
@@ -240,54 +307,57 @@ function parseResidentPop(rows) {
             '4인': parseInt(row.HNPN_CO_4_HSHLD_CO) || 0,
             '5인+': parseInt(row.HNPN_CO_5_ABOVE_HSHLD_CO) || 0,
         },
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: '서울시 주민등록'
     };
 }
 
-function parseSales(row) {
-    if (!row) return null;
-    return {
-        totalSales: parseInt(row.THSMON_SELNG_AMT) || 0,
-        totalCount: parseInt(row.THSMON_SELNG_CO) || 0,
-        byDay: {
-            '월': parseInt(row.MON_SELNG_AMT) || 0,
-            '화': parseInt(row.TUES_SELNG_AMT) || 0,
-            '수': parseInt(row.WED_SELNG_AMT) || 0,
-            '목': parseInt(row.THUR_SELNG_AMT) || 0,
-            '금': parseInt(row.FRI_SELNG_AMT) || 0,
-            '토': parseInt(row.SAT_SELNG_AMT) || 0,
-            '일': parseInt(row.SUN_SELNG_AMT) || 0,
-        },
-        byTime: {
-            '00~06시': parseInt(row.TMZON_00_06_SELNG_AMT) || 0,
-            '06~11시': parseInt(row.TMZON_06_11_SELNG_AMT) || 0,
-            '11~14시': parseInt(row.TMZON_11_14_SELNG_AMT) || 0,
-            '14~17시': parseInt(row.TMZON_14_17_SELNG_AMT) || 0,
-            '17~21시': parseInt(row.TMZON_17_21_SELNG_AMT) || 0,
-            '21~24시': parseInt(row.TMZON_21_24_SELNG_AMT) || 0,
-        },
-        byGender: {
-            male: parseInt(row.ML_SELNG_AMT) || 0,
-            female: parseInt(row.FML_SELNG_AMT) || 0,
-        },
-        byAge: {
-            '10대': parseInt(row.AGRDE_10_SELNG_AMT) || 0,
-            '20대': parseInt(row.AGRDE_20_SELNG_AMT) || 0,
-            '30대': parseInt(row.AGRDE_30_SELNG_AMT) || 0,
-            '40대': parseInt(row.AGRDE_40_SELNG_AMT) || 0,
-            '50대': parseInt(row.AGRDE_50_SELNG_AMT) || 0,
-            '60대+': parseInt(row.AGRDE_60_ABOVE_SELNG_AMT) || 0,
-        },
-        weekday: parseInt(row.MDWK_SELNG_AMT) || 0,
-        weekend: parseInt(row.WKEND_SELNG_AMT) || 0,
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+function parseSales(rows) {
+    if (!rows || rows.length === 0) return null;
+    const result = {
+        totalSales: 0,
+        totalCount: 0,
+        byDay: { '월': 0, '화': 0, '수': 0, '목': 0, '금': 0, '토': 0, '일': 0 },
+        byTime: { '00~06시': 0, '06~11시': 0, '11~14시': 0, '14~17시': 0, '17~21시': 0, '21~24시': 0 },
+        byGender: { male: 0, female: 0 },
+        byAge: { '10대': 0, '20대': 0, '30대': 0, '40대': 0, '50대': 0, '60대+': 0 },
+        weekday: 0, weekend: 0,
+        quarter: extractQuarter(rows[0]),
         source: '신한카드'
     };
+    rows.forEach(row => {
+        result.totalSales += parseInt(row.THSMON_SELNG_AMT) || 0;
+        result.totalCount += parseInt(row.THSMON_SELNG_CO) || 0;
+        result.byDay['월'] += parseInt(row.MON_SELNG_AMT) || 0;
+        result.byDay['화'] += parseInt(row.TUES_SELNG_AMT) || 0;
+        result.byDay['수'] += parseInt(row.WED_SELNG_AMT) || 0;
+        result.byDay['목'] += parseInt(row.THUR_SELNG_AMT) || 0;
+        result.byDay['금'] += parseInt(row.FRI_SELNG_AMT) || 0;
+        result.byDay['토'] += parseInt(row.SAT_SELNG_AMT) || 0;
+        result.byDay['일'] += parseInt(row.SUN_SELNG_AMT) || 0;
+        result.byTime['00~06시'] += parseInt(row.TMZON_00_06_SELNG_AMT) || 0;
+        result.byTime['06~11시'] += parseInt(row.TMZON_06_11_SELNG_AMT) || 0;
+        result.byTime['11~14시'] += parseInt(row.TMZON_11_14_SELNG_AMT) || 0;
+        result.byTime['14~17시'] += parseInt(row.TMZON_14_17_SELNG_AMT) || 0;
+        result.byTime['17~21시'] += parseInt(row.TMZON_17_21_SELNG_AMT) || 0;
+        result.byTime['21~24시'] += parseInt(row.TMZON_21_24_SELNG_AMT) || 0;
+        result.byGender.male += parseInt(row.ML_SELNG_AMT) || 0;
+        result.byGender.female += parseInt(row.FML_SELNG_AMT) || 0;
+        result.byAge['10대'] += parseInt(row.AGRDE_10_SELNG_AMT) || 0;
+        result.byAge['20대'] += parseInt(row.AGRDE_20_SELNG_AMT) || 0;
+        result.byAge['30대'] += parseInt(row.AGRDE_30_SELNG_AMT) || 0;
+        result.byAge['40대'] += parseInt(row.AGRDE_40_SELNG_AMT) || 0;
+        result.byAge['50대'] += parseInt(row.AGRDE_50_SELNG_AMT) || 0;
+        result.byAge['60대+'] += parseInt(row.AGRDE_60_ABOVE_SELNG_AMT) || 0;
+        result.weekday += parseInt(row.MDWK_SELNG_AMT) || 0;
+        result.weekend += parseInt(row.WKEND_SELNG_AMT) || 0;
+    });
+    return result;
 }
 
-function parseIncomeSpending(row) {
-    if (!row) return null;
+function parseIncomeSpending(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         monthlyIncome: parseInt(row.MT_AVRG_INCOME_AMT) || 0,
         totalSpending: parseInt(row.EXPNDTR_TOTAMT) || 0,
@@ -302,13 +372,14 @@ function parseIncomeSpending(row) {
             '교육': parseInt(row.EDC_EXPNDTR_TOTAMT) || 0,
             '유흥': parseInt(row.PLESR_EXPNDTR_TOTAMT) || 0,
         },
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: 'KB카드 + 건보공단'
     };
 }
 
-function parseApartment(row) {
-    if (!row) return null;
+function parseApartment(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         complexCount: parseInt(row.APT_HSHOLD_CO) || 0,
         avgPrice: parseInt(row.AVRG_AE) || 0,
@@ -320,59 +391,102 @@ function parseApartment(row) {
             '132~165㎡': parseInt(row.AE_132_165SQ_HSHOLD_CO) || 0,
             '165㎡~': parseInt(row.AE_165_ABVSQ_HSHOLD_CO) || 0,
         },
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: '서울시'
     };
 }
 
-function parseStore(row) {
-    if (!row) return null;
-    return {
-        totalStore: parseInt(row.STOR_CO) || 0,
-        similarStore: parseInt(row.SIMILR_INDUTY_STOR_CO) || 0,
-        openRate: parseFloat(row.OPBIZ_RT) || 0,
-        closeRate: parseFloat(row.CLSBIZ_RT) || 0,
-        franchiseCount: parseInt(row.FRC_STOR_CO) || 0,
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+function parseStore(rows) {
+    if (!rows || rows.length === 0) return null;
+    const result = {
+        totalStore: 0,
+        similarStore: 0,
+        openRate: 0,
+        closeRate: 0,
+        franchiseCount: 0,
+        quarter: extractQuarter(rows[0]),
         source: '서울시 + 카드사'
     };
+    
+    let totalOpenRate = 0;
+    let totalCloseRate = 0;
+    let rateCount = 0;
+    
+    rows.forEach(row => {
+        result.totalStore += parseInt(row.STOR_CO) || 0;
+        result.similarStore += parseInt(row.SIMILR_INDUTY_STOR_CO) || 0;
+        result.franchiseCount += parseInt(row.FRC_STOR_CO) || 0;
+        if (parseFloat(row.OPBIZ_RT) || parseFloat(row.CLSBIZ_RT)) {
+            totalOpenRate += parseFloat(row.OPBIZ_RT) || 0;
+            totalCloseRate += parseFloat(row.CLSBIZ_RT) || 0;
+            rateCount++;
+        }
+    });
+    
+    if (rateCount > 0) {
+        result.openRate = parseFloat((totalOpenRate / rateCount).toFixed(1));
+        result.closeRate = parseFloat((totalCloseRate / rateCount).toFixed(1));
+    }
+    return result;
 }
 
-function parseChangeIndex(row) {
-    if (!row) return null;
+function parseChangeIndex(rows) {
+    if (!rows || rows.length === 0) return null;
+    const row = rows[0];
     return {
         changeIndicator: row.TRDAR_CHNGE_IX || '',
         changeIndicatorNm: row.TRDAR_CHNGE_IX_NM || '',
         operationRate: parseFloat(row.OPR_SALE_MT_AVRG) || 0,
         closeMonth: parseFloat(row.CLS_SALE_MT_AVRG) || 0,
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+        quarter: extractQuarter(row),
         source: '서울시'
     };
 }
 
-function parseFacility(row) {
-    if (!row) return null;
-    return {
-        govOffice: parseInt(row.VIATR_FCLTY_CO) || 0,
-        bank: parseInt(row.BANK_CO) || 0,
-        hospital: parseInt(row.GNRL_HSPTL_CO) || 0,
-        pharmacy: parseInt(row.PHARMCY_CO) || 0,
-        kindergarten: parseInt(row.KNDRGR_CO) || 0,
-        elemSchool: parseInt(row.ELEMY_SCHL_CO) || 0,
-        midSchool: parseInt(row.MSKUL_CO) || 0,
-        highSchool: parseInt(row.HGSCHL_CO) || 0,
-        university: parseInt(row.UNVRST_CO) || 0,
-        department: parseInt(row.DPRTM_STRS_CO) || 0,
-        theater: parseInt(row.THEAT_CO) || 0,
-        accommodation: parseInt(row.STAYNG_FCLTY_CO) || 0,
-        airport: parseInt(row.ARPRT_CO) || 0,
-        railStation: parseInt(row.RLROAD_STATN_CO) || 0,
-        busTerminal: parseInt(row.BUS_TRMINL_CO) || 0,
-        subwayStation: parseInt(row.SUBWAY_STATN_CO) || 0,
-        busStop: parseInt(row.BUS_STTN_CO) || 0,
-        quarter: `${row.STDR_YY_CD}년 ${row.STDR_QU_CD}분기`,
+function parseFacility(rows) {
+    if (!rows || rows.length === 0) return null;
+    const result = {
+        govOffice: 0,
+        bank: 0,
+        hospital: 0,
+        pharmacy: 0,
+        kindergarten: 0,
+        elemSchool: 0,
+        midSchool: 0,
+        highSchool: 0,
+        university: 0,
+        department: 0,
+        theater: 0,
+        accommodation: 0,
+        airport: 0,
+        railStation: 0,
+        busTerminal: 0,
+        subwayStation: 0,
+        busStop: 0,
+        quarter: extractQuarter(rows[0]),
         source: '각급기관'
     };
+
+    rows.forEach(row => {
+        result.govOffice += parseInt(row.VIATR_FCLTY_CO) || 0;
+        result.bank += parseInt(row.BANK_CO) || 0;
+        result.hospital += parseInt(row.GNRL_HSPTL_CO) || 0;
+        result.pharmacy += parseInt(row.PHARMCY_CO) || 0;
+        result.kindergarten += parseInt(row.KNDRGR_CO) || 0;
+        result.elemSchool += parseInt(row.ELEMY_SCHL_CO) || 0;
+        result.midSchool += parseInt(row.MSKUL_CO) || 0;
+        result.highSchool += parseInt(row.HGSCHL_CO) || 0;
+        result.university += parseInt(row.UNVRST_CO) || 0;
+        result.department += parseInt(row.DPRTM_STRS_CO) || 0;
+        result.theater += parseInt(row.THEAT_CO) || 0;
+        result.accommodation += parseInt(row.STAYNG_FCLTY_CO) || 0;
+        result.airport += parseInt(row.ARPRT_CO) || 0;
+        result.railStation += parseInt(row.RLROAD_STATN_CO) || 0;
+        result.busTerminal += parseInt(row.BUS_TRMINL_CO) || 0;
+        result.subwayStation += parseInt(row.SUBWAY_STATN_CO) || 0;
+        result.busStop += parseInt(row.BUS_STTN_CO) || 0;
+    });
+    return result;
 }
 
 /**

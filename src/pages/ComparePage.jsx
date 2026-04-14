@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
@@ -86,9 +87,16 @@ function MetricCard({ metric }) {
 }
 
 export default function ComparePage() {
-    const [address1, setAddress1] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
+    
+    // 이관된 주소 및 반경 정보가 있으면 자동 할당
+    const presetAddressA = location.state?.presetAddressA || '';
+    const presetRadius = location.state?.radius || 500;
+
+    const [address1, setAddress1] = useState(presetAddressA);
     const [address2, setAddress2] = useState('');
-    const [radius, setRadius] = useState(500);
+    const [radius, setRadius] = useState(presetRadius);
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
@@ -123,27 +131,49 @@ export default function ComparePage() {
     const summary = emp?.summary;
 
     return (
-        <div className="compare-page">
-            <header className="compare-header">
-                <a href="/" className="compare-back">← 홈</a>
-                <h1>⚔️ 매물 비교 분석기</h1>
-                <p className="compare-subtitle">실증 데이터 기반 A vs B 상권 입지 비교 · {emp ? `${summary.totalMetrics}개 지표` : '20개+ 지표'}</p>
+        <div className="b2b-hub-container compare-page">
+            <header className="b2b-hub-header" style={{ marginBottom: '24px' }}>
+                <div className="b2b-header-brand" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+                    <span className="b2b-brand-logo">STANBY LAB</span>
+                    <span className="b2b-brand-vertical-line"></span>
+                    <span className="b2b-brand-subtitle">EXECUTIVE COMMAND CENTER</span>
+                </div>
+                <div className="b2b-header-status">
+                    <div style={{ color: '#D4AF37', fontWeight: 700, fontSize: '14px', border: '1px solid #D4AF37', padding: '6px 12px', borderRadius: '8px', background: 'rgba(212,175,55,0.05)' }}>
+                        CHIEF EVALUATOR : MARI
+                    </div>
+                </div>
             </header>
 
-            <section className="compare-input-section">
+            <section className="b2b-hero-section" style={{ padding: '0 48px', marginBottom: '40px', textAlign: 'center' }}>
+                <h1 className="b2b-hero-title" style={{ fontSize: '32px', marginBottom: '12px' }}>
+                    <span className="text-gold">핀포인트 자산 비교 비평</span>
+                </h1>
+                <p className="compare-subtitle b2b-hero-desc" style={{ margin: '0 auto' }}>
+                    수석 비평관 마리(Mari)가 실증 데이터를 바탕으로 두 매물의 우위를 저울질합니다.<br/>
+                    {emp ? `분석 완료: 총 ${summary.totalMetrics}개 지표 검증됨` : '비교할 두 매물의 주소를 입력하세요.'}
+                </p>
+            </section>
+
+            <section className="compare-input-section" style={{ padding: '0 20px' }}>
                 <div className="compare-input-grid">
-                    <div className="compare-input-card input-a">
-                        <div className="compare-input-badge">A 매물</div>
+                    <div className="compare-input-card input-a" style={{ background: 'rgba(30, 41, 59, 0.4)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                        <div className="compare-input-badge" style={{ background: '#06b6d4', color: '#fff' }}>A 매물</div>
                         <input type="text" placeholder="예: 서울 강남구 테헤란로 152"
                             value={address1} onChange={e => setAddress1(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && runCompare()} />
+                            onKeyDown={e => e.key === 'Enter' && runCompare()} 
+                            style={{ color: '#fff' }} />
                     </div>
-                    <div className="compare-vs-circle">VS</div>
-                    <div className="compare-input-card input-b">
-                        <div className="compare-input-badge">B 매물</div>
+                    
+                    <div className="compare-vs-circle" style={{ background: '#0a0f18', borderColor: '#D4AF37', color: '#D4AF37' }}>VS</div>
+
+                    <div className="compare-input-card input-b" style={{ background: 'rgba(30, 41, 59, 0.4)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                        <div className="compare-input-badge" style={{ background: '#f59e0b', color: '#1a1a2e' }}>B 매물</div>
                         <input type="text" placeholder="예: 서울 서초구 서초대로 231"
                             value={address2} onChange={e => setAddress2(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && runCompare()} />
+                            onKeyDown={e => e.key === 'Enter' && runCompare()} 
+                            autoFocus={!!presetAddressA}
+                            style={{ color: '#fff' }} />
                     </div>
                 </div>
                 <div className="compare-controls">
@@ -203,21 +233,31 @@ export default function ComparePage() {
                             <div className="compare-ai-grid">
                                 <div className="compare-ai-card ai-a">
                                     <h3>📍 A 매물의 강점</h3>
-                                    <ul>{ai.aStrengths?.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                                    <ul>{ai.aStrengths?.map((s, i) => <li key={i}>{s.replace(/\*\*/g, '')}</li>)}</ul>
                                 </div>
                                 <div className="compare-ai-card ai-b">
                                     <h3>📍 B 매물의 강점</h3>
-                                    <ul>{ai.bStrengths?.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                                    <ul>{ai.bStrengths?.map((s, i) => <li key={i}>{s.replace(/\*\*/g, '')}</li>)}</ul>
                                 </div>
                             </div>
                             {ai.targetGuide && (
                                 <div className="compare-ai-guide">
-                                    <strong>🎯 업종별 선택 가이드:</strong> {ai.targetGuide}
+                                    <strong>🎯 업종별 선택 가이드</strong>
+                                    <ul>
+                                        {Array.isArray(ai.targetGuide)
+                                            ? ai.targetGuide.map((g, i) => <li key={i}>{g.replace(/\*\*/g, '')}</li>)
+                                            : <li>{ai.targetGuide.replace(/\*\*/g, '')}</li>}
+                                    </ul>
                                 </div>
                             )}
                             {ai.riskFactors && (
                                 <div className="compare-ai-risk">
-                                    <strong>⚠️ 리스크 요인:</strong> {ai.riskFactors}
+                                    <strong>⚠️ 매물 리스크 요인</strong>
+                                    <ul>
+                                        {Array.isArray(ai.riskFactors)
+                                            ? ai.riskFactors.map((r, i) => <li key={i}>{r.replace(/\*\*/g, '')}</li>)
+                                            : <li>{ai.riskFactors.replace(/\*\*/g, '')}</li>}
+                                    </ul>
                                 </div>
                             )}
                         </section>

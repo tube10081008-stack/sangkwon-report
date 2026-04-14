@@ -1,6 +1,29 @@
 /* ===== 상권분석 리포트 - 프리미엄 디자인 시스템 ===== */
 
 :root {
+    /* === B2B Premium Executive Tokens === */
+    --b2b-bg-base: #0a0f18; /* Very deep dark navy */
+    --b2b-bg-panel: #111827;
+    --b2b-bg-card: rgba(30, 41, 59, 0.4);
+    
+    --b2b-gold-light: #FBECC7;
+    --b2b-gold-main: #D4AF37; /* Metallic Gold */
+    --b2b-gold-dark: #B38A2A;
+    --b2b-gold-glow: rgba(212, 175, 55, 0.15);
+    
+    --b2b-bronze: #CD7F32;
+    --b2b-platinum: #E2E8F0;
+    
+    --b2b-border-subtle: rgba(255, 255, 255, 0.06);
+    --b2b-border-accent: rgba(212, 175, 55, 0.3);
+    
+    --b2b-text-primary: #FFFFFF;
+    --b2b-text-secondary: #94A3B8;
+    --b2b-text-gold: #E5CD7E;
+    
+    --b2b-glass: rgba(15, 23, 42, 0.7);
+    --b2b-glass-border: rgba(255, 255, 255, 0.08); /* === End B2B Tokens === */
+
     /* Primary Palette */
     --primary-50: #eef2ff;
     --primary-100: #e0e7ff;
@@ -2571,4 +2594,380 @@ body {
     .compare-ai-grid { grid-template-columns: 1fr; }
     .compare-metrics-grid { grid-template-columns: 1fr; }
     .compare-header h1 { font-size: 24px; }
+}
+
+/* ==========================================================================
+   B2B Premium Executive Command Center Styles (Landing.jsx)
+   ========================================================================== */
+.b2b-hub-container {
+    min-height: 100vh;
+    background-color: var(--b2b-bg-base);
+    color: var(--b2b-text-primary);
+    position: relative;
+    overflow-x: hidden;
+    font-family: var(--font-display);
+}
+
+.b2b-hub-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 0%, #161e31 0%, /* dark blue tint */ var(--b2b-bg-base) 70%);
+    background-image: 
+        radial-gradient(ellipse at 50% -20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%), 
+        linear-gradient(to bottom, rgba(10,15,24,0) 0%, #0a0f18 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.b2b-hub-header {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 48px;
+    border-bottom: 1px solid var(--b2b-border-subtle);
+    background: rgba(10, 15, 24, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.b2b-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.b2b-brand-logo {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--b2b-text-primary);
+}
+
+.b2b-brand-vertical-line {
+    width: 1px;
+    height: 20px;
+    background: var(--b2b-border-accent);
+}
+
+.b2b-brand-subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--b2b-gold-main);
+}
+
+.b2b-header-status {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.b2b-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+.b2b-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+}
+
+.b2b-status-dot.pulse {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    animation: b2b-pulse 2s infinite;
+}
+
+@keyframes b2b-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.b2b-status-text {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #10b981;
+}
+
+.b2b-time-display {
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--b2b-text-secondary);
+    letter-spacing: 1px;
+}
+
+.b2b-hub-main {
+    position: relative;
+    z-index: 10;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 48px;
+}
+
+.b2b-hero-section {
+    margin-bottom: 80px;
+    animation: b2b-fade-in-up 0.8s ease-out forwards;
+}
+
+.b2b-hero-title {
+    font-size: 46px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.3;
+    margin-bottom: 24px;
+    color: var(--b2b-text-primary);
+    letter-spacing: -1px;
+}
+
+.text-gold {
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--b2b-gold-light), var(--b2b-gold-main));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.b2b-hero-desc {
+    font-size: 17px;
+    color: var(--b2b-text-secondary);
+    line-height: 1.8;
+    max-width: 700px;
+}
+
+.b2b-agents-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+.b2b-agent-card {
+    background: var(--b2b-bg-card);
+    border: 1px solid var(--b2b-border-subtle);
+    border-radius: 16px;
+    padding: 32px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: b2b-fade-in-up 0.8s ease-out forwards;
+}
+
+.b2b-agent-card:nth-child(1) { animation-delay: 0.1s; }
+.b2b-agent-card:nth-child(2) { animation-delay: 0.2s; }
+.b2b-agent-card:nth-child(3) { animation-delay: 0.3s; }
+
+.b2b-agent-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.02);
+}
+
+.b2b-agent-card.highlight-card {
+    border-color: rgba(212, 175, 55, 0.2);
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(212, 175, 55, 0.03) 100%);
+}
+
+.b2b-agent-card.highlight-card:hover {
+    border-color: var(--b2b-gold-main);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 30px var(--b2b-gold-glow);
+}
+
+.b2b-agent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.b2b-agent-badge {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: var(--b2b-text-secondary);
+}
+
+.gold-badge {
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--b2b-gold-main);
+}
+
+.b2b-agent-status.online {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+}
+
+.b2b-agent-body {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.b2b-agent-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--b2b-text-secondary);
+}
+
+.mari-avatar {
+    background: rgba(212, 175, 55, 0.05);
+    border-color: rgba(212, 175, 55, 0.3);
+    color: var(--b2b-gold-main);
+}
+
+.b2b-agent-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--b2b-text-primary);
+}
+
+.b2b-agent-role {
+    font-size: 13px;
+    color: var(--b2b-text-secondary);
+    margin: 0;
+}
+
+.b2b-agent-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #94A3B8;
+    font-style: italic;
+    margin-bottom: 32px;
+    flex-grow: 1;
+}
+
+.b2b-agent-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: auto;
+}
+
+.b2b-agent-core {
+    font-size: 11px;
+    color: var(--b2b-text-secondary);
+    font-family: monospace;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--b2b-border-subtle);
+}
+
+.b2b-btn-launch {
+    padding: 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--b2b-text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.b2b-agent-card:hover .b2b-btn-launch {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    color: #06b6d4;
+    padding-left: 20px;
+}
+
+.gold-btn {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+    color: var(--b2b-gold-light);
+}
+
+.b2b-agent-card:hover .gold-btn {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: rgba(212, 175, 55, 0.5);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+    color: #eab308;
+}
+
+.purple-badge {
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.3);
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.purple-btn {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
+    color: #c084fc;
+}
+
+.b2b-agent-card.purple-card {
+    border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.b2b-agent-card.purple-card:hover {
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.1);
+}
+
+.b2b-agent-card:hover .purple-btn {
+    background: rgba(168, 85, 247, 0.2);
+    border-color: rgba(168, 85, 247, 0.5);
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+    color: #d8b4fe;
+}
+
+.b2b-footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--b2b-border-subtle);
+}
+
+.b2b-system-specs {
+    display: flex;
+    gap: 32px;
+    font-family: monospace;
+    font-size: 10px;
+    color: #475569;
+    letter-spacing: 1px;
+}
+
+@keyframes b2b-fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+    .b2b-agents-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+    .b2b-agents-grid { grid-template-columns: 1fr; }
+    .b2b-hub-header { padding: 20px; flex-direction: column; gap: 16px; align-items: flex-start; }
+    .b2b-hub-main { padding: 40px 20px; }
+    .b2b-hero-title { font-size: 32px; }
 }

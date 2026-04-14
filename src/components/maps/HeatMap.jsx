@@ -69,6 +69,9 @@ function createSmoothHeatLayer(map, points, colorScheme = 'heat') {
         const mapSize = map.getSize();
         heatCanvas.width = mapSize.x;
         heatCanvas.height = mapSize.y;
+        
+        if (heatCanvas.width === 0 || heatCanvas.height === 0) return;
+
         const topLeft = map.containerPointToLayerPoint([0, 0]);
         L.DomUtil.setPosition(heatCanvas, topLeft);
 
@@ -151,6 +154,9 @@ function createCategoryHeatLayers(map, categories) {
             const mapSize = map.getSize();
             heatCanvas.width = mapSize.x;
             heatCanvas.height = mapSize.y;
+            
+            if (heatCanvas.width === 0 || heatCanvas.height === 0) return;
+
             const topLeft = map.containerPointToLayerPoint([0, 0]);
             L.DomUtil.setPosition(heatCanvas, topLeft);
 

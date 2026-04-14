@@ -7,6 +7,7 @@ import SharedReportPage from './pages/SharedReportPage';
 import AgentDashboard from './pages/AgentDashboard';
 import CoraChat from './pages/CoraChat';
 import ComparePage from './pages/ComparePage';
+import OpiePage from './pages/OpiePage';
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/shared/:id" element={<SharedReportPage />} />
                 <Route path="/agent-hub" element={<AgentDashboard />} />
                 <Route path="/compare" element={<ComparePage />} />
+                <Route path="/opie" element={<OpiePage />} />
             </Routes>
         </Router>
     );

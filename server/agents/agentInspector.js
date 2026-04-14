@@ -28,7 +28,7 @@ export async function inspectAddress(address, radius = 500, targetCategory = 'ì¹
         const location = await geocodeAddress(address);
         const stores = await getStoresInRadius(location.latitude, location.longitude, radius);
         const analysis = analyzeDistrict(stores, targetCategory);
-        const aiComments = await generateSingleAnalysisComment(analysis, location, null);
+        const aiComments = await generateSingleAnalysisComment({ analysis, location, realEstateData: null });
 
         analysisData = {
             location,

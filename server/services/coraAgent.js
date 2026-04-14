@@ -112,7 +112,7 @@ async function executeTool(toolName, args) {
                 }
             } catch (e) { /* 실패해도 무시 */ }
 
-            const aiComments = await generateSingleAnalysisComment(analysis, location, realEstateData);
+            const aiComments = await generateSingleAnalysisComment({ analysis, location, realEstateData });
 
             return {
                 success: true,

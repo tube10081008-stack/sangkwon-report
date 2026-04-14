@@ -9,7 +9,8 @@ import { askGemini } from './geminiService.js';
 /**
  * 단일 상권 분석 AI 코멘트 생성 (Gemini 기반 동적 생성, 실패 시 규칙 기반 폴백)
  */
-export async function generateSingleAnalysisComment(analysis, location, realEstateData) {
+export async function generateSingleAnalysisComment(integratedResult) {
+    const { analysis, location, realEstateData } = integratedResult;
     const { grade, overallScore, totalStores, categorySummary, franchiseAnalysis, indicators, targetAnalysis } = analysis;
 
     const topCategories = categorySummary.slice(0, 3);

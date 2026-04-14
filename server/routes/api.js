@@ -15,6 +15,7 @@ import { getRealEstateData } from '../services/realEstateData.js';
 import { reverseGeocode } from '../services/geocoding.js';
 import { askGemini } from '../services/geminiService.js';
 import { buildEmpiricalComparison, generateAICompareComment } from '../services/compareService.js';
+import { generateMarketingReport } from '../services/opieService.js';
 
 const router = Router();
 
@@ -110,20 +111,25 @@ router.post('/analyze/single', async (req, res) => {
             console.warn('프리미엄 데이터 조회 실패:', e.message);
         }
 
-        // AI 컨설팅 코멘트에 실거래가 데이터 적용
-        const aiComments = await generateSingleAnalysisComment(analysis, location, realEstateData);
+        // 💡 단일 진실 원천(Single Source of Truth) 통합 객체 생성
+        const integratedAnalysisResult = {
+            location,
+            radius,
+            analysis,
+            transitInfo,
+            demographics,
+            seoulData,
+            realEstateData
+        };
+
+        // AI 컨설팅 코멘트에 통합 분석 결과 적용 (데이터 파편화 방지)
+        const aiComments = await generateSingleAnalysisComment(integratedAnalysisResult);
 
         res.json({
             success: true,
             data: {
-                location,
-                radius,
-                analysis,
+                ...integratedAnalysisResult,
                 aiComments,
-                transitInfo,
-                demographics,
-                seoulData,
-                realEstateData,
                 generatedAt: new Date().toISOString()
             }
         });
@@ -233,7 +239,7 @@ router.post('/analyze/strategy', async (req, res) => {
         const analysis = analyzeDistrict(stores, targetCategory);
 
         // 4. AI 컨설팅 코멘트
-        const aiComments = await generateSingleAnalysisComment(analysis, location);
+        const aiComments = await generateSingleAnalysisComment({ analysis, location, realEstateData: null });
 
         // 5. 필승전략 가이드
         const strategy = generateStrategyGuide(analysis, location, targetCategory);
@@ -341,6 +347,31 @@ router.post('/ask-ai', async (req, res) => {
     } catch (error) {
         console.error('AI 질문 오류:', error);
         res.status(500).json({ error: error.message || 'AI 서버 통신 중 오류가 발생했습니다.' });
+    }
+});
+
+/**
+ * POST /api/opie/generate
+ * 오피(Opie) 브랜딩 리포트 생성
+ */
+router.post('/opie/generate', async (req, res) => {
+    try {
+        const { district, agencyName, brokerName, phone } = req.body;
+        
+        if (!district || !agencyName || !brokerName || !phone) {
+            return res.status(400).json({ error: '지점, 연락처 등 필수 정보가 누락되었습니다.' });
+        }
+
+        const reportMarkdown = await generateMarketingReport(district, agencyName, brokerName, phone);
+        
+        res.json({
+            success: true,
+            markdown: reportMarkdown
+        });
+
+    } catch (error) {
+        console.error('[Opie] 브랜딩 리포트 생성 실패:', error);
+        res.status(500).json({ error: '컨텐츠 생성 중 오류가 발생했습니다.' });
     }
 });
 

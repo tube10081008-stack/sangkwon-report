@@ -185,17 +185,8 @@ export function buildEmpiricalComparison(a, b) {
         noData: !aSales && !bSales,
     });
 
-    const aIncome = a.seoul?.incomeSpending?.monthlyIncome || 0;
-    const bIncome = b.seoul?.incomeSpending?.monthlyIncome || 0;
 
-    salesMetrics.push({
-        id: 'avg_income', label: '배후세대 월평균소득',
-        source: 'KB카드 + 국민건강보험공단',
-        icon: '💰', a: aIncome, b: bIncome,
-        unit: '원', format: 'currency',
-        winner: aIncome > bIncome ? 'A' : bIncome > aIncome ? 'B' : null,
-        noData: !aIncome && !bIncome,
-    });
+
 
     const aClose = a.seoul?.store?.closeRate || 0;
     const bClose = b.seoul?.store?.closeRate || 0;
@@ -364,10 +355,18 @@ export function buildEmpiricalComparison(a, b) {
 export async function generateAICompareComment(address1, address2, empiricalComparison) {
     try {
         const allMetrics = empiricalComparison.categories.flatMap(c => c.metrics);
+
+        const formatKoreanCurrency = (amount) => {
+            if (!amount) return '0원';
+            if (amount >= 100000000) return (amount / 100000000).toFixed(1) + '억원';
+            if (amount >= 10000) return Math.floor(amount / 10000).toLocaleString() + '만원';
+            return amount.toLocaleString() + '원';
+        };
+
         const metricsText = allMetrics.map(m => {
             if (m.type === 'text') return `${m.icon} ${m.label}: A="${m.textA}" vs B="${m.textB}" (${m.source})`;
-            const aVal = m.format === 'currency' ? `${m.a}원` : `${m.a}${m.unit}`;
-            const bVal = m.format === 'currency' ? `${m.b}원` : `${m.b}${m.unit}`;
+            const aVal = m.format === 'currency' ? formatKoreanCurrency(m.a) : `${m.a}${m.unit}`;
+            const bVal = m.format === 'currency' ? formatKoreanCurrency(m.b) : `${m.b}${m.unit}`;
             return `${m.icon} ${m.label}: A=${aVal} vs B=${bVal} (${m.source})${m.winner ? ` → ${m.winner} 우세` : ''}`;
         }).join('\n');
 
@@ -381,20 +380,19 @@ ${metricsText}
 
 [종합] A 승: ${empiricalComparison.summary.aWins}개 / B 승: ${empiricalComparison.summary.bWins}개
 
-⚠️ 핵심 작성 원칙 — "수치 근거 병행 규칙":
-- 정성적 표현(예: "확연한 우위", "압도적 차이")은 사용 가능하지만, 반드시 해당 수치와 % 차이를 함께 명시해야 합니다.
-- ✅ 좋은 예: "A의 유동인구 221,696명은 B(98,234명) 대비 126% 높아 확연한 우위를 보입니다"
-- ❌ 나쁜 예: "A가 현저히 높은 유동인구를 보입니다" (수치 없이 정성 표현만 단독 사용 = 금지)
-- 모든 강점, 리스크, 가이드에서 반드시 실제 데이터 수치를 인용하세요.
-- "높다/낮다/많다/적다"는 반드시 "몇 %, 몇 배, 구체적 수치"와 함께 쓰세요.
+⚠️ 핵심 작성 원칙 — "가독성 및 포맷 규칙":
+1. 절대 **마크다운(**)** 문법을 사용하지 마세요. 모든 텍스트는 순수 텍스트(Plain Text)로 작성하세요.
+2. 금액을 명시할 때는 원본 숫자가 아닌 "166.2억원", "323만원" 같이 한글 단위로 읽기 쉽게 작성하세요.
+3. 정성적 표현("확연한 우위", "압도적")을 쓸 땐 반드시 해당 수치와 % 차이를 함께 명시하세요.
+4. 항목들을 배열(Array) 형식 분리하여 가독성이 높게 구성하세요. (하나의 거대한 String으로 작성 금지)
 
-반드시 아래 JSON 형식 하나만 출력하세요:
+반드시 아래 JSON 형식 하나만 출력하세요. 배열 내부 요소는 1개의 문장 또는 단락 단위로 쪼개세요:
 {
-  "verdict": "종합 판정 2~3문장 (모든 비교에 수치와 %차를 포함하고, 근거 있는 정성 표현 병행)",
-  "aStrengths": ["A의 수치+근거 강점 1", "A의 수치+근거 강점 2", "A의 수치+근거 강점 3"],
-  "bStrengths": ["B의 수치+근거 강점 1", "B의 수치+근거 강점 2", "B의 수치+근거 강점 3"],
-  "targetGuide": "업종/타겟 고객별 선택 가이드 (수치 포함). 최소 3가지 시나리오",
-  "riskFactors": "각 매물의 구체적 리스크 (수치 근거 포함) 1~2문장"
+  "verdict": "종합 판정 2~3문장 (순수 텍스트, 수치 근거 포함)",
+  "aStrengths": ["A의 강점 1", "A의 강점 2"],
+  "bStrengths": ["B의 강점 1", "B의 강점 2"],
+  "targetGuide": ["타겟 가이드 시나리오 1", "타겟 가이드 시나리오 2", "타겟 가이드 시나리오 3"],
+  "riskFactors": ["A 매물 리스크 요인", "B 매물 리스크 요인"]
 }`;
         const raw = await askGemini(prompt, null, '부동산 상권 입지 비교 전문가. 순수 JSON만 반환.');
         const cleaned = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();

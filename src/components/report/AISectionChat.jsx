@@ -142,7 +142,7 @@ export default function AISectionChat({ sectionName, suggestedQuestions, context
                 </div>
             )}
             
-            <style jsx>{`
+            <style>{`
                 @keyframes spin {
                     to { transform: rotate(360deg); }
                 }

@@ -68,28 +68,16 @@ export async function applyAutoFixes(improvementPlan) {
     };
 }
 
-/**
- * KNOWN_FRANCHISES 배열에 새 브랜드 추가
- */
 async function addToFranchiseList(newBrands) {
-    const filePath = path.join(PROJECT_ROOT, 'server/services/storeData.js');
-    let content = fs.readFileSync(filePath, 'utf-8');
-
-    // 현재 KNOWN_FRANCHISES 배열 찾기
-    const arrayMatch = content.match(/const KNOWN_FRANCHISES\s*=\s*\[([\s\S]*?)\];/);
-    if (!arrayMatch) {
-        throw new Error('KNOWN_FRANCHISES 배열을 찾을 수 없습니다.');
+    const filePath = path.join(PROJECT_ROOT, 'server/data/franchises.json');
+    let currentBrands = [];
+    if (fs.existsSync(filePath)) {
+        currentBrands = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     }
 
-    // 현재 등록된 브랜드 추출
-    const currentBrands = arrayMatch[1].match(/'([^']+)'/g)?.map(s => s.replace(/'/g, '')) || [];
-
-    // 브랜드명 정제: 'CU (편의점)' → 'CU', '교촌치킨/BBQ' → '교촌치킨', 'BBQ'
     const cleanedBrands = [];
     newBrands.forEach(b => {
-        // 괄호 안 내용 제거
         let cleaned = b.replace(/\s*\([^)]*\)/g, '').trim();
-        // 슬래시로 분리된 경우 각각 추가
         if (cleaned.includes('/')) {
             cleaned.split('/').forEach(part => {
                 const p = part.trim();
@@ -100,56 +88,31 @@ async function addToFranchiseList(newBrands) {
         }
     });
 
-    // 중복 제거하여 새로운 브랜드만 필터링
     const trulyNew = [...new Set(cleanedBrands)].filter(b => !currentBrands.includes(b));
 
     if (trulyNew.length === 0) {
         return { type: 'FRANCHISE_ADD', addedCount: 0, message: '추가할 새 브랜드 없음 (이미 모두 등록됨)' };
     }
 
-    // 배열 마지막에 추가
-    const newEntries = trulyNew.map(b => `    '${b}'`).join(',\n');
-    const lastBrandMatch = arrayMatch[1].lastIndexOf("'");
-    const insertPos = content.indexOf(arrayMatch[0]) + arrayMatch[0].indexOf(']');
-
-    // 기존 배열 닫는 ] 앞에 새 항목 삽입
-    const oldArray = arrayMatch[0];
-    const oldContent = arrayMatch[1].trimEnd();
-    const newArray = `const KNOWN_FRANCHISES = [${oldContent},\n    // === Auto-added by Agent Loop (${new Date().toISOString().split('T')[0]}) ===\n${newEntries}\n];`;
-
-    content = content.replace(oldArray, newArray);
-    fs.writeFileSync(filePath, content, 'utf-8');
+    const updatedBrands = [...currentBrands, ...trulyNew];
+    fs.writeFileSync(filePath, JSON.stringify(updatedBrands, null, 2), 'utf-8');
 
     return {
         type: 'FRANCHISE_ADD',
         addedCount: trulyNew.length,
         addedBrands: trulyNew,
-        file: 'server/services/storeData.js',
-        message: `KNOWN_FRANCHISES에 ${trulyNew.length}개 브랜드 추가: ${trulyNew.join(', ')}`
+        file: 'server/data/franchises.json',
+        message: `franchises.json에 ${trulyNew.length}개 브랜드 추가: ${trulyNew.join(', ')}`
     };
 }
 
-/**
- * CATEGORY_DISPLAY_MAP에 새 매핑 추가
- */
 async function addToCategoryMapping(newMappings) {
-    const filePath = path.join(PROJECT_ROOT, 'server/services/storeData.js');
-    let content = fs.readFileSync(filePath, 'utf-8');
-
-    // 현재 CATEGORY_DISPLAY_MAP 찾기
-    const mapMatch = content.match(/const CATEGORY_DISPLAY_MAP\s*=\s*\{([\s\S]*?)\};/);
-    if (!mapMatch) {
-        throw new Error('CATEGORY_DISPLAY_MAP 객체를 찾을 수 없습니다.');
+    const filePath = path.join(PROJECT_ROOT, 'server/data/categories.json');
+    let currentMappings = {};
+    if (fs.existsSync(filePath)) {
+        currentMappings = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     }
 
-    // 현재 등록된 매핑 추출
-    const currentMappings = {};
-    const entryMatches = mapMatch[1].matchAll(/'([^']+)'\s*:\s*'([^']+)'/g);
-    for (const m of entryMatches) {
-        currentMappings[m[1]] = m[2];
-    }
-
-    // 중복 제거
     const trulyNew = {};
     Object.entries(newMappings).forEach(([from, to]) => {
         if (!currentMappings[from]) {
@@ -162,24 +125,15 @@ async function addToCategoryMapping(newMappings) {
         return { type: 'CATEGORY_MAP_ADD', addedCount: 0, message: '추가할 새 매핑 없음' };
     }
 
-    // 기존 객체에 새 매핑 추가
-    const newEntries = Object.entries(trulyNew)
-        .map(([from, to]) => `    '${from}': '${to}'`)
-        .join(',\n');
-
-    const oldMap = mapMatch[0];
-    const oldContent = mapMatch[1].trimEnd();
-    const newMap = `const CATEGORY_DISPLAY_MAP = {${oldContent},\n    // === Auto-added by Agent Loop (${new Date().toISOString().split('T')[0]}) ===\n${newEntries}\n};`;
-
-    content = content.replace(oldMap, newMap);
-    fs.writeFileSync(filePath, content, 'utf-8');
+    const updatedMappings = { ...currentMappings, ...trulyNew };
+    fs.writeFileSync(filePath, JSON.stringify(updatedMappings, null, 2), 'utf-8');
 
     return {
         type: 'CATEGORY_MAP_ADD',
         addedCount: newCount,
         addedMappings: trulyNew,
-        file: 'server/services/storeData.js',
-        message: `CATEGORY_DISPLAY_MAP에 ${newCount}개 매핑 추가`
+        file: 'server/data/categories.json',
+        message: `categories.json에 ${newCount}개 매핑 추가`
     };
 }
 
