@@ -40,44 +40,33 @@ jobs:
       - name: 📦 의존성 설치
         run: npm ci
 
-      - name: 🔄 에이전트 루프 실행
+      - name: 🔍 서비스 QA 실행
         run: |
           node -e "
             import('./server/agents/loopController.js').then(async ({ runLoop }) => {
               const district = '${{ github.event.inputs.district }}' || null;
               try {
                 const result = await runLoop(district);
-                console.log('루프 완료:', JSON.stringify({
+                console.log('QA 완료:', JSON.stringify({
                   district: result.district,
                   status: result.status,
                   issues: result.inspectionReport?.totalIssuesFound || 0,
-                  autoFixed: result.autoFixResult?.applied?.length || 0,
+                  pipelineHealth: result.inspectionReport?.pipelineHealth || 'unknown',
                   elapsed: result.elapsedSeconds
                 }, null, 2));
               } catch (e) {
-                console.error('루프 실패:', e.message);
+                console.error('QA 실패:', e.message);
                 process.exit(1);
               }
             });
           "
 
-      - name: 📤 변경사항 자동 커밋
-        run: |
-          git config user.name "AI Agent Bot"
-          git config user.email "agent-bot@sangkwon.ai"
-          git add -A
-          if git diff --staged --quiet; then
-            echo "변경사항 없음"
-          else
-            DATE=$(date +%Y-%m-%d)
-            git commit -m "🤖 AI Agent Loop: 자동 수정 적용 ($DATE)"
-            git push
-          fi
+      # V2: 에이전트가 코드/데이터를 수정하지 않으므로 자동 커밋 단계 삭제
 
-      - name: 📤 루프 히스토리 업로드
+      - name: 📤 QA 히스토리 업로드
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: loop-history-${{ github.run_number }}
+          name: qa-history-${{ github.run_number }}
           path: loop-history/
           retention-days: 30

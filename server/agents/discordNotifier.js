@@ -1,13 +1,14 @@
 /**
- * 📢 Discord Notifier
+ * 📢 Discord Notifier V2
  * 
- * 루프 결과를 Discord 웹훅으로 전송합니다.
+ * QA 결과를 Discord 웹훅으로 전송합니다.
+ * "이슈 N건" 대신 "서비스 상태 PASS/FAIL" 중심의 알림.
  */
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 
 /**
- * 루프 결과를 Discord로 전송
+ * QA 결과를 Discord로 전송
  */
 export async function sendLoopResult(loopResult) {
     if (!DISCORD_WEBHOOK_URL) {
@@ -15,74 +16,71 @@ export async function sendLoopResult(loopResult) {
         return { sent: false, reason: 'No webhook URL' };
     }
 
-    const { district, inspectionReport, improvementPlan, autoFixResult, loopNumber, timestamp } = loopResult;
+    const { district, inspectionReport, improvementPlan, loopNumber, timestamp } = loopResult;
+    const totalIssues = inspectionReport?.totalIssuesFound || 0;
+    const criticals = inspectionReport?.summary?.critical || 0;
+    const highs = inspectionReport?.summary?.high || 0;
 
-    // 임베드 메시지 구성
+    // 전체 판정
+    const verdict = criticals > 0 ? '🔴 FAIL' : highs > 0 ? '🟡 WARNING' : '🟢 PASS';
+    const color = criticals > 0 ? 0xEF4444 : highs > 0 ? 0xF59E0B : 0x22C55E;
+
+    // 파이프라인 상태
+    const pipelineStatus = inspectionReport?.pipelineHealth || '확인 불가';
+
+    // 주소별 스냅샷
+    const snapshots = (inspectionReport?.results || [])
+        .filter(r => r.analysisSnapshot)
+        .map(r => `📍 ${r.address?.split(' ').slice(-2).join(' ') || '?'}: ${r.analysisSnapshot.overallScore}점 ${r.analysisSnapshot.grade}등급 (${r.analysisSnapshot.storeCount}개 업소)`)
+        .join('\n');
+
     const embeds = [
         {
-            title: `🔄 상권 분석 에이전트 루프 #${loopNumber} 완료`,
-            description: `**${district}** 지역 검증 결과입니다.`,
-            color: getColorByIssueCount(inspectionReport.totalIssuesFound),
+            title: `${verdict} 서비스 QA #${loopNumber} — ${district}`,
+            description: `**${district}** 서비스 품질 점검 완료`,
+            color,
             fields: [
                 {
-                    name: '📍 검증 지역',
-                    value: district,
+                    name: '📊 판정',
+                    value: `${verdict} | 이슈 **${totalIssues}건** 발견`,
                     inline: true
                 },
                 {
                     name: '🏪 테스트 주소',
-                    value: `${inspectionReport.addressesTested}개`,
+                    value: `${inspectionReport?.addressesTested || 0}개`,
                     inline: true
                 },
                 {
-                    name: '🔍 발견 이슈',
-                    value: `**${inspectionReport.totalIssuesFound}건**`,
+                    name: '🔌 데이터 파이프라인',
+                    value: pipelineStatus === 'ALL_HEALTHY' ? '✅ 모두 정상' : `⚠️ ${pipelineStatus}`,
                     inline: true
                 },
-                {
+                ...(totalIssues > 0 ? [{
                     name: '🚨 심각도 분포',
                     value: formatSeverity(inspectionReport.summary),
                     inline: false
-                },
-                {
-                    name: '💡 개선 제안',
-                    value: improvementPlan.summary || '요약 없음',
+                }] : []),
+                ...(snapshots ? [{
+                    name: '📈 분석 스냅샷',
+                    value: snapshots.substring(0, 500),
                     inline: false
-                },
-                {
-                    name: '🛠️ 자동 수정',
-                    value: autoFixResult ? autoFixResult.summary : '자동 수정 없음',
-                    inline: false
-                }
+                }] : [])
             ],
-            timestamp: timestamp,
-            footer: {
-                text: '상권 분석 AI 에이전트 루프 시스템'
-            }
+            timestamp,
+            footer: { text: '상권분석 서비스 QA 시스템 V2' }
         }
     ];
 
-    // 수동 검토 필요 항목이 있으면 두 번째 임베드 추가
-    if (improvementPlan.manualReview && improvementPlan.manualReview.length > 0) {
+    // CRITICAL/HIGH 이슈 상세
+    if (improvementPlan?.manualReview?.length > 0) {
         embeds.push({
-            title: '👨‍💻 관리자 수동 검토 필요',
+            title: '⚠️ 점검 필요 항목',
             description: improvementPlan.manualReview
-                .map((item, idx) => `**${idx + 1}. [${item.severity}] ${item.title}**\n${item.description}`)
+                .slice(0, 5) // 최대 5건
+                .map((item, idx) => `**${idx + 1}. [${item.severity}] ${item.title}**\n${item.description || ''}`)
                 .join('\n\n')
-                .substring(0, 2000), // Discord 제한
-            color: 0xFF6B6B
-        });
-    }
-
-    // 자동 수정된 항목 상세
-    if (autoFixResult && autoFixResult.applied && autoFixResult.applied.length > 0) {
-        embeds.push({
-            title: '✅ 자동 수정 완료 상세',
-            description: autoFixResult.applied
-                .map(fix => `**${fix.type}**: ${fix.message}`)
-                .join('\n')
                 .substring(0, 2000),
-            color: 0x22C55E
+            color: 0xFF6B6B
         });
     }
 
@@ -91,9 +89,9 @@ export async function sendLoopResult(loopResult) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                username: '상권분석 AI 에이전트 🤖',
+                username: '상권분석 QA 봇 🔍',
                 avatar_url: 'https://cdn.discordapp.com/embed/avatars/0.png',
-                embeds: embeds.slice(0, 10) // Discord 최대 10개
+                embeds: embeds.slice(0, 10)
             })
         });
 
@@ -111,19 +109,6 @@ export async function sendLoopResult(loopResult) {
     }
 }
 
-/**
- * 이슈 수에 따른 색상 반환
- */
-function getColorByIssueCount(count) {
-    if (count === 0) return 0x22C55E; // 초록 (이슈 없음)
-    if (count <= 5) return 0x3B82F6; // 파랑 (경미)
-    if (count <= 15) return 0xF59E0B; // 노랑 (주의)
-    return 0xEF4444; // 빨강 (심각)
-}
-
-/**
- * 심각도 분포 포맷
- */
 function formatSeverity(summary) {
     const parts = [];
     if (summary.critical > 0) parts.push(`🔴 CRITICAL: ${summary.critical}`);

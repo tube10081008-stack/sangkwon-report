@@ -11,7 +11,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { inspectDistrict } from './agentInspector.js';
 import { generateImprovementPlan } from './agentAdvisor.js';
-import { applyAutoFixes, saveChangeLog } from './autoFixer.js';
+// AutoFixer 삭제됨 — V2에서는 에이전트가 코드/데이터를 자동 수정하지 않음
 import { sendLoopResult } from './discordNotifier.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -56,7 +56,7 @@ export async function runLoop(districtName = null) {
     const startTime = Date.now();
 
     console.log(`\n${'═'.repeat(60)}`);
-    console.log(`🔄 에이전트 루프 #${loopNumber} 시작`);
+    console.log(`🔄 서비스 QA #${loopNumber} 시작`);
     console.log(`📍 대상: ${district} (${addresses.length}개 주소)`);
     console.log(`⏰ 시작: ${new Date().toISOString()}`);
     console.log(`${'═'.repeat(60)}\n`);
@@ -70,9 +70,9 @@ export async function runLoop(districtName = null) {
     };
 
     try {
-        // Step 1: Inspector 검증
-        console.log('\n📌 Step 1/4: Inspector 검증 시작...');
-        loopResult.steps.push({ step: 1, name: 'Inspector', status: 'running', startedAt: new Date().toISOString() });
+        // Step 1: QA 검증
+        console.log('\n📌 Step 1/3: 서비스 QA 검증 시작...');
+        loopResult.steps.push({ step: 1, name: 'QA Inspector', status: 'running', startedAt: new Date().toISOString() });
 
         const inspectionReport = await inspectDistrict(district, addresses, cases.testCategories);
         loopResult.inspectionReport = inspectionReport;
@@ -80,46 +80,29 @@ export async function runLoop(districtName = null) {
         loopResult.steps[0].completedAt = new Date().toISOString();
         loopResult.steps[0].issuesFound = inspectionReport.totalIssuesFound;
 
-        console.log(`\n   ✅ Inspector 완료: ${inspectionReport.totalIssuesFound}건 이슈 발견`);
+        console.log(`\n   ✅ QA 완료: ${inspectionReport.totalIssuesFound}건 이슈 발견`);
 
-        // Step 2: Advisor 개선안 도출
-        console.log('\n📌 Step 2/4: Advisor 개선안 도출...');
-        loopResult.steps.push({ step: 2, name: 'Advisor', status: 'running', startedAt: new Date().toISOString() });
+        // Step 2: QA 요약 리포트 생성
+        console.log('\n📌 Step 2/3: QA 요약 리포트 생성...');
+        loopResult.steps.push({ step: 2, name: 'Reporter', status: 'running', startedAt: new Date().toISOString() });
 
         const improvementPlan = await generateImprovementPlan(inspectionReport);
         loopResult.improvementPlan = improvementPlan;
+        loopResult.autoFixResult = { applied: [], failed: [], summary: 'V2: 자동 수정 비활성화' };
         loopResult.steps[1].status = 'completed';
         loopResult.steps[1].completedAt = new Date().toISOString();
-        loopResult.steps[1].autoFixable = improvementPlan.autoFixable.length;
         loopResult.steps[1].manualReview = improvementPlan.manualReview.length;
 
-        console.log(`\n   ✅ Advisor 완료: 자동수정 ${improvementPlan.autoFixable.length}건, 수동검토 ${improvementPlan.manualReview.length}건`);
+        console.log(`\n   ✅ 리포트 완료: ${improvementPlan.manualReview.length}건 점검 필요`);
 
-        // Step 3: Auto Fixer 자동 수정
-        console.log('\n📌 Step 3/4: Auto Fixer 자동 수정...');
-        loopResult.steps.push({ step: 3, name: 'AutoFixer', status: 'running', startedAt: new Date().toISOString() });
-
-        const autoFixResult = await applyAutoFixes(improvementPlan);
-        loopResult.autoFixResult = autoFixResult;
-        loopResult.steps[2].status = 'completed';
-        loopResult.steps[2].completedAt = new Date().toISOString();
-        loopResult.steps[2].applied = autoFixResult.applied.length;
-
-        // 변경 로그 저장
-        if (autoFixResult.applied.length > 0) {
-            saveChangeLog(district, autoFixResult);
-        }
-
-        console.log(`\n   ✅ Auto Fixer 완료: ${autoFixResult.applied.length}건 적용`);
-
-        // Step 4: Discord 알림
-        console.log('\n📌 Step 4/4: Discord 알림 전송...');
-        loopResult.steps.push({ step: 4, name: 'Discord', status: 'running', startedAt: new Date().toISOString() });
+        // Step 3: Discord 알림
+        console.log('\n📌 Step 3/3: Discord 알림 전송...');
+        loopResult.steps.push({ step: 3, name: 'Discord', status: 'running', startedAt: new Date().toISOString() });
 
         const discordResult = await sendLoopResult(loopResult);
-        loopResult.steps[3].status = 'completed';
-        loopResult.steps[3].completedAt = new Date().toISOString();
-        loopResult.steps[3].sent = discordResult.sent;
+        loopResult.steps[2].status = 'completed';
+        loopResult.steps[2].completedAt = new Date().toISOString();
+        loopResult.steps[2].sent = discordResult.sent;
 
         loopResult.status = 'completed';
 
@@ -133,7 +116,7 @@ export async function runLoop(districtName = null) {
     loopResult.elapsedSeconds = parseFloat(elapsed);
 
     console.log(`\n${'═'.repeat(60)}`);
-    console.log(`🏁 루프 #${loopNumber} 완료: ${elapsed}초 소요`);
+    console.log(`🏁 QA #${loopNumber} 완료: ${elapsed}초 소요`);
     console.log(`   상태: ${loopResult.status}`);
     console.log(`${'═'.repeat(60)}\n`);
 
