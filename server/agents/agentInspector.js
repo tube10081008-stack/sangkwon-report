@@ -49,20 +49,31 @@ export async function inspectAddress(address, radius = 500, targetCategory = '�
 
         // 고객이 주소를 넣었을 때 실행되는 것과 동일한 파이프라인
         const location = await geocodeAddress(address);
+        // 2. 외부 API 병렬 사전 요청 (최적화)
+        const pendingTransitInfo = getTransitInfo(location.latitude, location.longitude, radius).catch(() => null);
+        const pendingSeoulData = getSeoulDistrictData(location.latitude, location.longitude).catch(() => null);
+        const pendingRegionInfo = reverseGeocode(location.latitude, location.longitude).catch(() => null);
+
+        // 3. 반경 내 상가업소 조회 (가장 무거운 작업)
         const stores = await getStoresInRadius(location.latitude, location.longitude, radius);
+        
+        // 4. 동기 연산
         const analysis = analyzeDistrict(stores, targetCategory);
 
-        let transitInfo = null, demographics = null, seoulData = null, realEstateData = null;
-        try {
-            const regionInfo = await reverseGeocode(location.latitude, location.longitude);
-            const bCode = regionInfo?.code || null;
-            [transitInfo, demographics, seoulData, realEstateData] = await Promise.all([
-                getTransitInfo(location.latitude, location.longitude, radius).catch(() => null),
-                getDemographics(location.latitude, location.longitude, location, stores).catch(() => null),
-                getSeoulDistrictData(location.latitude, location.longitude).catch(() => null),
-                (bCode ? getRealEstateData(bCode, location, radius) : Promise.resolve(null)).catch(() => null)
-            ]);
-        } catch (e) { /* 프리미엄 데이터 실패 — Phase 3에서 개별 진단 */ }
+        // 5. 종속성 있는 API 스케줄링
+        const pendingDemographics = getDemographics(location.latitude, location.longitude, location, stores).catch(() => null);
+        
+        const regionInfo = await pendingRegionInfo;
+        const bCode = regionInfo?.code || null;
+        const pendingRealEstateData = bCode ? getRealEstateData(bCode, location, radius).catch(() => null) : Promise.resolve(null);
+        
+        // 6. 모든 병렬 작업 대기
+        const [transitInfo, seoulData, demographics, realEstateData] = await Promise.all([
+            pendingTransitInfo,
+            pendingSeoulData,
+            pendingDemographics,
+            pendingRealEstateData
+        ]);
 
         const integratedResult = { analysis, location, realEstateData, transitInfo, demographics, seoulData };
         const aiComments = await generateSingleAnalysisComment(integratedResult);
@@ -129,9 +140,16 @@ export async function inspectAddress(address, radius = 500, targetCategory = '�
  */
 export async function inspectDistrict(districtName, addresses, categories = null) {
     const testCategories = categories || ['카페', '음식점', '편의점'];
-    // 비용 절감: 10개 중 3개만 샘플링
-    const sampleAddresses = addresses.length > 3
-        ? [addresses[0], addresses[Math.floor(addresses.length / 2)], addresses[addresses.length - 1]]
+    // 비용 절감: 10개 중 샘플링 -> 퀄리티 점검 강화를 위해 6개로 확대 (2배)
+    const sampleAddresses = addresses.length > 6
+        ? [
+            addresses[0], 
+            addresses[Math.floor(addresses.length / 5)], 
+            addresses[Math.floor(addresses.length / 2)], 
+            addresses[Math.floor(addresses.length * 3 / 4)],
+            addresses[addresses.length - 2],
+            addresses[addresses.length - 1]
+          ]
         : addresses;
 
     const results = [];

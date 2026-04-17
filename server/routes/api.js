@@ -83,33 +83,36 @@ router.post('/analyze/single', async (req, res) => {
         const location = await geocodeAddress(address);
         console.log(`   좌표: ${location.latitude}, ${location.longitude}`);
 
-        // 2. 반경 내 상가업소 조회
+        // 2. 독립적인 외부 API 사전 병렬 요청 (성능 최적화의 핵심)
+        // 가장 오래 걸리는 상가업소 데이터(stores)를 기다리는 동안, 좌표만 있으면 되는 정보들을 백그라운드에서 캐싱
+        const pendingTransitInfo = getTransitInfo(location.latitude, location.longitude, radius).catch(e => { console.warn('교통 정보 조회 실패:', e.message); return null; });
+        const pendingSeoulData = getSeoulDistrictData(location.latitude, location.longitude).catch(e => { console.warn('서울시 데이터 조회 실패:', e.message); return null; });
+        const pendingRegionInfo = reverseGeocode(location.latitude, location.longitude).catch(e => null);
+
+        // 3. 반경 내 상가업소 조회 (병목 구간)
         const stores = await getStoresInRadius(location.latitude, location.longitude, radius);
         console.log(`   업소 수: ${stores.length}개`);
 
-        // 3. 데이터 분석
+        // 4. 데이터 분석 (의존성: stores)
         const analysis = analyzeDistrict(stores, targetCategory);
 
-        // 4. (위치 이동: 하단에서 실거래가와 함께 생성됨)
+        // 5. 종속된 API 병렬 요청
+        // demographics는 stores 결과를, realEstate는 regionInfo 결과를 필요로 함
+        const pendingDemographics = getDemographics(location.latitude, location.longitude, location, stores).catch(e => { console.warn('인구통계 조회 실패:', e.message); return null; });
+        
+        const regionInfo = await pendingRegionInfo;
+        const bCode = regionInfo ? regionInfo.code : null;
+        const pendingRealEstateData = bCode
+            ? getRealEstateData(bCode, location, radius).catch(e => { console.warn('부동산 데이터 조회 실패:', e.message); return null; })
+            : Promise.resolve(null);
 
-        // 5. 교통 접근성 & 인구통계 & 서울시 데이터 (병렬 조회 - 실패해도 메인 분석에 영향 없음)
-        let transitInfo = null;
-        let demographics = null;
-        let seoulData = null;
-        let realEstateData = null;
-        try {
-            const regionInfo = await reverseGeocode(location.latitude, location.longitude);
-            const bCode = regionInfo ? regionInfo.code : null;
-
-            [transitInfo, demographics, seoulData, realEstateData] = await Promise.all([
-                getTransitInfo(location.latitude, location.longitude, radius).catch(e => { console.warn('교통 정보 조회 실패:', e.message); return null; }),
-                getDemographics(location.latitude, location.longitude, location, stores).catch(e => { console.warn('인구통계 조회 실패:', e.message); return null; }),
-                getSeoulDistrictData(location.latitude, location.longitude).catch(e => { console.warn('서울시 데이터 조회 실패:', e.message); return null; }),
-                (bCode ? getRealEstateData(bCode, location, radius) : Promise.resolve(null)).catch(e => { console.warn('부동산 실거래 데이터 조회 실패:', e.message); return null; })
-            ]);
-        } catch (e) {
-            console.warn('프리미엄 데이터 조회 실패:', e.message);
-        }
+        // 6. 모든 병렬 작업 최종 대기
+        const [transitInfo, seoulData, demographics, realEstateData] = await Promise.all([
+            pendingTransitInfo,
+            pendingSeoulData,
+            pendingDemographics,
+            pendingRealEstateData
+        ]);
 
         // 💡 단일 진실 원천(Single Source of Truth) 통합 객체 생성
         const integratedAnalysisResult = {
