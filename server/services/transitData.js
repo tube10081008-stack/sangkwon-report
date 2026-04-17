@@ -102,6 +102,14 @@ export async function getTransitInfo(lat, lng, radius = 500) {
         score += Math.min(busStops.filter(b => b.distance <= 500).length * 2, 10);
     }
 
+    // [QA V2.1 개선안] 대중교통 소외지역 패널티 (지하철역 + 버스정류장 합산 3개 이하 시 치명타)
+    const totalNodesCount = subways.length + busStops.length;
+    if (totalNodesCount <= 3) {
+        score = Math.min(score, 50); // 무조건 50점 이하로 강제 (최상급, 양호 불가)
+    } else if (totalNodesCount <= 5) {
+        score = Math.min(score, 75); // 무조건 75점 이하로 강제 (최상급 불가)
+    }
+
     score = Math.min(score, 100);
 
     let grade = 'D';

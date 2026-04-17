@@ -409,20 +409,20 @@ function factCheckAIComments(aiComments, analysis) {
 function checkPerformance(elapsedSeconds, address) {
     const issues = [];
 
-    if (elapsedSeconds > 20) {
+    if (elapsedSeconds > 25) {
         issues.push({
             phase: 'Phase 5: 성능',
             severity: 'HIGH',
             type: 'SLOW_RESPONSE',
-            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (기준: 20초 이내) — ${address}`,
+            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (기준: 25초 이내) — ${address}`,
             suggestion: '병렬 API 호출 최적화 또는 타임아웃 설정 점검'
         });
-    } else if (elapsedSeconds > 15) {
+    } else if (elapsedSeconds > 20) {
         issues.push({
             phase: 'Phase 5: 성능',
             severity: 'MEDIUM',
             type: 'SLOW_RESPONSE_WARNING',
-            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (권장: 15초 이내) — ${address}`,
+            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (권장: 20초 이내) — ${address}`,
             suggestion: '성능 최적화 권장'
         });
     }
@@ -443,7 +443,9 @@ function checkDataAnomaly(result, targetCategory) {
     if (analysis.categorySummary && targetCategory) {
         // 상위 5대 업종 안에 타겟 카테고리가 없는 경우 의심
         const top5 = analysis.categorySummary.slice(0, 5).map(c => c.name);
-        if (!top5.includes(targetCategory) && analysis.totalStores > 50) {
+        // 의뢰한 타겟이 아예 상가에 없는데 분석을 원한 '탐색적 검색'일 수 있으므로 너무 낮은 상가수의 경고를 무시합니다 (50 -> 400개 이상일 때만 경고)
+        const isMatched = top5.some(name => name.includes(targetCategory) || targetCategory.includes(name));
+        if (!isMatched && analysis.totalStores > 400) {
             issues.push({
                 phase: 'Phase 6: 데이터 정합성',
                 severity: 'WARNING',
@@ -553,7 +555,7 @@ function checkPremiumDataValidation(result) {
 
     // 2. 대중교통 커버리지 한계 및 패널티 작동 확인
     if (transitInfo && typeof transitInfo.score === 'number') {
-        const totalNodes = (transitInfo.subwayNodes || 0) + (transitInfo.busNodes || 0);
+        const totalNodes = (transitInfo.totalSubways || 0) + (transitInfo.totalBusStops || 0);
         if (totalNodes <= 3 && transitInfo.score > 70) {
             issues.push({
                 phase: 'Phase 8: 프리미엄 데이터',

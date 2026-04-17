@@ -16,9 +16,11 @@ export async function generateSingleAnalysisComment(integratedResult) {
     const topCategories = categorySummary.slice(0, 3);
     const topCatNames = topCategories.map(c => c.name).join(', ');
 
+    const targetText = targetAnalysis ? `\n[관심 타겟 업종]: ${targetAnalysis.targetCategory || '지정 안함'} (경쟁점수: ${targetAnalysis.competitorCount}개, 시장점유율: ${targetAnalysis.marketShare}%)` : '';
+
     // 1. Gemini 기반 동적 코멘트 생성 시도
     try {
-        const prompt = `당신은 대한민국 최고의 부동산 상권 분석 전문가입니다. 주어진 데이터를 바탕으로 신뢰성 있고 통찰력 있는 상권 분석 코멘트를 작성해주세요.
+        const prompt = `당신은 대한민국 최고의 부동산 상권 분석 전문가입니다. 주어진 데이터를 바탕으로 **신뢰성 있고 통찰력 있는 상권 분석 코멘트**를 작성해주세요.
 
 [분석 대상 지역]: ${location.address}
 [종합 점수 및 등급]: ${overallScore}점 (${grade.grade}등급)
@@ -26,17 +28,22 @@ export async function generateSingleAnalysisComment(integratedResult) {
 [프랜차이즈 비율]: ${franchiseAnalysis.franchiseRatio}%
 [주요 업종 탑 3]: ${topCatNames}
 [상권 활성도 점수]: ${indicators.densityScore?.value || 0}점
-[경쟁 강도 점수]: ${indicators.competitionIntensity?.value || 0}점
+[경쟁 강도 점수]: ${indicators.competitionIntensity?.value || 0}점${targetText}
 
-위 데이터를 바탕으로 객관적이고 전문적인 시각에서 다음 항목을 분석하여 반드시 JSON 형식으로만 응답하세요:
+!!! 중요 지침 (Must Follow) !!!
+1. **타겟 업종 언급 강제**: 분석 대상에 [관심 타겟 업종]이 있다면, 해당 업종(예: 카페, 편의점)의 이름과 경쟁 상점 개수를 \`overview\`, \`strengths\`, \`weaknesses\`, \`recommendations\` 중 최소 2곳 이상에 반드시 포함하세요.
+2. **수치 기반 논리 전개**: "비율이 높습니다", "많습니다" 같은 추상적 표현을 금지합니다. 반드시 제공된 데이터(예: "프랜차이즈 비율 30%", "종합 점수 85점", "업소 1500개")를 구체적인 숫자(숫자+단위)로 명시하며 설명하세요.
+3. **JSON 형식 엄수**: 마크다운(\`\`\`json 등) 없이 순수 JSON 객체만 반환하세요.
+
+위 지침과 데이터를 바탕으로, 다음 JSON 스키마에 맞게 분석해주세요:
 {
-    "overview": "상권 전체에 대한 2~3문장 브리핑",
-    "strengths": ["상시 유지되는 핵심 강점 1", "핵심 강점 2"],
-    "weaknesses": ["우려되는 취약점 1", "취약점 2"],
+    "overview": "상권 전체에 대한 구체적인 수치 포함 2~3문장 브리핑",
+    "strengths": ["상시 유지되는 핵심 강점 1 (숫자 데이터 포함)", "핵심 강점 2 (숫자 데이터 포함)"],
+    "weaknesses": ["우려되는 취약점 1 (숫자 데이터 포함)", "취약점 2"],
     "opportunities": ["시장 진입 시 노려볼 만한 기회 요인 1", "기회 요인 2"],
     "threats": ["주의해야 할 거시적 위험 요인 1"],
-    "recommendations": ["구체적이고 실전적인 추천 전략 1", "추천 전략 2"],
-    "conclusion": "최종 투자 판단 및 결론 한 문장 요약"
+    "recommendations": ["타겟 업종(존재 시)에 맞춘 구체적이고 실전적인 추천 전략 1", "추천 전략 2"],
+    "conclusion": "최종 투자 판단 및 결론 한 문장 요약 (명확한 가이드)"
 }`;
 
         const response = await askGemini(prompt, null, '상권 데이터 분석 전문가. 어조는 전문적이고 객관적. 마크다운 코드블록 제거 후 순수 JSON 객체(오브젝트)만 반환.');
