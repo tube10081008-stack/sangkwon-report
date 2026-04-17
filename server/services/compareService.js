@@ -8,7 +8,7 @@ import { askGemini } from './geminiService.js';
 /**
  * 실증 비교 지표 산출 — 카테고리별 분류
  */
-export function buildEmpiricalComparison(a, b) {
+export function buildEmpiricalComparison(a, b, seoulDataWarning = null) {
     const categories = [];
 
     // ═══════ 1. 상권 규모 & 활력 ═══════
@@ -123,6 +123,7 @@ export function buildEmpiricalComparison(a, b) {
         unit: '명',
         winner: (aFloat || a.demo?.floatingPop || 0) >= (bFloat || b.demo?.floatingPop || 0) ? 'A' : 'B',
         estimated: !(aFloat || bFloat),
+        sameSource: !!(seoulDataWarning && aFloat && bFloat),
     });
 
     // 직장인구
@@ -183,6 +184,7 @@ export function buildEmpiricalComparison(a, b) {
         unit: '원', format: 'currency',
         winner: aSales > bSales ? 'A' : bSales > aSales ? 'B' : null,
         noData: !aSales && !bSales,
+        sameSource: !!seoulDataWarning,
     });
 
 
@@ -199,6 +201,7 @@ export function buildEmpiricalComparison(a, b) {
         lowerIsBetter: true,
         noData: !aClose && !bClose,
         note: '낮을수록 상권 생존력이 높음',
+        sameSource: !!seoulDataWarning,
     });
 
     const aOpen = a.seoul?.store?.openRate || 0;
@@ -211,6 +214,7 @@ export function buildEmpiricalComparison(a, b) {
         winner: aOpen && bOpen ? (aOpen >= bOpen ? 'A' : 'B') : null,
         noData: !aOpen && !bOpen,
         note: '높을수록 신규 진입이 활발한 상권',
+        sameSource: !!seoulDataWarning,
     });
 
     categories.push({ title: '💳 매출 & 소비력', metrics: salesMetrics });
@@ -352,7 +356,7 @@ export function buildEmpiricalComparison(a, b) {
 /**
  * AI 비교 코멘트 생성
  */
-export async function generateAICompareComment(address1, address2, empiricalComparison) {
+export async function generateAICompareComment(address1, address2, empiricalComparison, seoulDataWarning = null) {
     try {
         const allMetrics = empiricalComparison.categories.flatMap(c => c.metrics);
 
@@ -367,14 +371,19 @@ export async function generateAICompareComment(address1, address2, empiricalComp
             if (m.type === 'text') return `${m.icon} ${m.label}: A="${m.textA}" vs B="${m.textB}" (${m.source})`;
             const aVal = m.format === 'currency' ? formatKoreanCurrency(m.a) : `${m.a}${m.unit}`;
             const bVal = m.format === 'currency' ? formatKoreanCurrency(m.b) : `${m.b}${m.unit}`;
-            return `${m.icon} ${m.label}: A=${aVal} vs B=${bVal} (${m.source})${m.winner ? ` → ${m.winner} 우세` : ''}`;
+            const sameTag = m.sameSource ? ' ⚠️[동일상권-비교불가]' : '';
+            return `${m.icon} ${m.label}: A=${aVal} vs B=${bVal} (${m.source})${m.winner ? ` → ${m.winner} 우세` : ''}${sameTag}`;
         }).join('\n');
+
+        const sameSourceBlock = seoulDataWarning
+            ? `\n🚨 [중요 데이터 한계 안내]\n두 매물이 서울시 상권 분석 기준으로 동일 상권 영역('${seoulDataWarning.trdarNm}')에 속합니다.\n⚠️[동일상권-비교불가] 표시된 지표(매출, 개업률, 폐업률, 유동인구 등)는 같은 데이터 소스이므로 비교 의미가 없습니다.\n이 항목은 비교 근거에서 제외하고, 반경 내 업소 수/교통/부동산 등 실질적으로 차이가 나는 지표 중심으로 분석하세요.\n`
+            : '';
 
         const prompt = `당신은 대한민국 최고의 상가 부동산 입지 분석 전문가입니다. 아래 두 매물의 실증 비교 데이터를 바탕으로, 수억 원의 투자를 결정하는 고객에게 신뢰를 줄 수 있는 전문 분석을 제공하세요.
 
 [A 매물]: ${address1}
 [B 매물]: ${address2}
-
+${sameSourceBlock}
 [실증 비교 데이터 - ${allMetrics.length}개 지표]
 ${metricsText}
 

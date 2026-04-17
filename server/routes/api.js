@@ -191,16 +191,33 @@ router.post('/analyze/compare', async (req, res) => {
             ]);
         } catch (e) { console.warn('실증 데이터 수집 부분 실패:', e.message); }
 
-        // 5. 실증 비교 지표
+        // 5. 🚨 동일 서울시 상권코드(TRDAR_CD) 중복 감지
+        //    2km 떨어진 두 매물이 같은 상권에 매핑되면 매출/소비력 지표가 동일하게 나오는 구조적 한계
+        let seoulDataWarning = null;
+        if (seoul1?.trdarInfo?.trdarCd && seoul2?.trdarInfo?.trdarCd) {
+            if (seoul1.trdarInfo.trdarCd === seoul2.trdarInfo.trdarCd) {
+                seoulDataWarning = {
+                    type: 'SAME_TRDAR_CD',
+                    message: `두 매물이 동일한 서울시 상권 영역 '${seoul1.trdarInfo.trdarNm}'(${seoul1.trdarInfo.trdarSe})에 위치합니다. 분기 매출, 개업률, 폐업률, 유동인구 등 서울시 제공 지표는 동일한 값을 보여줍니다.`,
+                    trdarCd: seoul1.trdarInfo.trdarCd,
+                    trdarNm: seoul1.trdarInfo.trdarNm,
+                    affectedMetrics: ['분기 추정매출', '개업률', '폐업률', '분기 유동인구', '직장인구', '상주인구'],
+                };
+                console.warn(`   ⚠️ 동일 상권 감지: 두 매물 모두 '${seoul1.trdarInfo.trdarNm}' (TRDAR_CD: ${seoul1.trdarInfo.trdarCd})`);
+            }
+        }
+
+        // 6. 실증 비교 지표
         const empiricalComparison = buildEmpiricalComparison(
             { analysis: analysis1, seoul: seoul1, transit: transit1, demo: demo1, realEstate: realEstate1 },
-            { analysis: analysis2, seoul: seoul2, transit: transit2, demo: demo2, realEstate: realEstate2 }
+            { analysis: analysis2, seoul: seoul2, transit: transit2, demo: demo2, realEstate: realEstate2 },
+            seoulDataWarning
         );
 
-        // 6. AI 비교 코멘트
-        const aiCompareComment = await generateAICompareComment(address1, address2, empiricalComparison);
+        // 7. AI 비교 코멘트
+        const aiCompareComment = await generateAICompareComment(address1, address2, empiricalComparison, seoulDataWarning);
 
-        // 7. 기본 비교
+        // 8. 기본 비교
         const comparison = compareDistricts(analysis1, analysis2);
 
         res.json({
@@ -209,6 +226,7 @@ router.post('/analyze/compare', async (req, res) => {
                 area1: { location: location1, analysis: analysis1, seoul: seoul1, transit: transit1, realEstate: realEstate1, demographics: demo1 },
                 area2: { location: location2, analysis: analysis2, seoul: seoul2, transit: transit2, realEstate: realEstate2, demographics: demo2 },
                 comparison, empiricalComparison, aiCompareComment,
+                seoulDataWarning,
                 radius, generatedAt: new Date().toISOString()
             }
         });
