@@ -408,25 +408,8 @@ function factCheckAIComments(aiComments, analysis) {
 
 function checkPerformance(elapsedSeconds, address) {
     const issues = [];
-
-    if (elapsedSeconds > 25) {
-        issues.push({
-            phase: 'Phase 5: 성능',
-            severity: 'HIGH',
-            type: 'SLOW_RESPONSE',
-            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (기준: 25초 이내) — ${address}`,
-            suggestion: '병렬 API 호출 최적화 또는 타임아웃 설정 점검'
-        });
-    } else if (elapsedSeconds > 20) {
-        issues.push({
-            phase: 'Phase 5: 성능',
-            severity: 'MEDIUM',
-            type: 'SLOW_RESPONSE_WARNING',
-            description: `분석 응답 ${elapsedSeconds.toFixed(1)}초 (권장: 20초 이내) — ${address}`,
-            suggestion: '성능 최적화 권장'
-        });
-    }
-
+    // 유저의 피드백: "분석응답시간은 그냥 문제 삼지마, 저정도 걸려도 괜찮아"에 따라
+    // 성능 지연 경고(SLOW_RESPONSE 등)를 모두 제거합니다.
     return issues;
 }
 

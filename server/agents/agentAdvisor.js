@@ -73,6 +73,12 @@ export async function generateImprovementPlan(inspectionReport) {
     }
     if (mediums.length > 0) {
         summaryParts.push(`🟡 MEDIUM ${mediums.length}건`);
+        mediums.forEach(i => manualReview.push({
+            type: i.type,
+            severity: 'MEDIUM',
+            title: i.description,
+            description: i.suggestion || '참고사항 확인'
+        }));
     }
     if (lows.length > 0) {
         summaryParts.push(`🟢 LOW ${lows.length}건`);
