@@ -431,7 +431,7 @@ function checkDataAnomaly(result, targetCategory) {
         if (!isMatched && analysis.totalStores > 400) {
             issues.push({
                 phase: 'Phase 6: 데이터 정합성',
-                severity: 'WARNING',
+                severity: 'MEDIUM',
                 type: 'TARGET_CATEGORY_MISSING',
                 description: `분석 타겟 '${targetCategory}'가 상위 5대 업종에 포함되지 않습니다. (총 업소 ${analysis.totalStores}개 중 비중이 극히 낮음)`,
                 suggestion: '상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요'
@@ -542,7 +542,7 @@ function checkPremiumDataValidation(result) {
         if (totalNodes <= 3 && transitInfo.score > 70) {
             issues.push({
                 phase: 'Phase 8: 프리미엄 데이터',
-                severity: 'WARNING',
+                severity: 'MEDIUM',
                 type: 'TRANSIT_SCORE_MISMATCH',
                 description: `정류장/역이 3개 이하(${totalNodes}개)인 대중교통 소외지역임에도 교통 접근성 점수가 ${transitInfo.score}점으로 너무 관대합니다.`,
                 suggestion: 'getTransitInfo 스코어링 함수 패널티 로직 점검'
