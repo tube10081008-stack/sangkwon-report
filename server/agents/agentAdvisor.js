@@ -1,8 +1,7 @@
 /**
- * 💡 Agent Advisor V2 — QA 결과 요약 리포터
+ * 💡 Agent Advisor V3 — QA 결과 요약 리포터
  * 
- * Inspector의 QA 결과를 사람이 읽기 좋은 형태로 요약합니다.
- * 더 이상 Gemini에게 개선안을 생성하지 않습니다.
+ * V3: 동일 유형 이슈 합산으로 앵무새 방지 + AI 복면 심사 통합.
  */
 
 /**
@@ -22,22 +21,25 @@ export async function generateImprovementPlan(inspectionReport) {
     });
 
     if (allIssues.length === 0) {
-        const summary = `✅ ${district} 서비스 QA 통과 — 모든 엔드포인트, 보고서 완결성, 데이터 파이프라인, AI 팩트체크, 성능 모두 정상입니다.`;
+        const summary = `✅ ${district} 서비스 QA 통과 — 모든 검증 항목 정상입니다.`;
         console.log(`   ${summary}`);
         return {
             district,
             timestamp: new Date().toISOString(),
             totalIssues: 0,
             improvements: [],
-            autoFixable: [], // 빈 배열 유지 (loopController 호환)
+            autoFixable: [],
             manualReview: [],
             summary
         };
     }
 
+    // V3: 동일 type 이슈 합산 (앵무새 방지)
+    const deduped = deduplicateIssues(allIssues);
+
     // Phase별로 그룹핑
     const byPhase = {};
-    allIssues.forEach(issue => {
+    deduped.forEach(issue => {
         const phase = issue.phase || 'Unknown';
         if (!byPhase[phase]) byPhase[phase] = [];
         byPhase[phase].push(issue);
@@ -47,11 +49,10 @@ export async function generateImprovementPlan(inspectionReport) {
     const summaryParts = [];
     const manualReview = [];
 
-    // CRITICAL/HIGH 먼저
-    const criticals = allIssues.filter(i => i.severity === 'CRITICAL');
-    const highs = allIssues.filter(i => i.severity === 'HIGH');
-    const mediums = allIssues.filter(i => i.severity === 'MEDIUM');
-    const lows = allIssues.filter(i => i.severity === 'LOW');
+    const criticals = deduped.filter(i => i.severity === 'CRITICAL');
+    const highs = deduped.filter(i => i.severity === 'HIGH');
+    const mediums = deduped.filter(i => i.severity === 'MEDIUM');
+    const lows = deduped.filter(i => i.severity === 'LOW');
 
     if (criticals.length > 0) {
         summaryParts.push(`🔴 CRITICAL ${criticals.length}건: ${criticals.map(i => i.type).join(', ')}`);
@@ -104,8 +105,43 @@ export async function generateImprovementPlan(inspectionReport) {
             issueCount: issues.length,
             issues: issues.map(i => ({ type: i.type, severity: i.severity, description: i.description }))
         })),
-        autoFixable: [], // V2에서는 자동 수정 없음
+        autoFixable: [],
         manualReview,
         summary
     };
 }
+
+
+/**
+ * V3: 동일 type 이슈 합산 (앵무새 방지)
+ * 같은 type이 3건 이상이면 한 줄로 합산
+ */
+function deduplicateIssues(issues) {
+    const byType = {};
+    issues.forEach(issue => {
+        if (!byType[issue.type]) byType[issue.type] = [];
+        byType[issue.type].push(issue);
+    });
+
+    const deduped = [];
+    Object.entries(byType).forEach(([type, group]) => {
+        if (group.length >= 3) {
+            // 합산: 같은 type이 3건 이상이면 한 줄로
+            const addresses = group.map(i => {
+                const addr = i.sourceAddress?.split(' ').slice(-2).join(' ');
+                return addr || '?';
+            }).join(', ');
+            deduped.push({
+                ...group[0],
+                description: `${group[0].description.split(' — ')[0]} — ${group.length}건 (${addresses})`,
+                _mergedCount: group.length
+            });
+        } else {
+            // 개별 유지
+            deduped.push(...group);
+        }
+    });
+
+    return deduped;
+}
+
