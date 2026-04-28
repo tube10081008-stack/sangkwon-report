@@ -108,7 +108,7 @@ export default function Landing() {
                     </div>
 
                     <h2 style={{ fontSize: '28px', fontWeight: 800, margin: '0 0 16px 0', letterSpacing: '-0.02em', textAlign: 'center', background: 'linear-gradient(135deg, #fff 0%, #94a3b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                        EXECUTIVE DATA LINK
+                        FORESIGHT DATA LINK
                     </h2>
                     
                     <div style={{ fontSize: '18px', color: '#06b6d4', fontWeight: 600, marginBottom: '40px', textAlign: 'center', letterSpacing: '0.05em' }}>
@@ -122,12 +122,12 @@ export default function Landing() {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginTop: '12px', color: '#64748b', fontSize: '14px', fontFamily: 'monospace' }}>
-                        <span>SYSTEM MODULE: EDDIE</span>
+                        <span>FORESIGHT MODULE: EDDIE</span>
                         <span style={{ color: '#06b6d4' }}>{progress}%</span>
                     </div>
 
                     <div style={{ marginTop: '30px', padding: '16px 24px', background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '8px', color: '#94a3b8', fontSize: '14px', lineHeight: 1.6, textAlign: 'center', maxWidth: '80%' }}>
-                        "코라(Cora)가 지휘 허브에서 수석 분석관 에디(Eddie)의 실측 상권 데이터 분석 파이프라인을 연결하고 있습니다. VWORLD 및 공공데이터 통신 채널 보안 유지 중입니다."
+                        "포어사이트 파트너스(Foresight Partners) 리서치 허브에서 수석 분석관 에디(Eddie)의 실측 데이터 파이프라인을 가동합니다. 공공데이터 통신 채널 보안 유지 중."
                     </div>
 
                     <style>
@@ -150,14 +150,14 @@ export default function Landing() {
             
             <header className="b2b-hub-header">
                 <div className="b2b-header-brand">
-                    <span className="b2b-brand-logo">STANDBY LAB</span>
+                    <span className="b2b-brand-logo">FORESIGHT PARTNERS</span>
                     <span className="b2b-brand-vertical-line"></span>
-                    <span className="b2b-brand-subtitle">EXECUTIVE COMMAND CENTER</span>
+                    <span className="b2b-brand-subtitle">AI CONSULTING FIRM</span>
                 </div>
                 <div className="b2b-header-status">
                     <div className="b2b-status-indicator">
                         <div className="b2b-status-dot pulse"></div>
-                        <span className="b2b-status-text">100% SECURE CONNECTION</span>
+                        <span className="b2b-status-text">SECURE · DATA-DRIVEN</span>
                     </div>
                     <div className="b2b-time-display">{systemTime}</div>
                 </div>
@@ -165,12 +165,15 @@ export default function Landing() {
 
             <main className="b2b-hub-main">
                 <section className="b2b-hero-section">
+                    <div className="b2b-hero-slogan" style={{ fontSize: '13px', letterSpacing: '3px', color: '#fbbf24', fontWeight: 700, marginBottom: '16px', textTransform: 'uppercase' }}>
+                        직감 대신 데이터로 증명하는 풀스택 AI 컨설팅 펌
+                    </div>
                     <h1 className="b2b-hero-title">
-                        VIP 고객을 위한 완벽한 상권 및 자산 비평,<br />
+                        VIP 고객을 위한 완벽한 상권 분석 및 비평,<br />
                         <span className="text-gold">엘리트 AI 리서치 팀</span>을 호출하세요.
                     </h1>
                     <p className="b2b-hero-desc">
-                        14,000개 이상의 극비 상권 데이터와 실시간 입지 분석 로직 가동 중.<br />
+                        수십 만 개 이상의 극비 상권 데이터와 실시간 입지 분석 로직 가동 중.<br />
                         수석 분석관이 당신의 의사결정을 지원합니다.
                     </p>
                 </section>
@@ -233,32 +236,31 @@ export default function Landing() {
                         </div>
                     </div>
 
-                    {/* 코라 (Cora) - 통합 운영 실장 */}
+                    {/* 코라 (Cora) - 상권경제학 명예교수 */}
                     <div className="b2b-agent-card" onClick={() => handleLaunchAgent('cora')}>
                         <div className="b2b-agent-header">
-                            <span className="b2b-agent-badge">EXECUTIVE ASSISTANT</span>
+                            <span className="b2b-agent-badge">PROFESSOR · 8 FRAMEWORKS</span>
                             <div className="b2b-agent-status online"></div>
                         </div>
                         <div className="b2b-agent-body">
                             <div className="b2b-agent-avatar cora-avatar">
-                                {/* SVG Avatar Placeholder for Cora */}
+                                {/* SVG Avatar: Academic Cap */}
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M12 2a5 5 0 00-5 5v2a5 5 0 0010 0V7a5 5 0 00-5-5z"></path>
-                                    <path d="M19 10v2a7 7 0 01-14 0v-2"></path>
-                                    <line x1="12" y1="19" x2="12" y2="22"></line>
+                                    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z"></path>
+                                    <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"></path>
                                 </svg>
                             </div>
                             <div>
                                 <h3 className="b2b-agent-name">코라 (Cora)</h3>
-                                <p className="b2b-agent-role">통합 운영 실장 / 어시스턴트</p>
+                                <p className="b2b-agent-role">상권경제학 명예교수 🎓</p>
                             </div>
                         </div>
                         <div className="b2b-agent-desc">
-                            "전반적인 시스템 운영 안내와 특이 동향 알림을 담당합니다. 도움이 필요하면 호출하세요."
+                            "8대 학술 프레임워크로 데이터 이면의 구조적 원인과 미래 방향을 진단합니다. 실시간 체감 온도 분석 탑재."
                         </div>
                         <div className="b2b-agent-footer">
-                            <span className="b2b-agent-core">상태: O/S 최적화 대기 중 🟢</span>
-                            <button className="b2b-btn-launch">채팅 상담 오픈 →</button>
+                            <span className="b2b-agent-core">엔진: 8 Frameworks + Trend Proxy 🟢</span>
+                            <button className="b2b-btn-launch">교수 상담실 입장 →</button>
                         </div>
                     </div>
 
@@ -293,8 +295,9 @@ export default function Landing() {
                 
                 <footer className="b2b-footer">
                     <div className="b2b-system-specs">
-                        <span>SYSTEM CAPACITY: 104M DB / SEC</span>
-                        <span>LATENCY: 12MS</span>
+                        <span>© FORESIGHT PARTNERS</span>
+                        <span>DATA SOURCES: 12 PUBLIC APIs</span>
+                        <span>TREND ENGINE: GOOGLE TRENDS + PROXY</span>
                         <span>ENCRYPTION: AES-256</span>
                     </div>
                 </footer>
