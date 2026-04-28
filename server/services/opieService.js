@@ -77,8 +77,8 @@ export async function generateMarketingReport(district, agencyName, brokerName, 
             
             // 개업/폐업 데이터
             const storeStats = seoulData?.store || null;
-            const openRate = storeStats?.openRate ? `${(storeStats.openRate * 100).toFixed(1)}%` : '데이터 없음';
-            const closeRate = storeStats?.closeRate ? `${(storeStats.closeRate * 100).toFixed(1)}%` : '데이터 없음';
+            const openRate = storeStats?.openRate ? `${storeStats.openRate.toFixed(1)}%` : '데이터 없음';
+            const closeRate = storeStats?.closeRate ? `${storeStats.closeRate.toFixed(1)}%` : '데이터 없음';
             const totalSales = storeStats?.totalSales ? `${Math.floor(storeStats.totalSales / 100000000)}억원` : '데이터 없음';
 
             spotDataList.push({
