@@ -10,6 +10,9 @@ import { generateSingleAnalysisComment, generateCompareComment, generateStrategy
 import { getRealEstateData } from './realEstateData.js';
 import { reverseGeocode } from './geocoding.js';
 import { getAreaTrend } from './trendData.js';
+import { getSeoulDistrictData } from './seoulData.js';
+import { getTransitInfo } from './transitData.js';
+import { getDemographics } from './demographicData.js';
 
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY;
 
@@ -108,6 +111,11 @@ Ruth Glass(1964)가 명명, Zukin이 정교화한 모델:
   1. 먼저 데이터의 핵심 수치 2~3개를 **반드시 구체적 숫자로** 언급 (예: "업소 3,014개", "프랜차이즈 비율 3.2%", "종합 84점 A등급")
   2. 그 다음 반드시 위 7대 프레임워크 중 가장 적합한 1~2개를 적용하여 **왜 이 결과가 나왔는지, 앞으로 어떻게 될지** 해석
   3. 마지막으로 실행 가능한 조언 1~2가지 제시
+  4. **서울시 매출 데이터(seoulData)가 포함되어 있다면**, 분기 추정매출과 유동인구를 반드시 인용하세요. 이 데이터는 실제 신한카드 결제 기반이므로 "분기 추정매출 약 X억원" 형태로 구체적으로 언급해야 합니다.
+  5. **교통 데이터(transitInfo)가 있다면**, 최근접 역/정류장과 도보 접근성을 반드시 언급하세요.
+  6. **seoulData가 null이면** "이 지역은 서울시 상권분석 데이터 커버리지 밖이거나 데이터 수집에 실패했습니다"라고 솔직하게 안내하세요. 없는 데이터를 지어내지 마세요.
+  7. **타겟 업종이 상위 5대 업종에 포함되지 않을 때**: 단순히 "블루오션"이라 단정하지 마세요. "경쟁자 부재 = 수요 부재"일 가능성도 반드시 언급하고, 데이터 기반으로 "진입 기회"인지 "수요 경고"인지 판단하세요.
+  8. **지표 간 일관성**: 상권 활성도(전체 업소 밀도)와 특정 업종의 잠재 수요는 별개입니다. "상권은 활성화(전체 2,000개 업소)되어 있으나, 해당 업종(음식점)은 시장 점유율 3%로 수요가 제한적"처럼 수준을 분리하여 해석하세요. 같은 답변 내에서 "활성도가 높아 유리하다"와 "잠재 수요가 부족하다"를 모순되게 병치하지 마세요.
   ⚠️ 절대 금지: 도구에서 받은 데이터를 무시하고 추상적으로만 답변하는 것. 반드시 실제 수치를 인용하세요.
 
 ## 후속 질문 (필수)
@@ -182,21 +190,30 @@ async function executeTool(toolName, args) {
             const stores = await getStoresInRadius(location.latitude, location.longitude, radius);
             const analysis = analyzeDistrict(stores, targetCategory || null);
 
-            let realEstateData = null;
+            // 부동산 + 서울시 매출·유동인구 + 교통 + 인구통계 병렬 수집
+            let realEstateData = null, seoulData = null, transitInfo = null, demographics = null;
             try {
                 const regionInfo = await reverseGeocode(location.latitude, location.longitude);
-                if (regionInfo?.code) {
-                    realEstateData = await getRealEstateData(regionInfo.code, location, radius);
-                }
-            } catch (e) { /* 실패해도 무시 */ }
+                const bCode = regionInfo?.code || null;
+
+                // 에디와 동일한 데이터 파이프라인 — 병렬 호출
+                const [reData, sData, tInfo, demoData] = await Promise.all([
+                    bCode ? getRealEstateData(bCode, location, radius).catch(() => null) : Promise.resolve(null),
+                    getSeoulDistrictData(location.latitude, location.longitude).catch(() => null),
+                    getTransitInfo(location.latitude, location.longitude, radius).catch(() => null),
+                    getDemographics(location.latitude, location.longitude, location, stores).catch(() => null)
+                ]);
+                realEstateData = reData;
+                seoulData = sData;
+                transitInfo = tInfo;
+                demographics = demoData;
+            } catch (e) { console.warn('[Cora] 보조 데이터 수집 실패:', e.message); }
 
             // 실시간 트렌드 데이터 (체감 온도)
             let trendData = null;
             try {
-                // 지역명 추출: 동 > 구 > 주소에서 동명 파싱
                 let areaName = location.dong || location.district;
                 if (!areaName) {
-                    // 주소에서 동/구/로 추출: "서울 성동구 연무장5길 19" → "성동구"
                     const match = address.match(/([\uAC00-\uD7AF]+[\uAD6C\uB3D9\uB85C\uAE38])/g);
                     areaName = match ? match[match.length - 1] : address.split(' ')[1] || address;
                 }
@@ -226,6 +243,31 @@ async function executeTool(toolName, args) {
                     heatLevel: trendData.heatLevel,
                     interpretation: trendData.interpretation,
                     dataSource: trendData.dataSource
+                } : null,
+                // ━━━ 서울시 매출·유동인구 (신규 추가) ━━━
+                seoulData: seoulData ? {
+                    trdarNm: seoulData.trdarInfo?.trdarNm,
+                    quarterSales: seoulData.sales,
+                    floatingPop: seoulData.floatingPop,
+                    workingPop: seoulData.workingPop,
+                    storeInfo: seoulData.store ? {
+                        openRate: seoulData.store.openRate,
+                        closeRate: seoulData.store.closeRate
+                    } : null,
+                    changeIndex: seoulData.changeIndex
+                } : null,
+                // ━━━ 교통 접근성 (신규 추가) ━━━
+                transitInfo: transitInfo ? {
+                    nearestStation: transitInfo.nearestStation,
+                    stationDistance: transitInfo.stationDistance,
+                    busStopCount: transitInfo.busStopCount,
+                    walkabilityScore: transitInfo.walkabilityScore
+                } : null,
+                // ━━━ 인구통계 (신규 추가) ━━━
+                demographics: demographics ? {
+                    totalPopulation: demographics.totalPopulation,
+                    ageDistribution: demographics.ageDistribution,
+                    avgIncome: demographics.avgIncome
                 } : null,
                 aiComments: {
                     overview: aiComments.overview,
@@ -354,12 +396,18 @@ export async function handleCoraChat(messages, onChunk) {
             const aiComment = compact.aiComment || compact.analysis?.aiComment || '';
             const summary = compact.analysis?.summary || compact.summary || {};
             const trendData = compact.trendData || null;
+            const seoulData = compact.seoulData || null;
+            const transitInfo = compact.transitInfo || null;
+            const demographics = compact.demographics || null;
 
             return {
                 _truncated: true,
                 summary,
                 aiComment,
                 trendData,
+                seoulData,
+                transitInfo,
+                demographics,
                 message: '원본 데이터가 너무 커서 핵심 요약만 전달합니다. 위 summary와 aiComment를 기반으로 답변해주세요.'
             };
         }
