@@ -320,6 +320,53 @@ export async function handleCoraChat(messages, onChunk) {
         }
     };
 
+    // ─── 도구 결과 토큰 초과 방지 ───
+    function truncateToolResult(result) {
+        if (!result || typeof result !== 'object') return result;
+
+        const compact = JSON.parse(JSON.stringify(result)); // deep copy
+
+        // 상가 원본 리스트가 있으면 상위 10개만 유지
+        const arrayKeys = ['stores', 'rawData', 'storeList', 'items', 'data'];
+        for (const key of arrayKeys) {
+            if (Array.isArray(compact[key]) && compact[key].length > 10) {
+                const total = compact[key].length;
+                compact[key] = compact[key].slice(0, 10);
+                compact[`${key}_note`] = `총 ${total}건 중 상위 10건만 포함 (토큰 절약)`;
+            }
+            // nested (ex: compact.analysis.stores)
+            if (compact.analysis && Array.isArray(compact.analysis[key]) && compact.analysis[key].length > 10) {
+                const total = compact.analysis[key].length;
+                compact.analysis[key] = compact.analysis[key].slice(0, 10);
+                compact.analysis[`${key}_note`] = `총 ${total}건 중 상위 10건만 포함`;
+            }
+        }
+
+        // realEstateData 내 listings도 잘라냄
+        if (compact.realEstateData?.listings && compact.realEstateData.listings.length > 5) {
+            compact.realEstateData.listings = compact.realEstateData.listings.slice(0, 5);
+        }
+
+        // 최종 JSON 크기 80KB 제한
+        let jsonStr = JSON.stringify(compact);
+        if (jsonStr.length > 80000) {
+            // aiComment는 보존하고 나머지 큰 필드 제거
+            const aiComment = compact.aiComment || compact.analysis?.aiComment || '';
+            const summary = compact.analysis?.summary || compact.summary || {};
+            const trendData = compact.trendData || null;
+
+            return {
+                _truncated: true,
+                summary,
+                aiComment,
+                trendData,
+                message: '원본 데이터가 너무 커서 핵심 요약만 전달합니다. 위 summary와 aiComment를 기반으로 답변해주세요.'
+            };
+        }
+
+        return compact;
+    }
+
     const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -354,13 +401,16 @@ export async function handleCoraChat(messages, onChunk) {
                 chartData = toolResult._chartData || null;
                 delete toolResult._chartData;
 
+                // 토큰 초과 방지: 도구 결과를 요약하여 크기 제한
+                const compactResult = truncateToolResult(toolResult);
+
                 // 도구 결과를 Gemini에게 다시 보내서 자연어 응답 생성
                 const followUpBody = {
                     system_instruction: { parts: [{ text: CORA_SYSTEM_PROMPT }] },
                     contents: [
                         ...contents,
                         { role: 'model', parts: [{ functionCall: { name, args } }] },
-                        { role: 'user', parts: [{ functionResponse: { name, response: toolResult } }] }
+                        { role: 'user', parts: [{ functionResponse: { name, response: compactResult } }] }
                     ],
                     tools: [{ function_declarations: TOOL_DEFINITIONS }],
                     tool_config: { function_calling_config: { mode: "AUTO" } }
