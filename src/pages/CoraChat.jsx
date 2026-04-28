@@ -87,8 +87,8 @@ export default function CoraChat() {
                 <div className="cora-header-left">
                     <img src="/cora-avatar.png" alt="Cora" className="cora-header-avatar" />
                     <div>
-                        <h1 className="cora-header-title">코라</h1>
-                        <span className="cora-header-subtitle">AI 상권분석 컨설턴트</span>
+                        <h1 className="cora-header-title">코라 교수</h1>
+                        <span className="cora-header-subtitle">상권경제학 명예교수 🎓</span>
                     </div>
                 </div>
                 <div className="cora-header-actions">
@@ -105,8 +105,8 @@ export default function CoraChat() {
                             <img src="/cora-avatar.png" alt="Cora" className="cora-welcome-avatar" />
                             <div className="cora-welcome-pulse"></div>
                         </div>
-                        <h2 className="cora-welcome-title">안녕하세요! 저는 <span className="cora-name-highlight">코라</span>예요 ✨</h2>
-                        <p className="cora-welcome-desc">상권 분석의 모든 것을 도와드릴게요.<br/>궁금한 동네 주소를 알려주시면, 바로 분석 시작할게요! 🏘️</p>
+                        <h2 className="cora-welcome-title">안녕하세요! <span className="cora-name-highlight">코라 교수</span>에요 🎓</h2>
+                        <p className="cora-welcome-desc">8대 학술 프레임워크로 상권 데이터 이면의 구조적 원인과 미래를 진단해드려요.<br/>궁금한 동네나 전략을 말씀해 주시면 분석해드릴게요! 🏠</p>
 
                         <div className="cora-suggestions">
                             {suggestions.map((s, i) => (

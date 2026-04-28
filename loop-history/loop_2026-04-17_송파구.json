@@ -1,0 +1,580 @@
+{
+  "loopNumber": 4,
+  "district": "송파구",
+  "timestamp": "2026-04-17T10:35:02.669Z",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 1,
+      "name": "QA Inspector",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:35:02.670Z",
+      "completedAt": "2026-04-17T10:37:51.548Z",
+      "issuesFound": 22
+    },
+    {
+      "step": 2,
+      "name": "Reporter",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:37:51.548Z",
+      "completedAt": "2026-04-17T10:37:51.550Z",
+      "manualReview": 12
+    },
+    {
+      "step": 3,
+      "name": "Discord",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:37:51.550Z",
+      "completedAt": "2026-04-17T10:37:51.551Z",
+      "sent": false
+    }
+  ],
+  "inspectionReport": {
+    "district": "송파구",
+    "timestamp": "2026-04-17T10:37:51.548Z",
+    "addressesTested": 6,
+    "totalIssuesFound": 22,
+    "summary": {
+      "critical": 0,
+      "high": 12,
+      "medium": 0,
+      "low": 0
+    },
+    "pipelineHealth": "ALL_HEALTHY",
+    "results": [
+      {
+        "address": "서울 송파구 올림픽로 300",
+        "totalIssues": 4,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 21.3초 (기준: 20초 이내) — 서울 송파구 올림픽로 300",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '카페'가 상위 5대 업종에 포함되지 않습니다. (총 업소 2026개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '카페' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          },
+          {
+            "phase": "Phase 8: 프리미엄 데이터",
+            "severity": "WARNING",
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 100점으로 너무 관대합니다.",
+            "suggestion": "getTransitInfo 스코어링 함수 패널티 로직 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 2026,
+          "overallScore": 87,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "일반사업·사무",
+            "생활서비스",
+            "부동산·시설관리"
+          ],
+          "franchiseCount": 102,
+          "franchiseRatio": "5.0"
+        }
+      },
+      {
+        "address": "서울 송파구 백제고분로 200",
+        "totalIssues": 4,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 28.8초 (기준: 20초 이내) — 서울 송파구 백제고분로 200",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '음식점'가 상위 5대 업종에 포함되지 않습니다. (총 업소 1560개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '음식점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          },
+          {
+            "phase": "Phase 8: 프리미엄 데이터",
+            "severity": "WARNING",
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 99점으로 너무 관대합니다.",
+            "suggestion": "getTransitInfo 스코어링 함수 패널티 로직 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1560,
+          "overallScore": 89,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "교육·학원",
+            "일반사업·사무"
+          ],
+          "franchiseCount": 87,
+          "franchiseRatio": "5.6"
+        }
+      },
+      {
+        "address": "서울 송파구 위례성대로 200",
+        "totalIssues": 4,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 31.1초 (기준: 20초 이내) — 서울 송파구 위례성대로 200",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '편의점'가 상위 5대 업종에 포함되지 않습니다. (총 업소 850개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '편의점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          },
+          {
+            "phase": "Phase 8: 프리미엄 데이터",
+            "severity": "WARNING",
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 84점으로 너무 관대합니다.",
+            "suggestion": "getTransitInfo 스코어링 함수 패널티 로직 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 850,
+          "overallScore": 76,
+          "grade": "B",
+          "topCategories": [
+            "쇼핑·판매",
+            "외식·음료",
+            "부동산·시설관리",
+            "생활서비스",
+            "병원·의료"
+          ],
+          "franchiseCount": 46,
+          "franchiseRatio": "5.4"
+        }
+      },
+      {
+        "address": "서울 송파구 마천로 210",
+        "totalIssues": 3,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 21.5초 (기준: 20초 이내) — 서울 송파구 마천로 210",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '미용실'가 상위 5대 업종에 포함되지 않습니다. (총 업소 611개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '미용실' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 611,
+          "overallScore": 88,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "부동산·시설관리",
+            "교육·학원"
+          ],
+          "franchiseCount": 28,
+          "franchiseRatio": "4.6"
+        }
+      },
+      {
+        "address": "서울 송파구 문정로 148",
+        "totalIssues": 4,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 22.9초 (기준: 20초 이내) — 서울 송파구 문정로 148",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '병원'가 상위 5대 업종에 포함되지 않습니다. (총 업소 850개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '병원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          },
+          {
+            "phase": "Phase 8: 프리미엄 데이터",
+            "severity": "WARNING",
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 84점으로 너무 관대합니다.",
+            "suggestion": "getTransitInfo 스코어링 함수 패널티 로직 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 850,
+          "overallScore": 76,
+          "grade": "B",
+          "topCategories": [
+            "쇼핑·판매",
+            "외식·음료",
+            "부동산·시설관리",
+            "생활서비스",
+            "병원·의료"
+          ],
+          "franchiseCount": 46,
+          "franchiseRatio": "5.4"
+        }
+      },
+      {
+        "address": "서울 송파구 석촌호수로 300",
+        "totalIssues": 3,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 2,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 21.4초 (기준: 20초 이내) — 서울 송파구 석촌호수로 300",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          },
+          {
+            "phase": "Phase 6: 데이터 정합성",
+            "severity": "WARNING",
+            "type": "TARGET_CATEGORY_MISSING",
+            "description": "분석 타겟 '학원'가 상위 5대 업종에 포함되지 않습니다. (총 업소 1283개 중 비중이 극히 낮음)",
+            "suggestion": "상권 성격 불일치 의심. AI 코멘트가 이 점을 타당하게 설명하는지 확인 필요"
+          },
+          {
+            "phase": "Phase 7: AI 품질 심층체크",
+            "severity": "HIGH",
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "description": "의뢰받은 타겟 업종 '학원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+            "suggestion": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1283,
+          "overallScore": 90,
+          "grade": "S",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "일반사업·사무",
+            "생활서비스",
+            "부동산·시설관리"
+          ],
+          "franchiseCount": 59,
+          "franchiseRatio": "4.6"
+        }
+      }
+    ]
+  },
+  "improvementPlan": {
+    "district": "송파구",
+    "timestamp": "2026-04-17T10:37:51.550Z",
+    "totalIssues": 22,
+    "improvements": [
+      {
+        "phase": "Phase 5: 성능",
+        "issueCount": 6,
+        "issues": [
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 21.3초 (기준: 20초 이내) — 서울 송파구 올림픽로 300"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 28.8초 (기준: 20초 이내) — 서울 송파구 백제고분로 200"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 31.1초 (기준: 20초 이내) — 서울 송파구 위례성대로 200"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 21.5초 (기준: 20초 이내) — 서울 송파구 마천로 210"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 22.9초 (기준: 20초 이내) — 서울 송파구 문정로 148"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 21.4초 (기준: 20초 이내) — 서울 송파구 석촌호수로 300"
+          }
+        ]
+      },
+      {
+        "phase": "Phase 6: 데이터 정합성",
+        "issueCount": 6,
+        "issues": [
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '카페'가 상위 5대 업종에 포함되지 않습니다. (총 업소 2026개 중 비중이 극히 낮음)"
+          },
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '음식점'가 상위 5대 업종에 포함되지 않습니다. (총 업소 1560개 중 비중이 극히 낮음)"
+          },
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '편의점'가 상위 5대 업종에 포함되지 않습니다. (총 업소 850개 중 비중이 극히 낮음)"
+          },
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '미용실'가 상위 5대 업종에 포함되지 않습니다. (총 업소 611개 중 비중이 극히 낮음)"
+          },
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '병원'가 상위 5대 업종에 포함되지 않습니다. (총 업소 850개 중 비중이 극히 낮음)"
+          },
+          {
+            "type": "TARGET_CATEGORY_MISSING",
+            "severity": "WARNING",
+            "description": "분석 타겟 '학원'가 상위 5대 업종에 포함되지 않습니다. (총 업소 1283개 중 비중이 극히 낮음)"
+          }
+        ]
+      },
+      {
+        "phase": "Phase 7: AI 품질 심층체크",
+        "issueCount": 6,
+        "issues": [
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '카페' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          },
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '음식점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          },
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '편의점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          },
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '미용실' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          },
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '병원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          },
+          {
+            "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+            "severity": "HIGH",
+            "description": "의뢰받은 타겟 업종 '학원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다."
+          }
+        ]
+      },
+      {
+        "phase": "Phase 8: 프리미엄 데이터",
+        "issueCount": 4,
+        "issues": [
+          {
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "severity": "WARNING",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 100점으로 너무 관대합니다."
+          },
+          {
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "severity": "WARNING",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 99점으로 너무 관대합니다."
+          },
+          {
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "severity": "WARNING",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 84점으로 너무 관대합니다."
+          },
+          {
+            "type": "TRANSIT_SCORE_MISMATCH",
+            "severity": "WARNING",
+            "description": "정류장/역이 3개 이하(0개)인 대중교통 소외지역임에도 교통 접근성 점수가 84점으로 너무 관대합니다."
+          }
+        ]
+      }
+    ],
+    "autoFixable": [],
+    "manualReview": [
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 21.3초 (기준: 20초 이내) — 서울 송파구 올림픽로 300",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '카페' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 28.8초 (기준: 20초 이내) — 서울 송파구 백제고분로 200",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '음식점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 31.1초 (기준: 20초 이내) — 서울 송파구 위례성대로 200",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '편의점' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 21.5초 (기준: 20초 이내) — 서울 송파구 마천로 210",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '미용실' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 22.9초 (기준: 20초 이내) — 서울 송파구 문정로 148",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '병원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 21.4초 (기준: 20초 이내) — 서울 송파구 석촌호수로 300",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "TARGET_CATEGORY_OMITTED_BY_AI",
+        "severity": "HIGH",
+        "title": "의뢰받은 타겟 업종 '학원' 단어가 AI 분석 코멘트에 단 한 번도 언급되지 않았습니다.",
+        "description": "상권 일반 분석만 수행하고 타겟팅 분석(Personalization)이 실패함. 프롬프트 구조화 필요"
+      }
+    ],
+    "summary": "📊 송파구 QA 결과: 22건 이슈\n🟠 HIGH 12건: SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI, SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI, SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI, SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI, SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI, SLOW_RESPONSE, TARGET_CATEGORY_OMITTED_BY_AI\n\n⚠️ Phase 5: 성능: 6건\n📝 Phase 6: 데이터 정합성: 6건\n⚠️ Phase 7: AI 품질 심층체크: 6건\n📝 Phase 8: 프리미엄 데이터: 4건"
+  },
+  "autoFixResult": {
+    "applied": [],
+    "failed": [],
+    "summary": "V2: 자동 수정 비활성화"
+  },
+  "elapsedSeconds": 168.9
+}

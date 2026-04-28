@@ -1,0 +1,334 @@
+{
+  "loopNumber": 3,
+  "district": "구로구",
+  "timestamp": "2026-04-17T10:20:32.827Z",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 1,
+      "name": "QA Inspector",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:20:32.827Z",
+      "completedAt": "2026-04-17T10:25:55.103Z",
+      "issuesFound": 6
+    },
+    {
+      "step": 2,
+      "name": "Reporter",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:25:55.103Z",
+      "completedAt": "2026-04-17T10:25:55.105Z",
+      "manualReview": 6
+    },
+    {
+      "step": 3,
+      "name": "Discord",
+      "status": "completed",
+      "startedAt": "2026-04-17T10:25:55.105Z",
+      "completedAt": "2026-04-17T10:25:55.105Z",
+      "sent": false
+    }
+  ],
+  "inspectionReport": {
+    "district": "구로구",
+    "timestamp": "2026-04-17T10:25:55.103Z",
+    "addressesTested": 6,
+    "totalIssuesFound": 6,
+    "summary": {
+      "critical": 0,
+      "high": 6,
+      "medium": 0,
+      "low": 0
+    },
+    "pipelineHealth": "ALL_HEALTHY",
+    "results": [
+      {
+        "address": "서울 구로구 디지털로 300",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 74.3초 (기준: 20초 이내) — 서울 구로구 디지털로 300",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 3709,
+          "overallScore": 82,
+          "grade": "A",
+          "topCategories": [
+            "일반사업·사무",
+            "외식·음료",
+            "쇼핑·판매",
+            "부동산·시설관리",
+            "교육·학원"
+          ],
+          "franchiseCount": 146,
+          "franchiseRatio": "3.9"
+        }
+      },
+      {
+        "address": "서울 구로구 경인로 662",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 50.8초 (기준: 20초 이내) — 서울 구로구 경인로 662",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1517,
+          "overallScore": 83,
+          "grade": "A",
+          "topCategories": [
+            "쇼핑·판매",
+            "외식·음료",
+            "생활서비스",
+            "교육·학원",
+            "부동산·시설관리"
+          ],
+          "franchiseCount": 84,
+          "franchiseRatio": "5.5"
+        }
+      },
+      {
+        "address": "서울 구로구 오리로 1110",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 36.6초 (기준: 20초 이내) — 서울 구로구 오리로 1110",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 215,
+          "overallScore": 77,
+          "grade": "B",
+          "topCategories": [
+            "교육·학원",
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "스포츠·레저"
+          ],
+          "franchiseCount": 21,
+          "franchiseRatio": "9.8"
+        }
+      },
+      {
+        "address": "서울 구로구 신도림로 100",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 45.3초 (기준: 20초 이내) — 서울 구로구 신도림로 100",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 215,
+          "overallScore": 77,
+          "grade": "B",
+          "topCategories": [
+            "교육·학원",
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "스포츠·레저"
+          ],
+          "franchiseCount": 21,
+          "franchiseRatio": "9.8"
+        }
+      },
+      {
+        "address": "서울 구로구 중앙로 20",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 32.6초 (기준: 20초 이내) — 서울 구로구 중앙로 20",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 215,
+          "overallScore": 77,
+          "grade": "B",
+          "topCategories": [
+            "교육·학원",
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "스포츠·레저"
+          ],
+          "franchiseCount": 21,
+          "franchiseRatio": "9.8"
+        }
+      },
+      {
+        "address": "서울 구로구 새말로 97",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 62.9초 (기준: 20초 이내) — 서울 구로구 새말로 97",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1532,
+          "overallScore": 82,
+          "grade": "A",
+          "topCategories": [
+            "쇼핑·판매",
+            "외식·음료",
+            "생활서비스",
+            "부동산·시설관리",
+            "일반사업·사무"
+          ],
+          "franchiseCount": 75,
+          "franchiseRatio": "4.9"
+        }
+      }
+    ]
+  },
+  "improvementPlan": {
+    "district": "구로구",
+    "timestamp": "2026-04-17T10:25:55.104Z",
+    "totalIssues": 6,
+    "improvements": [
+      {
+        "phase": "Phase 5: 성능",
+        "issueCount": 6,
+        "issues": [
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 74.3초 (기준: 20초 이내) — 서울 구로구 디지털로 300"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 50.8초 (기준: 20초 이내) — 서울 구로구 경인로 662"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 36.6초 (기준: 20초 이내) — 서울 구로구 오리로 1110"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 45.3초 (기준: 20초 이내) — 서울 구로구 신도림로 100"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 32.6초 (기준: 20초 이내) — 서울 구로구 중앙로 20"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 62.9초 (기준: 20초 이내) — 서울 구로구 새말로 97"
+          }
+        ]
+      }
+    ],
+    "autoFixable": [],
+    "manualReview": [
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 74.3초 (기준: 20초 이내) — 서울 구로구 디지털로 300",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 50.8초 (기준: 20초 이내) — 서울 구로구 경인로 662",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 36.6초 (기준: 20초 이내) — 서울 구로구 오리로 1110",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 45.3초 (기준: 20초 이내) — 서울 구로구 신도림로 100",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 32.6초 (기준: 20초 이내) — 서울 구로구 중앙로 20",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 62.9초 (기준: 20초 이내) — 서울 구로구 새말로 97",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      }
+    ],
+    "summary": "📊 구로구 QA 결과: 6건 이슈\n🟠 HIGH 6건: SLOW_RESPONSE, SLOW_RESPONSE, SLOW_RESPONSE, SLOW_RESPONSE, SLOW_RESPONSE, SLOW_RESPONSE\n\n⚠️ Phase 5: 성능: 6건"
+  },
+  "autoFixResult": {
+    "applied": [],
+    "failed": [],
+    "summary": "V2: 자동 수정 비활성화"
+  },
+  "elapsedSeconds": 322.3
+}

@@ -1,0 +1,196 @@
+{
+  "loopNumber": 2,
+  "district": "광진구",
+  "timestamp": "2026-04-16T08:09:36.606Z",
+  "status": "completed",
+  "steps": [
+    {
+      "step": 1,
+      "name": "QA Inspector",
+      "status": "completed",
+      "startedAt": "2026-04-16T08:09:36.606Z",
+      "completedAt": "2026-04-16T08:11:02.246Z",
+      "issuesFound": 3
+    },
+    {
+      "step": 2,
+      "name": "Reporter",
+      "status": "completed",
+      "startedAt": "2026-04-16T08:11:02.247Z",
+      "completedAt": "2026-04-16T08:11:02.247Z",
+      "manualReview": 2
+    },
+    {
+      "step": 3,
+      "name": "Discord",
+      "status": "completed",
+      "startedAt": "2026-04-16T08:11:02.247Z",
+      "completedAt": "2026-04-16T08:11:02.247Z",
+      "sent": false
+    }
+  ],
+  "inspectionReport": {
+    "district": "광진구",
+    "timestamp": "2026-04-16T08:11:02.246Z",
+    "addressesTested": 3,
+    "totalIssuesFound": 3,
+    "summary": {
+      "critical": 0,
+      "high": 2,
+      "medium": 1,
+      "low": 0
+    },
+    "pipelineHealth": "ALL_HEALTHY",
+    "results": [
+      {
+        "address": "서울 광진구 능동로 120",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 1,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "MEDIUM",
+            "type": "SLOW_RESPONSE_WARNING",
+            "description": "분석 응답 16.8초 (권장: 15초 이내) — 서울 광진구 능동로 120",
+            "suggestion": "성능 최적화 권장"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 1114,
+          "overallScore": 89,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "생활서비스",
+            "일반사업·사무",
+            "부동산·시설관리"
+          ],
+          "franchiseCount": 69,
+          "franchiseRatio": "6.2"
+        }
+      },
+      {
+        "address": "서울 광진구 광나루로 410",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 25.4초 (기준: 20초 이내) — 서울 광진구 광나루로 410",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 986,
+          "overallScore": 89,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "일반사업·사무",
+            "부동산·시설관리",
+            "생활서비스"
+          ],
+          "franchiseCount": 53,
+          "franchiseRatio": "5.4"
+        }
+      },
+      {
+        "address": "서울 광진구 동일로 500",
+        "totalIssues": 1,
+        "issuesBySeverity": {
+          "CRITICAL": 0,
+          "HIGH": 1,
+          "MEDIUM": 0,
+          "LOW": 0
+        },
+        "issues": [
+          {
+            "phase": "Phase 5: 성능",
+            "severity": "HIGH",
+            "type": "SLOW_RESPONSE",
+            "description": "분석 응답 27.1초 (기준: 20초 이내) — 서울 광진구 동일로 500",
+            "suggestion": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+          }
+        ],
+        "analysisSnapshot": {
+          "storeCount": 2492,
+          "overallScore": 89,
+          "grade": "A",
+          "topCategories": [
+            "외식·음료",
+            "쇼핑·판매",
+            "일반사업·사무",
+            "생활서비스",
+            "스포츠·레저"
+          ],
+          "franchiseCount": 115,
+          "franchiseRatio": "4.6"
+        }
+      }
+    ]
+  },
+  "improvementPlan": {
+    "district": "광진구",
+    "timestamp": "2026-04-16T08:11:02.247Z",
+    "totalIssues": 3,
+    "improvements": [
+      {
+        "phase": "Phase 5: 성능",
+        "issueCount": 3,
+        "issues": [
+          {
+            "type": "SLOW_RESPONSE_WARNING",
+            "severity": "MEDIUM",
+            "description": "분석 응답 16.8초 (권장: 15초 이내) — 서울 광진구 능동로 120"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 25.4초 (기준: 20초 이내) — 서울 광진구 광나루로 410"
+          },
+          {
+            "type": "SLOW_RESPONSE",
+            "severity": "HIGH",
+            "description": "분석 응답 27.1초 (기준: 20초 이내) — 서울 광진구 동일로 500"
+          }
+        ]
+      }
+    ],
+    "autoFixable": [],
+    "manualReview": [
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 25.4초 (기준: 20초 이내) — 서울 광진구 광나루로 410",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      },
+      {
+        "type": "SLOW_RESPONSE",
+        "severity": "HIGH",
+        "title": "분석 응답 27.1초 (기준: 20초 이내) — 서울 광진구 동일로 500",
+        "description": "병렬 API 호출 최적화 또는 타임아웃 설정 점검"
+      }
+    ],
+    "summary": "📊 광진구 QA 결과: 3건 이슈\n🟠 HIGH 2건: SLOW_RESPONSE, SLOW_RESPONSE | 🟡 MEDIUM 1건\n\n⚠️ Phase 5: 성능: 3건"
+  },
+  "autoFixResult": {
+    "applied": [],
+    "failed": [],
+    "summary": "V2: 자동 수정 비활성화"
+  },
+  "elapsedSeconds": 85.6
+}
