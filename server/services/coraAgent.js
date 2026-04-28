@@ -9,6 +9,7 @@ import { analyzeDistrict, compareDistricts } from './analyzer.js';
 import { generateSingleAnalysisComment, generateCompareComment, generateStrategyGuide } from './aiConsultant.js';
 import { getRealEstateData } from './realEstateData.js';
 import { reverseGeocode } from './geocoding.js';
+import { getAreaTrend } from './trendData.js';
 
 const GEMINI_API_KEY = () => process.env.GEMINI_API_KEY;
 
@@ -90,6 +91,15 @@ Ruth Glass(1964)가 명명, Zukin이 정교화한 모델:
   을지로(인쇄소→힙 카페), 성수동(구두공장→팝업 성지) = 공간의 창조적 파괴
   기존 업종 폐업률이 높으면서 전혀 다른 업종의 개업률이 높다면 → 창조적 파괴 진행 중
 
+### 📈 Framework 8: 체감 온도 (Proxy Data)
+- 공공데이터는 분기별 시차(1~2개월)가 존재. 이를 보정하기 위해 **Google Trends 실시간 검색량**을 체감 온도 지표로 활용.
+- trendScore(0~100): 현재 관심도(40%) + 모멘텀(30%) + 피크대비(30%)
+- momentum: 최근 4주 vs 이전 4주 검색량 변화율. +면 관심↑, -면 관심↓
+- 검색 관심도 상승 → 유동인구 증가의 선행지표 (실제 방문 전 검색하는 소비자 행동)
+- 검색 관심도 하락 → 공실률 상승의 선행지표 (관심 감소 → 방문 감소 → 매출 감소)
+- 데이터 해석 시: 공공데이터(과거 실측) + 트렌드(현재 체감)를 **교차 검증**하여 "지금 이 순간의 상권 상태"를 진단하세요.
+  예) 공공데이터 매출↑ + 트렌드↑ = "진짜 성장" / 공공데이터 매출↑ + 트렌드↓ = "과거의 영광, 현재 냉각 중"
+
 ## 도구 사용 규칙
 - 사용자가 특정 주소나 장소를 언급하면 analyze_area 도구를 호출하세요.
 - "비교해줘", "vs", "어디가 나아?" 등의 표현이 있으면 compare_areas를 호출하세요.
@@ -109,11 +119,11 @@ Ruth Glass(1964)가 명명, Zukin이 정교화한 모델:
 - 차트나 맵이 필요한 분석 결과는 \`[CHART:radar]\`, \`[CHART:bar]\`, \`[MAP:heatmap]\` 태그로 표시하세요.
 - 이 태그는 프론트엔드에서 인라인 차트/맵으로 자동 렌더링됩니다.
 
-## 첫 인사 규칙
-- 사용자의 **첫 번째 메시지**에만 인사하세요:
-  "안녕하세요! 저는 **코라** 교수예요 🎓 데이터 뒤에 숨은 *구조적 원인*과 *미래 방향*을 읽어드릴게요!"
-- 이후 메시지에서는 인사를 생략하고 바로 본론으로 들어가세요.
-- 절대로 매 답변마다 자기소개를 반복하지 마세요.
+## 첫 인사 규칙 (⚠️ 최우선)
+- 대화 히스토리에 당신의 이전 답변(role: model)이 하나라도 있으면 → 인사 절대 금지. 바로 본론.
+- 대화 히스토리에 사용자 메시지만 있으면(첫 대화) → 짧은 인사 1줄: "안녕하세요! 코라 교수에요 🎓"
+- 절대로 매 답변마다 "저는 코라 교수예요", "데이터 뒤에 숨은", "구조적 원인과 미래 방향"을 반복하지 마세요.
+- 인사 반복은 전문성을 해칩니다. 교수는 매번 자기소개를 하지 않습니다.
 `;
 
 // ═══════════════════════════════════════
@@ -180,6 +190,19 @@ async function executeTool(toolName, args) {
                 }
             } catch (e) { /* 실패해도 무시 */ }
 
+            // 실시간 트렌드 데이터 (체감 온도)
+            let trendData = null;
+            try {
+                // 지역명 추출: 동 > 구 > 주소에서 동명 파싱
+                let areaName = location.dong || location.district;
+                if (!areaName) {
+                    // 주소에서 동/구/로 추출: "서울 성동구 연무장5길 19" → "성동구"
+                    const match = address.match(/([\uAC00-\uD7AF]+[\uAD6C\uB3D9\uB85C\uAE38])/g);
+                    areaName = match ? match[match.length - 1] : address.split(' ')[1] || address;
+                }
+                trendData = await getAreaTrend(areaName);
+            } catch (e) { console.warn('[Cora] 트렌드 조회 실패:', e.message); }
+
             const aiComments = await generateSingleAnalysisComment({ analysis, location, realEstateData });
 
             return {
@@ -195,6 +218,15 @@ async function executeTool(toolName, args) {
                     topBrands: analysis.franchiseAnalysis.topBrands?.slice(0, 5)
                 },
                 targetAnalysis: analysis.targetAnalysis,
+                trendData: trendData ? {
+                    trendScore: trendData.trendScore,
+                    momentum: trendData.momentum,
+                    direction: trendData.direction,
+                    directionEmoji: trendData.directionEmoji,
+                    heatLevel: trendData.heatLevel,
+                    interpretation: trendData.interpretation,
+                    dataSource: trendData.dataSource
+                } : null,
                 aiComments: {
                     overview: aiComments.overview,
                     strengths: aiComments.strengths,
