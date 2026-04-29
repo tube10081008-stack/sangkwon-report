@@ -52,12 +52,48 @@ const DISTRICT_HOTSPOTS = {
 };
 
 
-export async function generateMarketingReport(district, agencyName, brokerName, phone) {
+export async function generateMarketingReport(district, targetAddress, agencyName, brokerName, phone) {
     const month = new Date().getMonth() + 1;
-    const hotspots = DISTRICT_HOTSPOTS[district];
+    let hotspots = [];
 
-    if (!hotspots) {
-        // 등록되지 않은 구는 기존 방식 폴백 (데이터 없이)
+    if (targetAddress && targetAddress.trim() !== '') {
+        // [Option A] 사용자가 입력한 특정 주소가 있는 경우 (단일 딥다이브)
+        hotspots.push({ name: targetAddress, address: targetAddress, category: '전체' });
+    } else {
+        // [Option B] 자율 탐색 모드: 해당 구의 랜덤 상권 탐색
+        // 카카오 API를 활용하여 해당 구의 상권/핫플 추출
+        console.log(`[Opie V2] ${district} 자율 탐색 시작...`);
+        try {
+            const KAKAO_API_KEY = process.env.KAKAO_API_KEY;
+            const query = `${district} 상가`;
+            const url = `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(query)}&size=10`;
+            const response = await fetch(url, { headers: { 'Authorization': `KakaoAK ${KAKAO_API_KEY}` } });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.documents && data.documents.length > 0) {
+                    // 무작위로 3곳 섞어서 선택
+                    const shuffled = data.documents.sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, 3);
+                    hotspots = selected.map(doc => ({
+                        name: doc.place_name,
+                        address: doc.road_address_name || doc.address_name,
+                        category: doc.category_name.includes('음식점') ? '음식점' : '카페' // 임의 매핑
+                    }));
+                }
+            }
+        } catch (e) {
+            console.warn(`[Opie V2] 동적 탐색 실패: ${e.message}`);
+        }
+
+        // 동적 탐색 실패 시 기존 하드코딩 폴백 (등록된 구인 경우에 한정)
+        if (hotspots.length === 0 && DISTRICT_HOTSPOTS[district]) {
+            hotspots = DISTRICT_HOTSPOTS[district];
+        }
+    }
+
+    if (hotspots.length === 0) {
+        // 동적 탐색도 실패하고 하드코딩도 없는 기타 구의 경우
         return generateFallbackReport(district, agencyName, brokerName, phone, month);
     }
 

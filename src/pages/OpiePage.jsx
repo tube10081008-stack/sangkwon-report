@@ -9,6 +9,7 @@ export default function OpiePage() {
     
     // Form state
     const [district, setDistrict] = useState('강남구');
+    const [targetAddress, setTargetAddress] = useState(''); // [추가] 선택형 타겟 주소
     const [agencyName, setAgencyName] = useState('');
     const [brokerName, setBrokerName] = useState('');
     const [phone, setPhone] = useState('');
@@ -34,7 +35,7 @@ export default function OpiePage() {
         setLoading(true);
         setProgress(5);
         setResultMarkdown('');
-        setLoadingMsg('수석 디렉터 오피(Opie)가 타겟 지역 데이터를 수집합니다...');
+        setLoadingMsg(targetAddress ? '수석 디렉터 오피(Opie)가 타겟 지역 데이터를 집중 수집합니다...' : '수석 디렉터 오피(Opie)가 랜덤 핫스팟 데이터를 자율 탐색합니다...');
 
         try {
             const steps = [
@@ -54,7 +55,7 @@ export default function OpiePage() {
             const res = await fetch(`${API_BASE}/api/opie/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ district, agencyName, brokerName, phone })
+                body: JSON.stringify({ district, targetAddress, agencyName, brokerName, phone })
             });
 
             clearInterval(msgInterval);
@@ -192,13 +193,24 @@ export default function OpiePage() {
                             <label style={{ display: 'block', fontSize: '13px', color: '#94A3B8', marginBottom: '8px' }}>타겟 지역구 (*)</label>
                             <select value={district} onChange={(e) => setDistrict(e.target.value)} 
                                 style={{ width: '100%', padding: '12px 16px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', outline: 'none' }}>
-                                <option value="강남구">강남구 (Gangnam-gu)</option>
-                                <option value="서초구">서초구 (Seocho-gu)</option>
-                                <option value="송파구">송파구 (Songpa-gu)</option>
-                                <option value="성동구">성동구 (Seongdong-gu)</option>
-                                <option value="마포구">마포구 (Mapo-gu)</option>
-                                <option value="용산구">용산구 (Yongsan-gu)</option>
+                                <option value="강남구">강남구</option>
+                                <option value="서초구">서초구</option>
+                                <option value="송파구">송파구</option>
+                                <option value="성동구">성동구</option>
+                                <option value="마포구">마포구</option>
+                                <option value="용산구">용산구</option>
+                                <option value="종로구">종로구</option>
+                                <option value="중구">중구</option>
+                                <option value="동작구">동작구</option>
+                                <option value="강서구">강서구</option>
+                                <option value="영등포구">영등포구</option>
+                                <option value="기타">기타 전체 구 (자동탐색)</option>
                             </select>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '13px', color: '#c084fc', marginBottom: '8px' }}>타겟 주소 또는 상권명 (선택)</label>
+                            <input type="text" value={targetAddress} onChange={(e) => setTargetAddress(e.target.value)} placeholder="비워두면 AI가 구내 상권을 자율 탐색합니다 (예: 반포동 123)"
+                                style={{ width: '100%', padding: '12px 16px', background: 'rgba(168,85,247,0.05)', border: '1px solid rgba(168,85,247,0.3)', borderRadius: '8px', color: '#fff', outline: 'none' }} />
                         </div>
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', color: '#94A3B8', marginBottom: '8px' }}>소속 중개사무소 명칭 (*)</label>

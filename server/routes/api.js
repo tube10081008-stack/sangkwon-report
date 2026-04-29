@@ -377,13 +377,13 @@ router.post('/ask-ai', async (req, res) => {
  */
 router.post('/opie/generate', async (req, res) => {
     try {
-        const { district, agencyName, brokerName, phone } = req.body;
+        const { district, targetAddress, agencyName, brokerName, phone } = req.body;
         
         if (!district || !agencyName || !brokerName || !phone) {
             return res.status(400).json({ error: '지점, 연락처 등 필수 정보가 누락되었습니다.' });
         }
 
-        const reportMarkdown = await generateMarketingReport(district, agencyName, brokerName, phone);
+        const reportMarkdown = await generateMarketingReport(district, targetAddress, agencyName, brokerName, phone);
         
         res.json({
             success: true,
