@@ -27,52 +27,82 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     // 1. 지하철역 검색 (카카오 category_group_code: SW8)
     const subwayUrl = `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=SW8&x=${lng}&y=${lat}&radius=${searchRadius}&sort=distance&size=15`;
     
-    // 2. 버스정류장 검색 (OpenStreetMap Overpass API)
-    const overpassQuery = `[out:json][timeout:10];(node[highway=bus_stop](around:${searchRadius},${lat},${lng});node["public_transport"="platform"]["bus"="yes"](around:${searchRadius},${lat},${lng});node["public_transport"="stop_position"]["bus"="yes"](around:${searchRadius},${lat},${lng});node["amenity"="bus_station"](around:${searchRadius},${lat},${lng}););out body;`;
-    const busUrl = `https://overpass-api.de/api/interpreter`;
+    // 2. 버스정류장 검색 — Overpass API (미러 순환) + 재시도
+    //    ⚠️ 카카오 API에는 버스정류장 카테고리가 없음 (SW8=지하철만 지원)
+    //    Overpass가 유일한 무료 버스정류장 데이터소스 → 미러 3개 순환으로 안정성 확보
+    const overpassQuery = `[out:json][timeout:15];(node[highway=bus_stop](around:${searchRadius},${lat},${lng});node["public_transport"="platform"]["bus"="yes"](around:${searchRadius},${lat},${lng}););out body;`;
+    const overpassMirrors = [
+        'https://overpass-api.de/api/interpreter',
+        'https://overpass.kumi.systems/api/interpreter',
+        'https://z.overpass-api.de/api/interpreter'
+    ];
 
-    // 🚀 Overpass 에러로 전체 마비 방지를 위한 개별 try-catch 및 text 확인 기법 적용
-    const fetchBusRaw = async () => {
+    const fetchOverpass = async (attempt = 1) => {
+        const mirrorUrl = overpassMirrors[(attempt - 1) % overpassMirrors.length];
         try {
-            const r = await fetch(busUrl, { 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+            
+            const r = await fetch(mirrorUrl, { 
                 method: 'POST', 
                 body: 'data=' + encodeURIComponent(overpassQuery), 
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' } 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
+            
             const text = await r.text();
-            if (text.startsWith('<') || !text.includes('elements')) return { elements: [] };
-            return JSON.parse(text);
+            if (text.startsWith('<') || !text.includes('elements')) {
+                if (attempt < overpassMirrors.length) {
+                    console.warn(`[Transit] Overpass 비정상 응답 (${mirrorUrl}), 다음 미러로 재시도...`);
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    return fetchOverpass(attempt + 1);
+                }
+                return [];
+            }
+            const data = JSON.parse(text);
+            return (data.elements || []).map(el => {
+                const dist = haversineDistance(lat, lng, el.lat, el.lon);
+                return {
+                    name: el.tags?.name || el.tags?.['name:ko'] || '버스정류장',
+                    distance: Math.round(dist),
+                    walkMinutes: Math.round(dist / 80),
+                    lat: el.lat,
+                    lng: el.lon
+                };
+            }).sort((a, b) => a.distance - b.distance);
         } catch (e) {
-            console.warn('Overpass API 실패 방어 성공:', e.message);
-            return { elements: [] };
+            if (attempt < overpassMirrors.length) {
+                console.warn(`[Transit] Overpass 실패 (${mirrorUrl}): ${e.message}, 다음 미러로...`);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                return fetchOverpass(attempt + 1);
+            }
+            console.warn(`[Transit] Overpass 전체 미러 실패: ${e.message}`);
+            return [];
         }
     };
 
-    const [subwayRes, busRaw] = await Promise.all([
+    // ── 병렬 호출 (지하철: 카카오 / 버스: Overpass) ──
+    const [subwayRes, busStopsRaw] = await Promise.all([
         fetch(subwayUrl, { headers }).then(r => r.json()).catch(() => ({ documents: [] })),
-        fetchBusRaw()
+        fetchOverpass()
     ]);
 
     const subways = (subwayRes.documents || []).map(doc => ({
         name: doc.place_name,
         distance: parseInt(doc.distance) || 0,
-        walkMinutes: Math.round((parseInt(doc.distance) || 0) / 80), // 도보 80m/분
+        walkMinutes: Math.round((parseInt(doc.distance) || 0) / 80),
         lat: parseFloat(doc.y),
         lng: parseFloat(doc.x),
         url: doc.place_url || ''
     }));
 
-    // Overpass 결과를 거리 계산 후 정렬
-    const busStops = (busRaw.elements || []).map(el => {
-        const dist = haversineDistance(lat, lng, el.lat, el.lon);
-        return {
-            name: el.tags?.name || el.tags?.['name:ko'] || '버스정류장',
-            distance: Math.round(dist),
-            walkMinutes: Math.round(dist / 80),
-            lat: el.lat,
-            lng: el.lon
-        };
-    }).sort((a, b) => a.distance - b.distance);
+    let busStops = busStopsRaw;
+    let busDataSource = busStops.length > 0 ? 'overpass' : 'none';
+
+    if (busStops.length === 0) {
+        console.warn(`[Transit] 버스정류장 0건 (${lat}, ${lng}) — Overpass 2회 시도 실패`);
+    }
 
     // 3. 접근성 점수 산출 (100점 만점)
     let score = 0;
@@ -128,7 +158,12 @@ export async function getTransitInfo(lat, lng, radius = 500) {
         busStops: busStops.slice(0, 8), // 상위 8개만
         totalSubways: subways.filter(s => s.distance <= searchRadius).length,
         totalBusStops: busStops.filter(b => b.distance <= searchRadius).length,
+        busStopCount: busStops.length,
+        busDataSource,
         nearestSubway: subways[0] || null,
-        nearestBus: busStops[0] || null
+        nearestBus: busStops[0] || null,
+        nearestStation: subways[0]?.name || null,
+        stationDistance: subways[0]?.distance || null,
+        walkabilityScore: score
     };
 }
