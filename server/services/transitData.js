@@ -27,9 +27,48 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     // 1. 지하철역 검색 (카카오 category_group_code: SW8)
     const subwayUrl = `https://dapi.kakao.com/v2/local/search/category.json?category_group_code=SW8&x=${lng}&y=${lat}&radius=${searchRadius}&sort=distance&size=15`;
     
-    // 2. 버스정류장 검색 — Overpass API (미러 순환) + 재시도
-    //    ⚠️ 카카오 API에는 버스정류장 카테고리가 없음 (SW8=지하철만 지원)
-    //    Overpass가 유일한 무료 버스정류장 데이터소스 → 미러 3개 순환으로 안정성 확보
+    // 2. 버스정류장 검색
+    //    Primary: 서울시 공공 버스정류소 API (ws.bus.go.kr — data.go.kr 키 사용)
+    //    Fallback: Overpass API (미러 순환)
+    const BUS_API_KEY = process.env.STORE_API_KEY; // data.go.kr 공용 키
+
+    /** Primary: 서울시 좌표기반 근접 정류소 목록 조회 */
+    const fetchSeoulBus = async () => {
+        if (!BUS_API_KEY) return [];
+        try {
+            const busApiUrl = `http://ws.bus.go.kr/api/rest/stationinfo/getStationByPos?serviceKey=${encodeURIComponent(BUS_API_KEY)}&tmX=${lng}&tmY=${lat}&radius=${searchRadius}&resultType=json`;
+            const r = await fetch(busApiUrl, { signal: AbortSignal.timeout(8000) });
+            const data = await r.json();
+            
+            // 키 인증 실패 체크
+            if (data.msgHeader?.headerCd === '7' || data.msgHeader?.headerCd === 7) {
+                console.warn('[Transit] 서울시 버스 API 키 인증 실패 — Overpass 폴백 전환');
+                return [];
+            }
+            
+            const items = data.msgBody?.itemList || [];
+            if (items.length === 0) return [];
+            
+            console.log(`[Transit] 서울시 버스 API 성공: ${items.length}개 정류소`);
+            return items.map(item => {
+                const dist = haversineDistance(lat, lng, parseFloat(item.gpsY), parseFloat(item.gpsX));
+                return {
+                    name: item.stNm || '버스정류장',
+                    distance: Math.round(dist),
+                    walkMinutes: Math.round(dist / 80),
+                    lat: parseFloat(item.gpsY),
+                    lng: parseFloat(item.gpsX),
+                    arsId: item.arsId || null,  // 정류소 고유번호
+                    stId: item.stId || null     // 정류소 ID
+                };
+            }).sort((a, b) => a.distance - b.distance);
+        } catch (e) {
+            console.warn('[Transit] 서울시 버스 API 실패:', e.message);
+            return [];
+        }
+    };
+
+    /** Fallback: Overpass (미러 순환) */
     const overpassQuery = `[out:json][timeout:15];(node[highway=bus_stop](around:${searchRadius},${lat},${lng});node["public_transport"="platform"]["bus"="yes"](around:${searchRadius},${lat},${lng}););out body;`;
     const overpassMirrors = [
         'https://overpass-api.de/api/interpreter',
@@ -40,21 +79,16 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     const fetchOverpass = async (attempt = 1) => {
         const mirrorUrl = overpassMirrors[(attempt - 1) % overpassMirrors.length];
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 12000);
-            
             const r = await fetch(mirrorUrl, { 
                 method: 'POST', 
                 body: 'data=' + encodeURIComponent(overpassQuery), 
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                signal: controller.signal
+                signal: AbortSignal.timeout(12000)
             });
-            clearTimeout(timeoutId);
-            
             const text = await r.text();
             if (text.startsWith('<') || !text.includes('elements')) {
                 if (attempt < overpassMirrors.length) {
-                    console.warn(`[Transit] Overpass 비정상 응답 (${mirrorUrl}), 다음 미러로 재시도...`);
+                    console.warn(`[Transit] Overpass 비정상 응답 (${mirrorUrl}), 다음 미러로...`);
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     return fetchOverpass(attempt + 1);
                 }
@@ -73,7 +107,6 @@ export async function getTransitInfo(lat, lng, radius = 500) {
             }).sort((a, b) => a.distance - b.distance);
         } catch (e) {
             if (attempt < overpassMirrors.length) {
-                console.warn(`[Transit] Overpass 실패 (${mirrorUrl}): ${e.message}, 다음 미러로...`);
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 return fetchOverpass(attempt + 1);
             }
@@ -82,11 +115,19 @@ export async function getTransitInfo(lat, lng, radius = 500) {
         }
     };
 
-    // ── 병렬 호출 (지하철: 카카오 / 버스: Overpass) ──
-    const [subwayRes, busStopsRaw] = await Promise.all([
+    // ── 병렬 호출 (지하철: 카카오 / 버스: 서울시 API Primary) ──
+    const [subwayRes, seoulBusResult] = await Promise.all([
         fetch(subwayUrl, { headers }).then(r => r.json()).catch(() => ({ documents: [] })),
-        fetchOverpass()
+        fetchSeoulBus()
     ]);
+    
+    // 서울시 API 실패 시 Overpass 폴백
+    let busStopsRaw = seoulBusResult;
+    let busDataSource = seoulBusResult.length > 0 ? 'seoul_api' : null;
+    if (busStopsRaw.length === 0) {
+        busStopsRaw = await fetchOverpass();
+        busDataSource = busStopsRaw.length > 0 ? 'overpass' : 'none';
+    }
 
     const subways = (subwayRes.documents || []).map(doc => ({
         name: doc.place_name,
@@ -98,10 +139,9 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     }));
 
     let busStops = busStopsRaw;
-    let busDataSource = busStops.length > 0 ? 'overpass' : 'none';
 
     if (busStops.length === 0) {
-        console.warn(`[Transit] 버스정류장 0건 (${lat}, ${lng}) — Overpass 2회 시도 실패`);
+        console.warn(`[Transit] 버스정류장 0건 (${lat}, ${lng}) — 서울시 API + Overpass 모두 실패`);
     }
 
     // 3. 접근성 점수 산출 (100점 만점)
