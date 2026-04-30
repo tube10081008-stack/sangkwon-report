@@ -65,8 +65,20 @@ async function fetchPageWithRetry(url, serviceName, maxRetries = 2) {
     return [];
 }
 
-// URL 필터링이 작동하는 서비스 목록 (서울시 API 테스트 검증 완료)
-const URL_FILTERABLE_SERVICES = new Set(['VwsmTrdarStorQq']);
+// URL 필터링 우선 시도 서비스 목록
+// 서울시 열린데이터 API는 /{분기}/{상권코드} 패턴을 대부분 지원
+// 실패 시(빈 결과) 전수 스캔으로 자동 폴백
+const URL_FILTERABLE_SERVICES = new Set([
+    'VwsmTrdarStorQq',       // 점포
+    'VwsmTrdarSelngQq',      // 추정매출 (신한카드) ← P0 핵심
+    'VwsmTrdarFlpopQq',      // 유동인구 (KT)
+    'VwsmTrdarWrkPopltnQq',  // 직장인구 (SKT)
+    'VwsmTrdarPopltnQq',     // 상주인구
+    'VwsmTrdarChgIndQq',     // 상권변화지표
+    'VwsmTrdarFcltyQq',      // 집객시설
+    'VwsmTrdhlNcmCnsmpQq',   // 소득소비
+    'VwsmTrdarAptQq',        // 아파트
+]);
 
 /**
  * 상권코드로 특정 API 조회 (하이브리드: URL필터 or 배치순차스캔)
@@ -95,16 +107,23 @@ async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
         console.log(`[SeoulAPI] ${serviceName} Quarter: ${targetQuarter}, Total: ${totalCount}`);
         if (!targetQuarter || totalCount === 0) return null;
 
-        // 2-A. URL 필터링 지원 서비스: 상권코드로 직접 필터링 (1회 호출)
+        // 2-A. URL 필터링 우선 시도: 상권코드로 직접 필터링 (1회 호출)
         if (URL_FILTERABLE_SERVICES.has(serviceName)) {
-            const url = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1000/${targetQuarter}/${trdarCd}`;
-            const rows = await fetchPageWithRetry(url, serviceName);
-            console.log(`[SeoulAPI] ${serviceName} (URL필터) -> ${rows.length} rows`);
-            return rows.length > 0 ? rows : null;
+            try {
+                const url = `${SEOUL_BASE}/${apiKey}/json/${serviceName}/1/1000/${targetQuarter}/${trdarCd}`;
+                const rows = await fetchPageWithRetry(url, serviceName);
+                if (rows.length > 0) {
+                    console.log(`[SeoulAPI] ${serviceName} (URL필터 성공) -> ${rows.length} rows`);
+                    return rows;
+                }
+                console.warn(`[SeoulAPI] ${serviceName} URL필터 빈 결과 → 전수 스캔 폴백`);
+            } catch (e) {
+                console.warn(`[SeoulAPI] ${serviceName} URL필터 실패 → 전수 스캔 폴백:`, e.message);
+            }
         }
 
-        // 2-B. 전수 스캔 필요 서비스: 배치 순차 처리 (동시 3페이지씩)
-        const BATCH_SIZE = 3;
+        // 2-B. 전수 스캔 폴백: 배치 순차 처리 (동시 5페이지씩, 확대)
+        const BATCH_SIZE = 5;
         const pages = Math.ceil(totalCount / 1000);
         let allRows = [];
 
@@ -117,9 +136,9 @@ async function callSeoulAPIByTrdarCd(apiKey, serviceName, trdarCd) {
             const batchResults = await Promise.all(batch);
             batchResults.forEach(rows => { allRows = allRows.concat(rows); });
 
-            // 이미 타겟 상권이 발견되었고, 이 서비스가 단일행 반환이면 조기 종료
+            // 이미 타겟 상권이 발견되면 조기 종료
             const found = allRows.filter(r => r.TRDAR_CD === String(trdarCd));
-            if (found.length > 0 && totalCount <= 2000) break;
+            if (found.length > 0) break;
         }
 
         console.log(`[SeoulAPI] ${serviceName} Scanned ${allRows.length}/${totalCount} rows`);

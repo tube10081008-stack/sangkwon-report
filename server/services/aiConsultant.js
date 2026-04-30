@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AI 컨설팅 분석 서비스
  * Gemini API 없이 규칙 기반 전문가 분석 코멘트 생성
  * (Gemini API 키가 있으면 AI 분석 활성화 가능)
@@ -18,6 +18,12 @@ export async function generateSingleAnalysisComment(integratedResult) {
 
     const targetText = targetAnalysis ? `\n[관심 타겟 업종]: ${targetAnalysis.targetCategory || '지정 안함'} (경쟁점수: ${targetAnalysis.competitorCount}개, 시장점유율: ${targetAnalysis.marketShare}%)` : '';
 
+    // 교통 접근성이 null(데이터 미측정)인 경우 AI에게 명시
+    const transitScore = indicators.densityScore?.value;
+    const transitNote = transitScore === null || transitScore === undefined 
+        ? '[교통 접근성]: 데이터 수집 실패로 미측정 (이 항목을 근거로 교통 관련 언급을 하지 마세요)' 
+        : '';
+
     // 1. Gemini 기반 동적 코멘트 생성 시도
     try {
         const prompt = `당신은 대한민국 최고의 부동산 상권 분석 전문가입니다. 주어진 데이터를 바탕으로 **신뢰성 있고 통찰력 있는 상권 분석 코멘트**를 작성해주세요.
@@ -29,6 +35,7 @@ export async function generateSingleAnalysisComment(integratedResult) {
 [주요 업종 탑 3]: ${topCatNames}
 [상권 활성도 점수]: ${indicators.densityScore?.value || 0}점
 [경쟁 강도 점수]: ${indicators.competitionIntensity?.value || 0}점${targetText}
+${transitNote}
 
 !!! 중요 지침 (Must Follow) !!!
 1. **타겟 업종 언급 강제**: 분석 대상에 [관심 타겟 업종]이 있다면, 해당 업종(예: 카페, 편의점)의 이름과 경쟁 상점 개수를 \`overview\`, \`strengths\`, \`weaknesses\`, \`recommendations\` 중 최소 2곳 이상에 반드시 포함하세요.

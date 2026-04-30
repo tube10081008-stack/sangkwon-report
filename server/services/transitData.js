@@ -145,6 +145,29 @@ export async function getTransitInfo(lat, lng, radius = 500) {
     }
 
     // 3. 접근성 점수 산출 (100점 만점)
+    // [P1] 지하철 + 버스 합산 0건이면 "데이터 수집 실패"로 판단 → null 반환
+    if (subways.length === 0 && busStops.length === 0) {
+        console.warn(`[Transit] 지하철 + 버스 모두 0건 (${lat}, ${lng}) — 데이터 미측정 처리`);
+        return {
+            score: null,
+            grade: null,
+            gradeLabel: '데이터 미측정',
+            gradeColor: '#94a3b8',
+            subways: [],
+            busStops: [],
+            totalSubways: 0,
+            totalBusStops: 0,
+            busStopCount: 0,
+            busDataSource: 'none',
+            nearestSubway: null,
+            nearestBus: null,
+            nearestStation: null,
+            stationDistance: null,
+            walkabilityScore: null,
+            dataUnavailable: true
+        };
+    }
+
     let score = 0;
     
     // 지하철 기여 (최대 50점)
@@ -204,6 +227,7 @@ export async function getTransitInfo(lat, lng, radius = 500) {
         nearestBus: busStops[0] || null,
         nearestStation: subways[0]?.name || null,
         stationDistance: subways[0]?.distance || null,
-        walkabilityScore: score
+        walkabilityScore: score,
+        dataUnavailable: false
     };
 }
